@@ -10,4 +10,14 @@
     <ProjectReference Include="..\Prensadao.Domain\Prensadao.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Consumer\" />
+    <Folder Include="Services\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="RabbitMQ.Client" Version="6.5.0" />
+  </ItemGroup>
+
 </Project>

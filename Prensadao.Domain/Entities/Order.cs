@@ -1,10 +1,27 @@
-﻿namespace Prensadao.Domain.Entities;
+﻿using Prensadao.Domain.Enum;
+
+namespace Prensadao.Domain.Entities;
 
 public class Order
 {
+    public Order() { }
+
+    public Order(bool delivery, decimal value, string observation, int customerId)
+    {
+        DateOrder = DateTime.Now;
+        OrderStatus = OrderStatusEnum.Cozinha;
+        Delivery = delivery;
+        Value = value;
+        Observation = observation;
+        CustomerId = customerId;
+
+        OrderItems = new List<OrderItem>();
+    }
+
+
     public int OrderId { get; private set; }
     public DateTime DateOrder { get; private set; }
-    public int OrderStatus { get; private set; } // TODO: enum
+    public OrderStatusEnum OrderStatus { get; private set; }
     public bool Delivery { get; private set; }
     public decimal Value { get; private set; }
     public string Observation { get; private set; }
