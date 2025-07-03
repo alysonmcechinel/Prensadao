@@ -8,24 +8,17 @@ public class Bus : IBus
 {
     private readonly IModel _channel;
 
-    public Bus()
+    public Bus(IModel channel)
     {
-        var connectionFactory = new ConnectionFactory
-        {
-            HostName = "localhost"
-        };
-
-        var connection = connectionFactory.CreateConnection("prensadao-publisher");
-
-        _channel = connection.CreateModel();
+        _channel = channel;
     }
 
-    public Task Publish<T>(T message)
+    public Task Publish<T>(T message, string? routingKey = "")
     {
         var json = JsonSerializer.Serialize(message);
         var byteArray = Encoding.UTF8.GetBytes(json);
 
-        _channel.BasicPublish("order.created", "", null, byteArray);
+        _channel.BasicPublish(RabbitMqConstants.Exchanges.OrderExchange, routingKey, null, byteArray);
 
         return Task.CompletedTask;
     }

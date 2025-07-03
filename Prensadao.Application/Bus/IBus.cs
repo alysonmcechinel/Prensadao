@@ -2,5 +2,5 @@
 
 public interface IBus
 {
-    Task Publish<T>(T message);
+    Task Publish<T>(T message, string? routingKey);
 }
