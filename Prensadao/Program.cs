@@ -1,19 +1,19 @@
-using Prensadao.Application;
 using Prensadao.Application.Publish;
+using Prensadao.Application.Services;
 using RabbitMQ.Client;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+builder.Services.AddHostedService<RabbitMqStartupService>();
+builder.Services.AddSingleton<IRabbitMqConfigService, RabbitMqConfigService>();
+
+builder.Services.AddScoped<IModel>(x =>
+{
+    var rabbitConfig = x.GetRequiredService<RabbitMqConfigService>();
+    return rabbitConfig.CreateChannel();
+});
+
 builder.Services.AddScoped<IBus, Bus>();
-
-// RabbitMQ
-var connectionFactory = new ConnectionFactory { HostName = "localhost" };
-using var connection = connectionFactory.CreateConnection();
-var channel = connection.CreateModel();
-
-var rabbitMqConfig = new RabbitMqConfig(channel);
-rabbitMqConfig.Config();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

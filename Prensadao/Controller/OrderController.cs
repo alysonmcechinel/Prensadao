@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Prensadao.Application;
 using Prensadao.Application.Models;
 using Prensadao.Application.Publish;
 
@@ -20,8 +21,8 @@ namespace Prensadao.API.Controller
         {
             try
             {
-                await _bus.Publish(order);
-                return Ok();
+                await _bus.Publish(order, RabbitMqConstants.Exchanges.OrderExchange);
+                return Ok("Mensagem publicada");
             }
             catch (Exception ex)
             {

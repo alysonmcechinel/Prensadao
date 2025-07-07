@@ -1,4 +1,5 @@
-﻿using RabbitMQ.Client;
+﻿using Prensadao.Application.Services;
+using RabbitMQ.Client;
 using System.Text;
 using System.Text.Json;
 
@@ -6,19 +7,27 @@ namespace Prensadao.Application.Publish;
 
 public class Bus : IBus
 {
-    private readonly IModel _channel;
+    private readonly IRabbitMqConfigService _rabbitMqConfigService;
 
-    public Bus(IModel channel)
+    public Bus(IRabbitMqConfigService rabbitMqConfigService)
     {
-        _channel = channel;
+        _rabbitMqConfigService = rabbitMqConfigService;
     }
 
-    public Task Publish<T>(T message, string? routingKey = "")
+    public Task Publish<T>(T message, string exchange, string? routingKey = "")
     {
+        if (string.IsNullOrWhiteSpace(exchange))
+            throw new ArgumentNullException(nameof(exchange));
+
+        if (message is null) 
+            throw new ArgumentNullException(nameof(message));
+
         var json = JsonSerializer.Serialize(message);
         var byteArray = Encoding.UTF8.GetBytes(json);
 
-        _channel.BasicPublish(RabbitMqConstants.Exchanges.OrderExchange, routingKey, null, byteArray);
+        using var channel = _rabbitMqConfigService.CreateChannel();
+
+        channel.BasicPublish(exchange, routingKey, null, byteArray);
 
         return Task.CompletedTask;
     }
