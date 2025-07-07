@@ -31,8 +31,8 @@ namespace Prensadao.Application.Services
             channel.ExchangeDeclare(RabbitMqConstants.Exchanges.OrderExchange, ExchangeType.Fanout, durable: true);
 
             // queues
-            channel.QueueDeclare(RabbitMqConstants.Queues.OrderCozinhaQueue, durable: true);
-            channel.QueueDeclare(RabbitMqConstants.Queues.OrderNotifyQueue, durable: true);
+            channel.QueueDeclare(RabbitMqConstants.Queues.OrderCozinhaQueue, durable: true, exclusive: false, arguments: null);
+            channel.QueueDeclare(RabbitMqConstants.Queues.OrderNotifyQueue, durable: true, exclusive: false, arguments: null);
 
             // bind queues to exchange
             channel.QueueBind(RabbitMqConstants.Queues.OrderCozinhaQueue, RabbitMqConstants.Exchanges.OrderExchange, "");
