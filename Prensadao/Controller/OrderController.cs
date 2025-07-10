@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Prensadao.Application;
+using Prensadao.Application.Interfaces;
 using Prensadao.Application.Models;
 using Prensadao.Application.Publish;
 
@@ -9,11 +10,11 @@ namespace Prensadao.API.Controller
     [Route("/")]
     public class OrderController : ControllerBase
     {
-        private readonly IBus _bus;
+        private readonly IOrderService _orderService;
 
-        public OrderController(IBus bus)
+        public OrderController(IOrderService orderService)
         {
-            _bus = bus;
+            _orderService = orderService;
         }
 
         [HttpPost]
@@ -21,14 +22,18 @@ namespace Prensadao.API.Controller
         {
             try
             {
-                await _bus.Publish(order, RabbitMqConstants.Exchanges.OrderExchange);
-                return Ok("Mensagem publicada");
+                var result = await _orderService.OrderCreate(order);
+
+                return Ok(new
+                {
+                    message = "Pedido criado com sucesso",
+                    data = result
+                });
             }
             catch (Exception ex)
             {
-                return BadRequest(ex);
+                return BadRequest(($"Erro ao criar pedido {0}", ex));
             }
         }
-
     }
 }
