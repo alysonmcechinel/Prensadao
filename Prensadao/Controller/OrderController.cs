@@ -7,7 +7,7 @@ using Prensadao.Application.Publish;
 namespace Prensadao.API.Controller
 {
     [ApiController]
-    [Route("/")]
+    [Route("prensadao/[controller]")]
     public class OrderController : ControllerBase
     {
         private readonly IOrderService _orderService;
@@ -32,8 +32,17 @@ namespace Prensadao.API.Controller
             }
             catch (Exception ex)
             {
-                return BadRequest(($"Erro ao criar pedido {0}", ex));
+                return BadRequest($"Erro ao criar pedido {ex.Message}");
             }
         }
+
+        [HttpGet]
+        public async Task<IActionResult> Get()
+        {
+            var result = await _orderService.GetOrders();
+
+            return Ok(result);
+        }
+
     }
 }

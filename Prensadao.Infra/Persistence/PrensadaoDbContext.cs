@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace Prensadao.Infra.Persistence
 {
+    // DbContext = Instancia que representa uma seção de acesso ao db(banco de dados)
     public class PrensadaoDbContext : DbContext
     {
 

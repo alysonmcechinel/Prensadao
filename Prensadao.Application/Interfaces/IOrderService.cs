@@ -1,4 +1,5 @@
 ﻿using Prensadao.Application.Models;
+using Prensadao.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,7 @@ namespace Prensadao.Application.Interfaces
 {
     public interface IOrderService
     {
-        Task<OrderResultViewModel> OrderCreate(OrderDto dto);
+        Task<List<Order>> GetOrders();
+        Task<int> OrderCreate(OrderDto dto);
     }
 }

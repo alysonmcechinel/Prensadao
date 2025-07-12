@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Prensadao.Application\Prensadao.Application.csproj" />
+    <ProjectReference Include="..\Prensadao.Infra\Prensadao.Infra.csproj" />
   </ItemGroup>
 
 </Project>

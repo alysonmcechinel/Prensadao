@@ -1,32 +1,34 @@
+using Prensadao.Application;
+using Prensadao.Application.Interfaces;
 using Prensadao.Application.Publish;
 using Prensadao.Application.Services;
-using RabbitMQ.Client;
+using Prensadao.Domain.Repositories;
+using Prensadao.Infra;
+using Prensadao.Infra.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddHostedService<RabbitMqStartupService>();
-builder.Services.AddSingleton<IRabbitMqConfigService, RabbitMqConfigService>();
-
-builder.Services.AddScoped<IModel>(x =>
-{
-    var rabbitConfig = x.GetRequiredService<RabbitMqConfigService>();
-    return rabbitConfig.CreateChannel();
-});
-
-builder.Services.AddScoped<IBus, Bus>();
+// Aqui esta as configurações => do modulo de aplicação (application) e do modulo Infrastructure (Infra)
+builder.Services
+    .AddAplications()
+    .AddInfrastructure(builder.Configuration);
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+}
+
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<PrensadaoDbContext>();
+    InfrastructureModule.Seed(dbContext);
 }
 
 app.UseHttpsRedirection();
