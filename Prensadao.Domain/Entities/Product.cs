@@ -2,6 +2,18 @@
 
 public class Product
 {
+    public Product()
+    {
+        
+    }
+
+    public Product(string name, decimal value, string description)
+    {
+        Name = name;
+        Value = value;
+        Description = description;
+    }
+
     public int ProductId { get; private set; }
     public string Name { get; private set; }
     public decimal Value { get; private set; }

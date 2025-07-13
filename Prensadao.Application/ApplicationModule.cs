@@ -27,6 +27,7 @@ namespace Prensadao.Application
         {
             services.AddScoped<IBus, Bus>();
             services.AddScoped<IOrderService, OrderService>();
+            services.AddScoped<IOrderItemService, OrderItemService>();
 
             return services;
         }

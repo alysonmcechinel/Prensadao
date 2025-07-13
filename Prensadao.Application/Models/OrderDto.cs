@@ -7,6 +7,7 @@ public class OrderDto
     [Key]
     public int? OrderId { get; set; }
 
+    [Required]
     public bool Delivery { get; set; }
 
     [Required]
@@ -28,9 +29,6 @@ public class OrderItemDto
 
     [Required]
     public decimal Value { get; set; }
-
-    [Required]
-    public int OrderId { get; set; }
 
     [Required]
     public int ProductId { get; set; }

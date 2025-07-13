@@ -37,15 +37,22 @@ namespace Prensadao.Infra
         public static IServiceCollection AddRepositories(this IServiceCollection services)
         {
             services.AddScoped<IOrderRepository, OrderRepository>();
+            services.AddScoped<IOrderItemRepository, OrderItemRepository>();
 
             return services;
         }
 
         public static void Seed(PrensadaoDbContext dbContext)
         {
-            var customer = new Customer("Teste banco", 123456789, "rua joao", "Centro", "S/N", "Criciuma", "Predio bonito", 88850000);
+            var customer = new Customer("Teste legal", 123456789, "rua joao", "Centro", "S/N", "Criciuma", "Predio bonito", 88850000);
 
             dbContext.Add(customer);
+
+            var product = new Product("X Normal", 10.50m , "O melhor X da cidade");
+            var product2 = new Product("X Frango", 12.50m, "O melhor X da cidade");
+
+            dbContext.AddRange(product, product2);
+
             dbContext.SaveChanges();
         }
     }

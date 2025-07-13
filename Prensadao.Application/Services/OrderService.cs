@@ -10,11 +10,13 @@ namespace Prensadao.Application.Services
     {
         private readonly IBus _bus;
         private readonly IOrderRepository _orderRepository;
+        private readonly IOrderItemRepository _orderItemRepository;
 
-        public OrderService(IBus bus, IOrderRepository orderRepository)
+        public OrderService(IBus bus, IOrderRepository orderRepository, IOrderItemRepository orderItemRepository)
         {
             _bus = bus;
             _orderRepository = orderRepository;
+            _orderItemRepository = orderItemRepository;
         }
 
         public Task<List<Order>> GetOrders() => _orderRepository.GetOrders();
@@ -26,7 +28,7 @@ namespace Prensadao.Application.Services
             if (dto is null)
                 throw new ArgumentException("O pedido não pode ser nulo");
 
-            if (!dto.Items.Any())
+            if (!dto.Items.Any() || dto.Items.Any(x => x.ProductId <= 0))
                 throw new ArgumentException("Pedido não pode ser feito sem items");
 
             if (dto.CustomerId <= 0)
@@ -35,6 +37,7 @@ namespace Prensadao.Application.Services
             var order = new Order(dto.Delivery, dto.Value, dto.Observation, dto.CustomerId);
 
             await _orderRepository.CreateOrder(order);
+            dto.Items.ForEach(x => _orderItemRepository.AddOrderItem(new OrderItem(x.Quantity, x.Value, order.OrderId, x.ProductId)));
             await _bus.Publish(dto, RabbitMqConstants.Exchanges.OrderExchange);
 
             return order.OrderId;
