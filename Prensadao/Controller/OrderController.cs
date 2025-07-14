@@ -7,7 +7,7 @@ using Prensadao.Application.Publish;
 namespace Prensadao.API.Controller
 {
     [ApiController]
-    [Route("prensadao/[controller]")]
+    [Route("api/[controller]")]
     public class OrderController : ControllerBase
     {
         private readonly IOrderService _orderService;
