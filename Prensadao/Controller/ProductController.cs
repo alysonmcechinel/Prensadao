@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Prensadao.Application.Interfaces;
 using Prensadao.Application.Models;
+using Prensadao.Application.Services;
 
 namespace Prensadao.API.Controller
 {
@@ -9,10 +10,12 @@ namespace Prensadao.API.Controller
     public class ProductController : ControllerBase
     {
         private readonly IProductService _productService;
+        private readonly IOrderItemService _orderItemService;
 
-        public ProductController(IProductService productService)
+        public ProductController(IProductService productService, IOrderItemService orderItemService)
         {
             _productService = productService;
+            _orderItemService = orderItemService;
         }
 
         [HttpPost]
@@ -38,6 +41,14 @@ namespace Prensadao.API.Controller
         public async Task<IActionResult> Get()
         {
             var result = await _productService.GetProducts();
+
+            return Ok(result);
+        }
+
+        [HttpGet("/GetOrderItems")]
+        public async Task<IActionResult> GetOrderItems()
+        {
+            var result = await _orderItemService.GetOrderItems();
 
             return Ok(result);
         }

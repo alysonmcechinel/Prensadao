@@ -1,11 +1,11 @@
-﻿namespace Prensadao.Domain.Entities;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
+
+namespace Prensadao.Domain.Entities;
 
 public class Product
 {
-    public Product()
-    {
-        
-    }
+    public Product() { }
 
     public Product(string name, decimal value, string description)
     {
@@ -14,6 +14,7 @@ public class Product
         Description = description;
     }
 
+    [Key]
     public int ProductId { get; private set; }
     public string Name { get; private set; }
     public decimal Value { get; private set; }

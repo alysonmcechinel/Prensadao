@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Drawing;
 
 namespace Prensadao.Domain.Entities;
 
@@ -14,6 +15,7 @@ public class OrderItem
         ProductId = productId;
     }
 
+    [Key]
     public int OrderItemId { get; private set; }
     public int Quantity { get; private set; }
     public decimal Value { get; private set; }

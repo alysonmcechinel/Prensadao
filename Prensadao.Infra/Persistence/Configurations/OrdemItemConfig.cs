@@ -16,14 +16,14 @@ namespace Prensadao.Infra.Persistence.Configurations
             builder.Property(x => x.ProductId);
 
             builder
-                .HasOne(x => x.Order)
-                .WithMany(i => i.OrderItems)
-                .HasForeignKey(i => i.OrderItemId);
+                .HasOne(x => x.Order) // OrderItem tem um Order.
+                .WithMany(i => i.OrderItems) // Orders tem muitos OrderItem
+                .HasForeignKey(i => i.OrderId); // Define a FK no lado de OrderItems.
 
             builder
-                .HasOne(x => x.Product)
-                .WithMany(i => i.OrderItems)
-                .HasForeignKey(i => i.OrderItemId);
+                .HasOne(x => x.Product) // OrderItem tem um Product.
+                .WithMany(i => i.OrderItems) // Product tem muitos OrderItem
+                .HasForeignKey(i => i.ProductId); // Define a FK no lado de OrderItems.
         }
     }
 }

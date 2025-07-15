@@ -35,9 +35,14 @@ namespace Prensadao.Application.Services
                 throw new ArgumentException("Pedido não pode ser feito sem cliente cadastrado");
 
             var order = new Order(dto.Delivery, dto.Value, dto.Observation, dto.CustomerId);
-
             await _orderRepository.CreateOrder(order);
-            dto.Items.ForEach(x => _orderItemRepository.AddOrderItem(new OrderItem(x.Quantity, x.Value, order.OrderId, x.ProductId)));
+
+            foreach (var item in dto.Items)
+            {
+                var ordemItem = new OrderItem(item.Quantity, item.Value, order.OrderId, item.ProductId);
+                await _orderItemRepository.AddOrderItem(ordemItem);
+            }
+                        
             await _bus.Publish(dto, RabbitMqConstants.Exchanges.OrderExchange);
 
             return order.OrderId;

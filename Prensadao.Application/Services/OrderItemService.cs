@@ -19,5 +19,7 @@ namespace Prensadao.Application.Services
         }
 
         public async Task AddOrderItem(OrderItem ordemItem) => await _orderItemRepository.AddOrderItem(ordemItem);
+
+        public async Task<List<OrderItem>> GetOrderItems() => await _orderItemRepository.GetOrderItems();
     }
 }

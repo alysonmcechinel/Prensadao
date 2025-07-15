@@ -1,13 +1,11 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace Prensadao.Domain.Entities;
 
 public class Customer
 {
-    public Customer()
-    {
-        
-    }
+    public Customer() { }
 
     public Customer(string name, int phone, string street, string district, string number, string city, string refencePoint, int cep)
     {
@@ -21,6 +19,7 @@ public class Customer
         Cep = cep;
     }
 
+    [Key]
     public int CustomerId { get; private set; }
     public string Name { get; private set; }
     public int Phone { get; private set; }
@@ -32,6 +31,5 @@ public class Customer
     public int Cep { get; private set; }
 
     // Relationship
-    [JsonIgnore]
     public ICollection<Order> Orders { get; set; }
 }

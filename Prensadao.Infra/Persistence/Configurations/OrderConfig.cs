@@ -25,7 +25,7 @@ namespace Prensadao.Infra.Persistence.Configurations
             builder
                 .HasMany(x => x.OrderItems) // Order tem muitos OrderItems.
                 .WithOne(o => o.Order) // Cada OrderItems tem um Order.
-                .HasForeignKey(o => o.OrderItemId); // Define a FK no lado de OrderItem.
+                .HasForeignKey(o => o.OrderId); // Define a FK no lado de OrderItem.
         }
     }
 }

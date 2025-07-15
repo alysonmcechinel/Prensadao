@@ -1,4 +1,6 @@
 ﻿using Prensadao.Domain.Enum;
+using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace Prensadao.Domain.Entities;
 
@@ -18,7 +20,7 @@ public class Order
         OrderItems = new List<OrderItem>();
     }
 
-
+    [Key]
     public int OrderId { get; private set; }
     public DateTime DateOrder { get; private set; }
     public OrderStatusEnum OrderStatus { get; private set; }
