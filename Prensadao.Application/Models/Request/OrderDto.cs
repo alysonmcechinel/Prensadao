@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Prensadao.Application.Models;
+namespace Prensadao.Application.Models.Request;
 
 public class OrderDto
 {
@@ -22,14 +22,4 @@ public class OrderDto
     public List<OrderItemDto> Items { get; set; }
 }
 
-public class OrderItemDto
-{
-    [Required]
-    public int Quantity { get; set; }
 
-    [Required]
-    public decimal Value { get; set; }
-
-    [Required]
-    public int ProductId { get; set; }
-}

@@ -1,5 +1,5 @@
 ﻿using Prensadao.Application.Interfaces;
-using Prensadao.Application.Models;
+using Prensadao.Application.Models.Request;
 using Prensadao.Domain.Entities;
 using Prensadao.Domain.Repositories;
 

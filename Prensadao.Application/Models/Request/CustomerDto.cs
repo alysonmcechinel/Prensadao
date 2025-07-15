@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Prensadao.Application.Models
+namespace Prensadao.Application.Models.Request
 {
     public class CustomerDto
     {

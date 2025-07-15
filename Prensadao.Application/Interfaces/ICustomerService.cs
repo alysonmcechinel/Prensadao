@@ -1,4 +1,4 @@
-﻿using Prensadao.Application.Models;
+﻿using Prensadao.Application.Models.Request;
 using Prensadao.Domain.Entities;
 using System;
 using System.Collections.Generic;

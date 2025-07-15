@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Prensadao.Application.Interfaces;
-using Prensadao.Application.Models;
+using Prensadao.Application.Models.Request;
 using Prensadao.Domain.Entities;
 
 namespace Prensadao.API.Controller
