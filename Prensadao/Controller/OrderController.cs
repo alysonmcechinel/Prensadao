@@ -18,7 +18,7 @@ namespace Prensadao.API.Controller
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] OrderDto order)
+        public async Task<IActionResult> Post([FromBody] OrderRequestDto order)
         {
             try
             {

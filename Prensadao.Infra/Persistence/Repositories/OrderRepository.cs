@@ -25,9 +25,13 @@ namespace Prensadao.Infra.Persistence.Repositories
             return order.OrderId;
         }
 
-        public async Task<List<Order>> GetOrders() => await _dbContext.Orders
-            .Include(x => x.OrderItems)
-            .Include(x => x.Customer)
-            .ToListAsync();
+        public async Task<List<Order>> GetOrders() => 
+            await _dbContext.Orders
+                .Include(x => x.Customer)
+                .Include(x => x.OrderItems)
+                    .ThenInclude(oi => oi.Product)
+                .AsNoTracking()
+                .ToListAsync();
+         
     }
 }

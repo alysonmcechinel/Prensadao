@@ -1,5 +1,6 @@
 ﻿using Prensadao.Application.Interfaces;
 using Prensadao.Application.Models.Request;
+using Prensadao.Application.Models.Response;
 using Prensadao.Application.Publish;
 using Prensadao.Domain.Entities;
 using Prensadao.Domain.Repositories;
@@ -19,23 +20,27 @@ namespace Prensadao.Application.Services
             _orderItemRepository = orderItemRepository;
         }
 
-        public Task<List<Order>> GetOrders() => _orderRepository.GetOrders();
+        public async Task<List<OrderReponseDto>> GetOrders()
+        {
+            var result = await _orderRepository.GetOrders();
+            return OrderReponseDto.FromListOrder(result);            
+        }
 
-        public async Task<int> OrderCreate(OrderDto dto)
+        public async Task<int> OrderCreate(OrderRequestDto dto)
         {
             if (dto is null)
                 throw new ArgumentException("O pedido não pode ser nulo");
 
-            if (!dto.Items.Any() || dto.Items.Any(x => x.ProductId <= 0))
+            if (!dto.OrderItems.Any() || dto.OrderItems.Any(x => x.ProductId <= 0))
                 throw new ArgumentException("Pedido não pode ser feito sem items");
 
             if (dto.CustomerId <= 0)
                 throw new ArgumentException("Pedido não pode ser feito sem cliente cadastrado");
-
+            
             var order = new Order(dto.Delivery, dto.Value, dto.Observation, dto.CustomerId);
             await _orderRepository.CreateOrder(order);
 
-            foreach (var item in dto.Items)
+            foreach (var item in dto.OrderItems)
             {
                 var ordemItem = new OrderItem(item.Quantity, item.Value, order.OrderId, item.ProductId);
                 await _orderItemRepository.AddOrderItem(ordemItem);
