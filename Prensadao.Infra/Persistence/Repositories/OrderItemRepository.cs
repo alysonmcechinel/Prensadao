@@ -1,11 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Prensadao.Domain.Entities;
 using Prensadao.Domain.Repositories;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Prensadao.Infra.Persistence.Repositories
 {

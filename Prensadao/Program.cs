@@ -1,8 +1,4 @@
 using Prensadao.Application;
-using Prensadao.Application.Interfaces;
-using Prensadao.Application.Publish;
-using Prensadao.Application.Services;
-using Prensadao.Domain.Repositories;
 using Prensadao.Infra;
 using Prensadao.Infra.Persistence;
 

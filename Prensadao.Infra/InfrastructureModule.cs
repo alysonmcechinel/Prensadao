@@ -5,11 +5,6 @@ using Prensadao.Domain.Entities;
 using Prensadao.Domain.Repositories;
 using Prensadao.Infra.Persistence;
 using Prensadao.Infra.Persistence.Repositories;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Prensadao.Infra
 {

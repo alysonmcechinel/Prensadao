@@ -1,5 +1,4 @@
-﻿using Prensadao.Application.Models.Request;
-using Prensadao.Domain.Entities;
+﻿using Prensadao.Domain.Entities;
 using System.ComponentModel.DataAnnotations;
 
 namespace Prensadao.Application.Models.Response
