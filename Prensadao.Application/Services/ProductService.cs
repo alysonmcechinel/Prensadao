@@ -1,5 +1,6 @@
 ﻿using Prensadao.Application.Interfaces;
 using Prensadao.Application.Models.Request;
+using Prensadao.Application.Models.Response;
 using Prensadao.Domain.Entities;
 using Prensadao.Domain.Repositories;
 
@@ -14,13 +15,36 @@ namespace Prensadao.Application.Services
             _productRepository = productRepository;
         }
 
-        public async Task<int> AddProduct(ProductDto dto)
+        public async Task<int> AddProduct(ProductRequestDto dto)
         {
+            if(string.IsNullOrEmpty(dto.Name))
+                throw new ArgumentException("O produto deve ter um nome.");
+
+            bool nameAlreadyExists = await _productRepository.NameAlreadyExists(dto.Name);
+            if (nameAlreadyExists)
+                throw new ArgumentException("Já existe um produto com esse nome");
+
+            if (dto.Value > 0)
+                throw new ArgumentException("O valor do produto deve ser maior que 0");
+
             var product = new Product(dto.Name, dto.Value, dto.Description);
 
             return await _productRepository.AddProduct(product);
         }
 
-        public async Task<List<Product>> GetProducts() => await _productRepository.GetProducts();
+        public async Task<ProductResponseDto> GetById(int id)
+        {
+            if (id >= 0)
+                throw new ArgumentException("O ID informado incorretamente");
+            
+             var product = await _productRepository.GetById(id);
+
+            if (product == null)
+                throw new ArgumentException("Produto não encontrado");
+
+            return ProductResponseDto.ToDto(product);
+        }
+
+        public async Task<List<ProductResponseDto>> GetProducts() => ProductResponseDto.ToListDto(await _productRepository.GetProducts());
     }
 }

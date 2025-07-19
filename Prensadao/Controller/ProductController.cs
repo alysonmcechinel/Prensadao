@@ -18,7 +18,7 @@ namespace Prensadao.API.Controller
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] ProductDto product)
+        public async Task<IActionResult> Post([FromBody] ProductRequestDto product)
         {
             try
             {
@@ -37,19 +37,57 @@ namespace Prensadao.API.Controller
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> GetAll()
         {
-            var result = await _productService.GetProducts();
-
-            return Ok(result);
+            try
+            {
+                var result = await _productService.GetProducts();
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"{ex.Message}");
+            }
         }
 
-        [HttpGet("/GetOrderItems")]
-        public async Task<IActionResult> GetOrderItems()
+        [HttpGet("GetById")]
+        public async Task<IActionResult> GetById(int id)
         {
-            var result = await _orderItemService.GetOrderItems();
+            try
+            {
+                var result = await _productService.GetById(id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Erro ao localizar o Produto, {ex.Message}");
+            }
+        }
 
-            return Ok(result);
+        [HttpPost("Enabled")]
+        public async Task<IActionResult> Enabled(int id)
+        {
+            try
+            {
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest();
+            }
+        }
+
+        [HttpPut]
+        public async Task<IActionResult> Update(ProductRequestDto dto)
+        {
+            try
+            {
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest();
+            }
         }
     }
 }

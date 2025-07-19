@@ -21,8 +21,18 @@ namespace Prensadao.Infra.Persistence.Repositories
             return product.ProductId;
         }
 
+        public async Task Update(Product product)
+        {
+            _dbContext.Products.Update(product);
+            await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task<Product?> GetById(int id) => await _dbContext.Products.SingleOrDefaultAsync(x => x.ProductId == id);
+
         public async Task<List<Product>> GetProducts() => await _dbContext.Products
             .Include(x => x.OrderItems)
-            .ToListAsync();
+            .ToListAsync();        
+
+        public async Task<bool> NameAlreadyExists(string name) => await _dbContext.Products.AnyAsync(x => x.Name == name);
     }
 }
