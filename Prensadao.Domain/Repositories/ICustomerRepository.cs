@@ -4,7 +4,11 @@ namespace Prensadao.Domain.Repositories
 {
     public interface ICustomerRepository
     {
-        Task<List<Customer>> GetCustomers();
         Task<int> AddCustomer(Customer customer);
+        Task<Customer> GetById(int id);
+        Task<List<Customer>> GetCustomers();
+        Task Update(Customer customer);
+        Task<bool> PhoneIsExists(long phone);
+        
     }
 }

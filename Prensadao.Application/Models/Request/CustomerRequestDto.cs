@@ -2,12 +2,12 @@
 
 namespace Prensadao.Application.Models.Request
 {
-    public class CustomerDto
+    public class CustomerRequestDto
     {
         [Key]
         public int CustomerId { get; set; }
         public string Name { get; set; }
-        public int Phone { get; set; }
+        public long Phone { get; set; }
         public string Street { get; set; }
         public string District { get; set; }
         public string Number { get; set; }

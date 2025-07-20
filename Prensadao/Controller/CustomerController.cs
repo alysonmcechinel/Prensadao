@@ -16,7 +16,7 @@ namespace Prensadao.API.Controller
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] CustomerDto dto)
+        public async Task<IActionResult> Post([FromBody] CustomerRequestDto dto)
         {
             try
             {
@@ -30,16 +30,50 @@ namespace Prensadao.API.Controller
             }
             catch (Exception ex)
             {
-                return BadRequest($"Erro ao criar cadastro. {ex.Message}");
+                return BadRequest($"Erro ao cadastrar, motivo: {ex.Message}");
+            }
+        }
+
+        [HttpGet("GetById")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            try
+            {
+                var result = await _customerService.GetById(id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
             }
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> GetAll()
         {
-            var result = await _customerService.GetCustomers();
+            try
+            {
+                var result = await _customerService.GetCustomers();
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }            
+        }
 
-            return Ok(result);
+        [HttpPut]
+        public async Task<IActionResult> Update(CustomerRequestDto dto)
+        {
+            try
+            {
+                await _customerService.Update(dto);
+                return Ok("Cadastro atualizado com sucesso");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }

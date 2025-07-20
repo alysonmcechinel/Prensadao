@@ -26,7 +26,12 @@ namespace Prensadao.Application.Models.Response
         public string CustomerName { get; set; }
         public List<OrderItemResponseDto> OrderItems { get; set; }
 
-        public static List<OrderReponseDto> FromListOrder(List<Order> orders)
+        #region Mapeamento
+
+        //TODO: ajustar orderItems
+        public static OrderReponseDto ToDto(Order order) => new OrderReponseDto(order.OrderId, order.Delivery, order.Value, order.Observation, order.CustomerId, order.Customer.Name, null);
+
+        public static List<OrderReponseDto> ToListDto(List<Order> orders)
         {
             var orderResponse = new List<OrderReponseDto>();
 
@@ -47,6 +52,7 @@ namespace Prensadao.Application.Models.Response
 
             return orderResponse;
         }
+        #endregion
     }
 }
 

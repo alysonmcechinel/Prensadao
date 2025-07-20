@@ -20,8 +20,21 @@ namespace Prensadao.Infra.Persistence.Repositories
             return customer.CustomerId;
         }
 
+        public async Task<Customer?> GetById(int id) => await _dbContext.Customers
+            .SingleOrDefaultAsync(c => c.CustomerId == id);
+
         public async Task<List<Customer>> GetCustomers() => await _dbContext.Customers
             .Include(x => x.Orders)
+                .ThenInclude(o => o.OrderItems)
             .ToListAsync();
+
+        public async Task Update(Customer customer)
+        {
+            _dbContext.Update(customer);
+            await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task<bool> PhoneIsExists(long phone) => await _dbContext.Customers
+            .AnyAsync(c => c.Phone == phone);
     }
 }

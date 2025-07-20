@@ -23,7 +23,7 @@ namespace Prensadao.Application.Services
         public async Task<List<OrderReponseDto>> GetOrders()
         {
             var result = await _orderRepository.GetOrders();
-            return OrderReponseDto.FromListOrder(result);            
+            return OrderReponseDto.ToListDto(result);
         }
 
         public async Task<int> OrderCreate(OrderRequestDto dto)
