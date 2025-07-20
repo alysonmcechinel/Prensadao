@@ -16,6 +16,6 @@ namespace Prensadao.Application.Models.Request
     public class ProductEnabledDto
     {
         public int ProductId { get; set; }
-        public string Enabled { get; set; }
+        public bool Enabled { get; set; }
     }
 }

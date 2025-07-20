@@ -68,8 +68,8 @@ namespace Prensadao.Application.Services
             if (product == null)
                 throw new ArgumentException("Produto não encontrado");
 
-            if (product.Enabled != product.Enabled)
-                product.EnabledProduct(product.Enabled);
+            if (product.Enabled != dto.Enabled)
+                product.EnabledProduct(dto.Enabled);
             else
                 return;
 
