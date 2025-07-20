@@ -24,7 +24,7 @@ namespace Prensadao.Application.Services
             if (nameAlreadyExists)
                 throw new ArgumentException("Já existe um produto com esse nome");
 
-            if (dto.Value > 0)
+            if (dto.Value <= 0)
                 throw new ArgumentException("O valor do produto deve ser maior que 0");
 
             var product = new Product(dto.Name, dto.Value, dto.Description);
@@ -34,7 +34,7 @@ namespace Prensadao.Application.Services
 
         public async Task<ProductResponseDto> GetById(int id)
         {
-            if (id >= 0)
+            if (id <= 0)
                 throw new ArgumentException("O ID informado incorretamente");
             
              var product = await _productRepository.GetById(id);
@@ -45,6 +45,35 @@ namespace Prensadao.Application.Services
             return ProductResponseDto.ToDto(product);
         }
 
+        public async Task Update(ProductRequestDto dto)
+        {
+            if (dto.ProductId <= 0)
+                throw new ArgumentException("O ID informado incorretamente");
+
+            var product = await _productRepository.GetById(dto.ProductId);
+
+            if (product == null)
+                throw new ArgumentException("Produto não encontrado");
+
+            product.Update(dto.Name, dto.Enabled, dto.Value, dto.Description);
+            await _productRepository.Update(product);
+        }
+
         public async Task<List<ProductResponseDto>> GetProducts() => ProductResponseDto.ToListDto(await _productRepository.GetProducts());
+
+        public async Task Enabled(ProductEnabledDto dto)
+        {
+            var product = await _productRepository.GetById(dto.ProductId);
+
+            if (product == null)
+                throw new ArgumentException("Produto não encontrado");
+
+            if (product.Enabled != product.Enabled)
+                product.EnabledProduct(product.Enabled);
+            else
+                return;
+
+            await _productRepository.Update(product);
+        }
     }
 }

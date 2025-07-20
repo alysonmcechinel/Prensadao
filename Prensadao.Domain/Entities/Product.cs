@@ -24,6 +24,13 @@ public class Product
     //Relationship
     public ICollection<OrderItem> OrderItems { get; set; }
 
-    public void DisableProduct() => Enabled = false;
-    public void EnabledProduct() => Enabled = true;
+    public void EnabledProduct(bool enabled) => Enabled = enabled;
+
+    public void Update(string name, bool enabled, decimal value, string description)
+    {
+        Name = name;
+        Enabled = enabled;
+        Value = value;
+        Description = description;
+    }
 }

@@ -9,12 +9,10 @@ namespace Prensadao.API.Controller
     public class ProductController : ControllerBase
     {
         private readonly IProductService _productService;
-        private readonly IOrderItemService _orderItemService;
 
-        public ProductController(IProductService productService, IOrderItemService orderItemService)
+        public ProductController(IProductService productService)
         {
             _productService = productService;
-            _orderItemService = orderItemService;
         }
 
         [HttpPost]
@@ -65,15 +63,16 @@ namespace Prensadao.API.Controller
         }
 
         [HttpPost("Enabled")]
-        public async Task<IActionResult> Enabled(int id)
+        public async Task<IActionResult> Enabled(ProductEnabledDto dto)
         {
             try
             {
-                return Ok();
+                await _productService.Enabled(dto);
+                return Ok($"Produto atualizado com sucesso");
             }
             catch (Exception ex)
             {
-                return BadRequest();
+                return BadRequest(ex);
             }
         }
 
@@ -82,11 +81,12 @@ namespace Prensadao.API.Controller
         {
             try
             {
-                return Ok();
+                var result = _productService.Update(dto);
+                return Ok("Produto atualizado com sucesso");
             }
             catch (Exception ex)
             {
-                return BadRequest();
+                return BadRequest(ex);
             }
         }
     }
