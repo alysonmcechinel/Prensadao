@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres_prensadao_local
+    restart: always
+    environment:
+      POSTGRES_USER: devPrensadao
+      POSTGRES_PASSWORD: devpass
+      POSTGRES_DB: dbPrensadao
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
