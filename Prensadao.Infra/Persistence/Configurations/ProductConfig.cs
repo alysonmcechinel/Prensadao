@@ -10,14 +10,17 @@ namespace Prensadao.Infra.Persistence.Configurations
         {
             builder.HasKey(x => x.ProductId);
 
-            builder.Property(x => x.Name);
-            builder.Property(x => x.Value);
-            builder.Property(x => x.Description);
+            builder.Property(x => x.Name)
+                .HasMaxLength(100)
+                .IsRequired();
 
-            builder
-                .HasMany(x => x.OrderItems)
-                .WithOne(i => i.Product)
-                .HasForeignKey(i => i.ProductId);
+            builder.Property(x => x.Enabled);
+
+            builder.Property(x => x.Value)
+                .IsRequired();
+
+            builder.Property(x => x.Description)
+                .HasMaxLength(500);
         }
     }
 }

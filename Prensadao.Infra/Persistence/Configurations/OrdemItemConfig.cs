@@ -10,10 +10,17 @@ namespace Prensadao.Infra.Persistence.Configurations
         {
             builder.HasKey(x => x.OrderItemId);
 
-            builder.Property(x => x.Quantity);
-            builder.Property(x => x.Value);
-            builder.Property(x => x.OrderId);
-            builder.Property(x => x.ProductId);
+            builder.Property(x => x.Quantity)
+                .IsRequired();
+
+            builder.Property(x => x.Value)
+                .IsRequired();
+
+            builder.Property(x => x.OrderId)
+                .IsRequired();
+
+            builder.Property(x => x.ProductId)
+                .IsRequired();
 
             builder
                 .HasOne(x => x.Order) // OrderItem tem um Order.

@@ -10,22 +10,27 @@ namespace Prensadao.Infra.Persistence.Configurations
         {
             builder.HasKey(x => x.OrderId);
 
-            builder.Property(x => x.DateOrder);
-            builder.Property(x => x.OrderStatus);
+            builder.Property(x => x.DateOrder)
+                .IsRequired();
+
+            builder.Property(x => x.OrderStatus)
+                .IsRequired();
+
             builder.Property(x => x.Delivery);
-            builder.Property(x => x.Value);
-            builder.Property(x => x.Observation);
-            builder.Property(x => x.CustomerId);
+
+            builder.Property(x => x.Value)
+                .IsRequired();
+
+            builder.Property(x => x.Observation)
+                .HasMaxLength(500);
+
+            builder.Property(x => x.CustomerId)
+                .IsRequired();
 
             builder
                 .HasOne(x => x.Customer) // Order tem um Customer.
                 .WithMany(o => o.Orders) // Customer tem muitos Orders
                 .HasForeignKey(o => o.CustomerId);  // Define a FK no lado de Order.
-
-            builder
-                .HasMany(x => x.OrderItems) // Order tem muitos OrderItems.
-                .WithOne(o => o.Order) // Cada OrderItems tem um Order.
-                .HasForeignKey(o => o.OrderId); // Define a FK no lado de OrderItem.
         }
     }
 }
