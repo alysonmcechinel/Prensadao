@@ -22,8 +22,10 @@ namespace Prensadao.Infra
         // Configuração do banco de dados
         public static IServiceCollection AddData(this IServiceCollection services, IConfiguration configuration)
         {
-            //TODO: CONFIGURAR BASE DEPOIS
-            services.AddDbContext<PrensadaoDbContext>(o => o.UseInMemoryDatabase("dbPrensadao"));
+
+            //services.AddDbContext<PrensadaoDbContext>(o => o.UseInMemoryDatabase("dbPrensadao"));
+            var connectionString = configuration.GetConnectionString("DefaultConnection");
+            services.AddDbContext<PrensadaoDbContext>(o => o.UseNpgsql(connectionString));
 
             return services;
         }
