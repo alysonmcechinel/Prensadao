@@ -1,4 +1,5 @@
-﻿using Prensadao.Application.Interfaces;
+﻿using Prensadao.Application.DTOs;
+using Prensadao.Application.Interfaces;
 using Prensadao.Application.Models.Request;
 using Prensadao.Application.Models.Response;
 using Prensadao.Application.Publish;
@@ -36,7 +37,7 @@ namespace Prensadao.Application.Services
 
             if (dto.CustomerId <= 0)
                 throw new ArgumentException("Pedido não pode ser feito sem cliente cadastrado");
-            
+
             var order = new Order(dto.Delivery, dto.Value, dto.Observation, dto.CustomerId);
             await _orderRepository.CreateOrder(order);
 
@@ -45,10 +46,22 @@ namespace Prensadao.Application.Services
                 var ordemItem = new OrderItem(item.Quantity, item.Value, order.OrderId, item.ProductId);
                 await _orderItemRepository.AddOrderItem(ordemItem);
             }
-                        
-            await _bus.Publish(dto, RabbitMqConstants.Exchanges.OrderExchange);
+
+            await Message(order);
 
             return order.OrderId;
+        }
+
+        // Privates
+
+        private async Task Message(Order order)
+        {
+            var messageDto = new OrderMessageDTO
+            {
+                OrderId = order.OrderId
+            };
+
+            await _bus.Publish(messageDto, RabbitMqConstants.Exchanges.OrderExchange);
         }
     }
 }

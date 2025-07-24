@@ -1,4 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Prensadao.Application.Consumer;
+using Prensadao.Application.Consumers;
 using Prensadao.Application.Interfaces;
 using Prensadao.Application.Publish;
 using Prensadao.Application.Services;
@@ -21,6 +23,7 @@ namespace Prensadao.Application
         public static IServiceCollection AddServices(this IServiceCollection services)
         {
             services.AddScoped<IBus, Bus>();
+            services.AddScoped<IConsumer, Consumer>();
             services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<IOrderItemService, OrderItemService>();
             services.AddScoped<ICustomerService, CustomerService>();
