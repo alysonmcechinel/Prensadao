@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Prensadao.Application.Consumer;
 using Prensadao.Application.Consumers;
 using Prensadao.Application.Interfaces;
 using Prensadao.Application.Publish;
