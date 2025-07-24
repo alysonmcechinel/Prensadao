@@ -15,6 +15,7 @@ public class CustomerResponseDto
         Number = number;
         City = city;
         ReferencePoint = referencePoint;
+        Cep = cep;
 
         Orders = orders;
     }

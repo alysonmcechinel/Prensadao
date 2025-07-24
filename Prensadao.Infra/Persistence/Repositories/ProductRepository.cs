@@ -23,7 +23,7 @@ namespace Prensadao.Infra.Persistence.Repositories
 
         public async Task Update(Product product)
         {
-            _dbContext.Products.Update(product);
+            _dbContext.Update(product);
             await _dbContext.SaveChangesAsync();
         }
 
