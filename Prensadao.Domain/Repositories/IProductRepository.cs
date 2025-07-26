@@ -9,5 +9,6 @@ namespace Prensadao.Domain.Repositories
         Task<Product> GetById(int id);
         Task<List<Product>> GetProducts();
         Task<bool> NameAlreadyExists(string name);
+        Task<bool> ExistsInactiveProduct(List<int> productsIDs);
     }
 }

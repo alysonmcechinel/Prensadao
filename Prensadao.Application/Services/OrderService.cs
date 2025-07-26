@@ -13,12 +13,14 @@ namespace Prensadao.Application.Services
         private readonly IBus _bus;
         private readonly IOrderRepository _orderRepository;
         private readonly IOrderItemRepository _orderItemRepository;
+        private readonly IProductRepository _productRepository;
 
-        public OrderService(IBus bus, IOrderRepository orderRepository, IOrderItemRepository orderItemRepository)
+        public OrderService(IBus bus, IOrderRepository orderRepository, IOrderItemRepository orderItemRepository, IProductRepository productRepository)
         {
             _bus = bus;
             _orderRepository = orderRepository;
             _orderItemRepository = orderItemRepository;
+            _productRepository = productRepository;
         }
 
         public async Task<List<OrderReponseDto>> GetOrders()
@@ -38,11 +40,17 @@ namespace Prensadao.Application.Services
             if (dto.CustomerId <= 0)
                 throw new ArgumentException("Pedido não pode ser feito sem cliente cadastrado");
 
+            List<int> productsIDs = dto.OrderItems.Select(x => x.ProductId).ToList();
+            var verifyProductActive = await _productRepository.ExistsInactiveProduct(productsIDs);
+            if (verifyProductActive)
+                throw new ArgumentException("Pedido não pode ser feito com produtos inativos");
+
             var order = new Order(dto.Delivery, dto.Value, dto.Observation, dto.CustomerId);
             await _orderRepository.CreateOrder(order);
 
             foreach (var item in dto.OrderItems)
             {
+                
                 var ordemItem = new OrderItem(item.Quantity, item.Value, order.OrderId, item.ProductId);
                 await _orderItemRepository.AddOrderItem(ordemItem);
             }

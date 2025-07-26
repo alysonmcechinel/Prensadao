@@ -34,5 +34,8 @@ namespace Prensadao.Infra.Persistence.Repositories
             .ToListAsync();        
 
         public async Task<bool> NameAlreadyExists(string name) => await _dbContext.Products.AnyAsync(x => x.Name == name);
+
+        public async Task<bool> ExistsInactiveProduct(List<int> productsIDs) => await _dbContext.Products.AnyAsync(x => productsIDs.Contains(x.ProductId) && !x.Enabled);       
+
     }
 }
