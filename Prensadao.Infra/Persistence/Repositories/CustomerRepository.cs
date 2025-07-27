@@ -30,7 +30,7 @@ namespace Prensadao.Infra.Persistence.Repositories
 
         public async Task Update(Customer customer)
         {
-            _dbContext.Update(customer);
+            _dbContext.Customers.Update(customer);
             await _dbContext.SaveChangesAsync();
         }
 

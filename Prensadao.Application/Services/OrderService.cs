@@ -50,7 +50,6 @@ namespace Prensadao.Application.Services
 
             foreach (var item in dto.OrderItems)
             {
-                
                 var ordemItem = new OrderItem(item.Quantity, item.Value, order.OrderId, item.ProductId);
                 await _orderItemRepository.AddOrderItem(ordemItem);
             }

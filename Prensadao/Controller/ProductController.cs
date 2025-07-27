@@ -81,7 +81,7 @@ namespace Prensadao.API.Controller
         {
             try
             {
-                var result = _productService.Update(dto);
+                await _productService.Update(dto);
                 return Ok("Produto atualizado com sucesso");
             }
             catch (Exception ex)
