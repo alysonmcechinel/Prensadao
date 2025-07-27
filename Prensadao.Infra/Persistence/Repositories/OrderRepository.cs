@@ -14,7 +14,7 @@ namespace Prensadao.Infra.Persistence.Repositories
 
         public async Task<int> CreateOrder(Order order)
         {
-            await _dbContext.AddAsync(order);
+            await _dbContext.Orders.AddAsync(order);
             await _dbContext.SaveChangesAsync();
 
             return order.OrderId;

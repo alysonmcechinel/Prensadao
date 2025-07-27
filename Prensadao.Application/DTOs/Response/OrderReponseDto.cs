@@ -1,11 +1,12 @@
-﻿using Prensadao.Domain.Entities;
+﻿using Prensadao.Application.Helpers;
+using Prensadao.Domain.Entities;
 using System.ComponentModel.DataAnnotations;
 
 namespace Prensadao.Application.Models.Response
 {
     public class OrderReponseDto
     {
-        public OrderReponseDto(int orderId, bool delivery, decimal value, string observation, int customerId, string customerName, List<OrderItemResponseDto> ordemItems)
+        public OrderReponseDto(int orderId, bool delivery, decimal value, string observation, int customerId, string customerName, DateTime dateOrder, List<OrderItemResponseDto> ordemItems)
         {
             OrderId = orderId;
             Delivery = delivery;
@@ -13,6 +14,7 @@ namespace Prensadao.Application.Models.Response
             Observation = observation;
             CustomerId = customerId;
             CustomerName = customerName;
+            DateOrder = dateOrder.ToBrasil();
 
             OrderItems = ordemItems;
         }
@@ -24,12 +26,13 @@ namespace Prensadao.Application.Models.Response
         public string? Observation { get; set; }
         public int CustomerId { get; set; }
         public string CustomerName { get; set; }
+        public DateTime DateOrder { get; set; }
         public List<OrderItemResponseDto> OrderItems { get; set; }
 
         #region Mapeamento
 
         //TODO: ajustar orderItems
-        public static OrderReponseDto ToDto(Order order) => new OrderReponseDto(order.OrderId, order.Delivery, order.Value, order.Observation, order.CustomerId, order.Customer.Name, null);
+        public static OrderReponseDto ToDto(Order order) => new OrderReponseDto(order.OrderId, order.Delivery, order.Value, order.Observation, order.CustomerId, order.Customer.Name, order.DateOrder, null);
 
         public static List<OrderReponseDto> ToListDto(List<Order> orders)
         {
@@ -47,7 +50,7 @@ namespace Prensadao.Application.Models.Response
                     ProductName = x.Product.Name
                 }).ToList();
 
-                orderResponse.Add(new OrderReponseDto(order.OrderId, order.Delivery, order.Value, order.Observation, order.CustomerId, order.Customer.Name, ordemItens));
+                orderResponse.Add(new OrderReponseDto(order.OrderId, order.Delivery, order.Value, order.Observation, order.CustomerId, order.Customer.Name, order.DateOrder, ordemItens));
             }
 
             return orderResponse;
