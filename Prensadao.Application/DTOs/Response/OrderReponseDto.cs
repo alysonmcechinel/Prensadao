@@ -30,9 +30,7 @@ namespace Prensadao.Application.Models.Response
         public List<OrderItemResponseDto> OrderItems { get; set; }
 
         #region Mapeamento
-
-        //TODO: ajustar orderItems
-        public static OrderReponseDto ToDto(Order order) => new OrderReponseDto(order.OrderId, order.Delivery, order.Value, order.Observation, order.CustomerId, order.Customer.Name, order.DateOrder, null);
+        public static OrderReponseDto ToDto(Order order) => new OrderReponseDto(order.OrderId, order.Delivery, order.Value, order.Observation, order.CustomerId, order.Customer.Name, order.DateOrder, ToListItens(order.OrderItems.ToList()));
 
         public static List<OrderReponseDto> ToListDto(List<Order> orders)
         {
@@ -40,21 +38,23 @@ namespace Prensadao.Application.Models.Response
 
             foreach (var order in orders)
             {
-                var ordemItens = order.OrderItems.Select(x => new OrderItemResponseDto
-                {
-                    OrderItemId = x.OrderItemId,
-                    OrderId = x.OrderId,
-                    ProductId = x.ProductId,
-                    Quantity = x.Quantity,
-                    ProductValue = x.Product.Value,
-                    ProductName = x.Product.Name
-                }).ToList();
+                var ordemItens = ToListItens(order.OrderItems.ToList());
 
                 orderResponse.Add(new OrderReponseDto(order.OrderId, order.Delivery, order.Value, order.Observation, order.CustomerId, order.Customer.Name, order.DateOrder, ordemItens));
             }
 
             return orderResponse;
         }
+
+        private static List<OrderItemResponseDto> ToListItens(List<OrderItem> orderItem) => orderItem.Select(x => new OrderItemResponseDto
+        {
+            OrderItemId = x.OrderItemId,
+            OrderId = x.OrderId,
+            ProductId = x.ProductId,
+            Quantity = x.Quantity,
+            ProductValue = x.Product.Value,
+            ProductName = x.Product.Name
+        }).ToList();
         #endregion
     }
 }

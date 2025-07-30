@@ -21,11 +21,15 @@ namespace Prensadao.Infra.Persistence.Repositories
         }
 
         public async Task<Customer?> GetById(int id) => await _dbContext.Customers
+            .Include(x => x.Orders)
+                .ThenInclude(o => o.OrderItems)
+                .ThenInclude(p => p.Product)
             .SingleOrDefaultAsync(c => c.CustomerId == id);
 
         public async Task<List<Customer>> GetCustomers() => await _dbContext.Customers
             .Include(x => x.Orders)
                 .ThenInclude(o => o.OrderItems)
+                .ThenInclude(p => p.Product)
             .ToListAsync();
 
         public async Task Update(Customer customer)
