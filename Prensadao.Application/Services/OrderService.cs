@@ -38,7 +38,7 @@ namespace Prensadao.Application.Services
             if (dto.CustomerId <= 0)
                 throw new ArgumentException("Pedido não pode ser feito sem cliente cadastrado.");
 
-            await ValidationsOrdemItem(dto);
+            await ValidationsOrderItem(dto);
             Dictionary<int, decimal> prices = await GetPrices(dto);
 
             decimal totalAmountOrder = Math.Round(dto.OrderItems.Sum(i => prices[i.ProductId] * i.Quantity));
@@ -72,7 +72,7 @@ namespace Prensadao.Application.Services
             return prices;
         }
 
-        private async Task ValidationsOrdemItem(OrderRequestDto dto)
+        private async Task ValidationsOrderItem(OrderRequestDto dto)
         {
             if (!dto.OrderItems.Any() || dto.OrderItems.Any(x => x.ProductId <= 0))
                 throw new ArgumentException("Pedido não pode ser feito sem items.");
