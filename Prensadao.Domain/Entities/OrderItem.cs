@@ -17,6 +17,7 @@ public class OrderItem
     [Key]
     public int OrderItemId { get; private set; }
     public int Quantity { get; private set; }
+    //TODO: Alterar para UnitPrice
     public decimal Value { get; private set; }
     public int OrderId { get; private set; }
     public int ProductId { get; private set; }
@@ -24,4 +25,6 @@ public class OrderItem
     // Relationship
     public Order Order { get; private set; }
     public Product Product { get; private set; }
+
+    public decimal GetTotal() => Quantity * Value;
 }

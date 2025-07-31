@@ -9,8 +9,6 @@ public class OrderRequestDto
 
     [Required]
     public bool Delivery { get; set; }
-
-    public decimal Value { get; set; }
     
     public string? Observation { get; set; }
 
@@ -18,14 +16,13 @@ public class OrderRequestDto
     public int CustomerId { get; set; }
 
     [Required]
-    public List<OrderItemRequestDto> OrderItems { get; set; }    
+    public List<OrderItemRequestDto> OrderItems { get; set; } = [];
 }
 
 public class OrderItemRequestDto 
 {
     public int Quantity { get; set; }
     public int ProductId { get; set; }
-    public decimal Value { get; set; }
 }
 
 

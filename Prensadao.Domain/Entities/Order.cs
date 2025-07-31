@@ -32,4 +32,8 @@ public class Order
     public Customer Customer { get; set; }
     public ICollection<OrderItem> OrderItems { get; set; }
 
+    public void AtualizaStatusPreparacao() => OrderStatus = OrderStatusEnum.EmPreparacao;
+    public void AtualizaStatusPronto() => OrderStatus = OrderStatusEnum.Pronto;
+    public void AtualizaStatusSaiuParaEntrega() => OrderStatus = OrderStatusEnum.SaiuParaEntrega;
+    public void AtualizaStatusFinalizado() => OrderStatus = OrderStatusEnum.Finalizado;
 }

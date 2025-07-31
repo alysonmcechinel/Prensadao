@@ -5,6 +5,7 @@ using Prensadao.Application.Models.Response;
 using Prensadao.Application.Publish;
 using Prensadao.Domain.Entities;
 using Prensadao.Domain.Repositories;
+using System.Threading.Tasks;
 
 namespace Prensadao.Application.Services
 {
@@ -32,25 +33,30 @@ namespace Prensadao.Application.Services
         public async Task<int> OrderCreate(OrderRequestDto dto)
         {
             if (dto is null)
-                throw new ArgumentException("O pedido não pode ser nulo");
-
-            if (!dto.OrderItems.Any() || dto.OrderItems.Any(x => x.ProductId <= 0))
-                throw new ArgumentException("Pedido não pode ser feito sem items");
+                throw new ArgumentException("O pedido não pode ser nulo.");           
 
             if (dto.CustomerId <= 0)
-                throw new ArgumentException("Pedido não pode ser feito sem cliente cadastrado");
+                throw new ArgumentException("Pedido não pode ser feito sem cliente cadastrado.");
+            
+            await ValidationsOrdemItem(dto);
 
-            List<int> productsIDs = dto.OrderItems.Select(x => x.ProductId).ToList();
-            var verifyProductActive = await _productRepository.ExistsInactiveProduct(productsIDs);
-            if (verifyProductActive)
-                throw new ArgumentException("Pedido não pode ser feito com produtos inativos");
+            var productIds = dto.OrderItems.Select(i => i.ProductId).Distinct().ToList();
+            var produtos = await _productRepository.ValueOfProducts(productIds);
+            var precos = produtos.ToDictionary(p => p.ProductId, p => p.Value);
 
-            var order = new Order(dto.Delivery, dto.Value, dto.Observation, dto.CustomerId);
+            var idsNotFound = productIds.Except(precos.Keys).ToList();
+            if (idsNotFound.Any())
+                throw new ArgumentException($"Produtos não encontrados: {string.Join(", ", idsNotFound)}");
+
+            decimal TotalAmountOrder = Math.Round(dto.OrderItems.Sum(i => precos[i.ProductId] * i.Quantity));
+
+            var order = new Order(dto.Delivery, TotalAmountOrder, dto.Observation, dto.CustomerId);
             await _orderRepository.CreateOrder(order);
 
             foreach (var item in dto.OrderItems)
             {
-                var ordemItem = new OrderItem(item.Quantity, item.Value, order.OrderId, item.ProductId);
+                var unitPrice = precos[item.ProductId];
+                var ordemItem = new OrderItem(item.Quantity, unitPrice, order.OrderId, item.ProductId);
                 await _orderItemRepository.AddOrderItem(ordemItem);
             }
 
@@ -61,6 +67,20 @@ namespace Prensadao.Application.Services
 
         // Privates
 
+        private async Task ValidationsOrdemItem(OrderRequestDto dto)
+        {
+            if (!dto.OrderItems.Any() || dto.OrderItems.Any(x => x.ProductId <= 0))
+                throw new ArgumentException("Pedido não pode ser feito sem items.");
+
+            if (!dto.OrderItems.Any() || dto.OrderItems.Any(x => x.Quantity <= 0))
+                throw new ArgumentException("Pedido não pode ser feito sem a quantidade do item não estar informada corretamente.");
+
+            List<int> productsIDs = dto.OrderItems.Select(x => x.ProductId).ToList();
+            var verifyProductActive = await _productRepository.ExistsInactiveProduct(productsIDs);
+            if (verifyProductActive)
+                throw new ArgumentException("Pedido não pode ser feito com produtos inativos.");
+        }
+
         private async Task Message(Order order)
         {
             var messageDto = new OrderMessageDTO
@@ -69,6 +89,6 @@ namespace Prensadao.Application.Services
             };
 
             await _bus.Publish(messageDto, RabbitMqConstants.Exchanges.OrderExchange);
-        }
+        }        
     }
 }
