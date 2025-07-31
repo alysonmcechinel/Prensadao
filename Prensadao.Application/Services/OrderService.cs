@@ -6,6 +6,7 @@ using Prensadao.Application.Publish;
 using Prensadao.Domain.Entities;
 using Prensadao.Domain.Repositories;
 using System.Threading.Tasks;
+using System.Transactions;
 
 namespace Prensadao.Application.Services
 {
@@ -44,14 +45,20 @@ namespace Prensadao.Application.Services
             decimal totalAmountOrder = Math.Round(dto.OrderItems.Sum(i => prices[i.ProductId] * i.Quantity));
 
             var order = new Order(dto.Delivery, totalAmountOrder, dto.Observation, dto.CustomerId);
-            await _orderRepository.CreateOrder(order);
 
-            foreach (var item in dto.OrderItems)
+            using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                var unitPrice = prices[item.ProductId];
-                var ordemItem = new OrderItem(item.Quantity, unitPrice, order.OrderId, item.ProductId);
-                await _orderItemRepository.AddOrderItem(ordemItem);
-            }
+                await _orderRepository.CreateOrder(order);
+
+                foreach (var item in dto.OrderItems)
+                {
+                    var unitPrice = prices[item.ProductId];
+                    var orderItem = new OrderItem(item.Quantity, unitPrice, order.OrderId, item.ProductId);
+                    await _orderItemRepository.AddOrderItem(orderItem);
+                }
+
+                scope.Complete();
+            };           
 
             await Message(order);
 
@@ -74,11 +81,14 @@ namespace Prensadao.Application.Services
 
         private async Task ValidationsOrderItem(OrderRequestDto dto)
         {
-            if (!dto.OrderItems.Any() || dto.OrderItems.Any(x => x.ProductId <= 0))
+            if (!dto.OrderItems.Any())
                 throw new ArgumentException("Pedido não pode ser feito sem items.");
 
-            if (!dto.OrderItems.Any() || dto.OrderItems.Any(x => x.Quantity <= 0))
-                throw new ArgumentException("Pedido não pode ser feito sem a quantidade do item não estar informada corretamente.");
+            if (dto.OrderItems.Any(x => x.ProductId <= 0))
+                throw new ArgumentException("Pedido contém Id inválido.");
+
+            if (dto.OrderItems.Any(x => x.Quantity <= 0))
+                throw new ArgumentException("Pedido contém itens com quantidade inválida.");
 
             List<int> productsIDs = dto.OrderItems.Select(x => x.ProductId).ToList();
             var verifyProductActive = await _productRepository.ExistsInactiveProduct(productsIDs);
