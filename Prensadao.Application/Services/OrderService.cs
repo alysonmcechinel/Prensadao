@@ -33,29 +33,22 @@ namespace Prensadao.Application.Services
         public async Task<int> OrderCreate(OrderRequestDto dto)
         {
             if (dto is null)
-                throw new ArgumentException("O pedido não pode ser nulo.");           
+                throw new ArgumentException("O pedido não pode ser nulo.");
 
             if (dto.CustomerId <= 0)
                 throw new ArgumentException("Pedido não pode ser feito sem cliente cadastrado.");
-            
+
             await ValidationsOrdemItem(dto);
+            Dictionary<int, decimal> prices = await GetPrices(dto);
 
-            var productIds = dto.OrderItems.Select(i => i.ProductId).Distinct().ToList();
-            var produtos = await _productRepository.ValueOfProducts(productIds);
-            var precos = produtos.ToDictionary(p => p.ProductId, p => p.Value);
+            decimal totalAmountOrder = Math.Round(dto.OrderItems.Sum(i => prices[i.ProductId] * i.Quantity));
 
-            var idsNotFound = productIds.Except(precos.Keys).ToList();
-            if (idsNotFound.Any())
-                throw new ArgumentException($"Produtos não encontrados: {string.Join(", ", idsNotFound)}");
-
-            decimal TotalAmountOrder = Math.Round(dto.OrderItems.Sum(i => precos[i.ProductId] * i.Quantity));
-
-            var order = new Order(dto.Delivery, TotalAmountOrder, dto.Observation, dto.CustomerId);
+            var order = new Order(dto.Delivery, totalAmountOrder, dto.Observation, dto.CustomerId);
             await _orderRepository.CreateOrder(order);
 
             foreach (var item in dto.OrderItems)
             {
-                var unitPrice = precos[item.ProductId];
+                var unitPrice = prices[item.ProductId];
                 var ordemItem = new OrderItem(item.Quantity, unitPrice, order.OrderId, item.ProductId);
                 await _orderItemRepository.AddOrderItem(ordemItem);
             }
@@ -66,6 +59,18 @@ namespace Prensadao.Application.Services
         }
 
         // Privates
+        private async Task<Dictionary<int, decimal>> GetPrices(OrderRequestDto dto)
+        {
+            var productIds = dto.OrderItems.Select(i => i.ProductId).Distinct().ToList();
+            var products = await _productRepository.ValueOfProducts(productIds);
+            var prices = products.ToDictionary(p => p.ProductId, p => p.Value);
+
+            var idsNotFound = productIds.Except(prices.Keys).ToList();
+            if (idsNotFound.Any())
+                throw new ArgumentException($"Produtos não encontrados: {string.Join(", ", idsNotFound)}");
+
+            return prices;
+        }
 
         private async Task ValidationsOrdemItem(OrderRequestDto dto)
         {
