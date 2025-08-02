@@ -3,6 +3,7 @@ using Prensadao.Application.Consumers;
 using Prensadao.Application.Interfaces;
 using Prensadao.Application.Publish;
 using Prensadao.Application.Services;
+using Prensadao.Application.Workers;
 using RabbitMQ.Client;
 
 namespace Prensadao.Application
@@ -13,7 +14,8 @@ namespace Prensadao.Application
         {
             services
                 .AddRabbitMQ()
-                .AddServices();
+                .AddServices()
+                .AddWorkers();
 
             return services;
         }
@@ -22,7 +24,7 @@ namespace Prensadao.Application
         public static IServiceCollection AddServices(this IServiceCollection services)
         {
             services.AddScoped<IBus, Bus>();
-            services.AddScoped<IConsumer, Consumer>();
+            services.AddSingleton<IConsumer, Consumer>();
             services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<IOrderItemService, OrderItemService>();
             services.AddScoped<ICustomerService, CustomerService>();
@@ -42,6 +44,13 @@ namespace Prensadao.Application
                 var rabbitConfig = x.GetRequiredService<RabbitMqConfigService>();
                 return rabbitConfig.CreateChannel();
             });
+
+            return services;
+        }
+
+        public static IServiceCollection AddWorkers(this IServiceCollection services) 
+        {
+            services.AddHostedService<OrderWorker>();
 
             return services;
         }
