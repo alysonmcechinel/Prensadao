@@ -20,6 +20,16 @@ namespace Prensadao.Infra.Persistence.Repositories
             return order.OrderId;
         }
 
+        public async Task Update(Order order)
+        {
+            _dbContext.Orders.Update(order);
+            await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task<Order?> GetById(int id) => await _dbContext.Orders
+            .Include(x => x.OrderItems)
+            .SingleOrDefaultAsync(o => o.OrderId == id);
+
         public async Task<List<Order>> GetOrders() => 
             await _dbContext.Orders
                 .Include(x => x.Customer)
