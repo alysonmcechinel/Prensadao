@@ -32,7 +32,6 @@ public class Order
     public Customer Customer { get; set; }
     public ICollection<OrderItem> OrderItems { get; set; }
 
-
     public void UpdateStatus(OrderStatusEnum status)
     {
         switch (status)
@@ -55,6 +54,27 @@ public class Order
             default:
                 OrderStatus = OrderStatusEnum.Error;
                 break;
+        }
+    }
+
+    public void NextStatus()
+    {
+        switch (OrderStatus)
+        {
+            case OrderStatusEnum.Criado:
+                OrderStatus = OrderStatusEnum.EmPreparacao;
+                break;
+            case OrderStatusEnum.EmPreparacao:
+                OrderStatus = OrderStatusEnum.Pronto;
+                break;
+            case OrderStatusEnum.Pronto:
+                OrderStatus = Delivery ? OrderStatusEnum.SaiuParaEntrega : OrderStatusEnum.Finalizado;
+                break;
+            case OrderStatusEnum.SaiuParaEntrega:
+                OrderStatus = OrderStatusEnum.Finalizado;
+                break;
+            default:
+                throw new ArgumentException("Status não pode ser atualizado");
         }
     }
 }

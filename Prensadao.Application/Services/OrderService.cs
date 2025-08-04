@@ -73,7 +73,7 @@ namespace Prensadao.Application.Services
             if (order is null)
                 throw new ArgumentException("Pedido não encontrado.");
 
-            if(order.OrderStatus != dto.OrderStatus)
+            if (order.OrderStatus != dto.OrderStatus)
             {
                 order.UpdateStatus(dto.OrderStatus);
                 await _orderRepository.Update(order);

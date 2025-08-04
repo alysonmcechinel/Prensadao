@@ -3,6 +3,7 @@ using Microsoft.Extensions.Hosting;
 using Prensadao.Application.Consumers;
 using Prensadao.Application.DTOs;
 using Prensadao.Application.Interfaces;
+using Prensadao.Domain.Enum;
 using Prensadao.Domain.Repositories;
 
 namespace Prensadao.Application.Workers;
@@ -20,7 +21,7 @@ public class OrderWorker : BackgroundService
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
-
+        // WORKER QUE RECEBE E ATUALIZA PEDIDOS ENVIADOS PARA COZINHA.
         _consumer.Listen<OrderMessageDTO>(RabbitMqConstants.Queues.OrderCozinhaQueue, async message =>
         {
             using var scope = _serviceProvider.CreateScope();
@@ -34,11 +35,14 @@ public class OrderWorker : BackgroundService
                 return;
             }
 
-            // TODO: atualizar prox status
-            //order.AtualizaStatusPreparacao();
-            //await orderRepository.Update(order);
+            if (order.OrderStatus == OrderStatusEnum.Criado)
+            {
+                order.NextStatus();
+                await orderRepository.Update(order);
 
-            Console.WriteLine($"Pedido #{order.OrderId} atualizado para {order.OrderStatus}");
+                Console.WriteLine($"Pedido #{order.OrderId} atualizado para {order.OrderStatus}");
+            }
+            
         });
 
         return Task.CompletedTask;
