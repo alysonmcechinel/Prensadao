@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Prensadao.Application.DTOs.Request;
 using Prensadao.Application.Interfaces;
 using Prensadao.Application.Models.Request;
+using System.Data;
 
 namespace Prensadao.API.Controller
 {
@@ -40,6 +42,20 @@ namespace Prensadao.API.Controller
             var result = await _orderService.GetOrders();
 
             return Ok(result);
+        }
+
+        [HttpPut("UpdateStatus")]
+        public async Task<IActionResult> UpdateStatus([FromBody] UpdateStatusDTO dto)
+        {
+            try
+            {
+                var result = await _orderService.UpdateStatus(dto);
+                return Ok( new { message = "Status do pedido atualizado com sucesso.", data = result });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Erro ao atualizar o pedido {ex.Message}");
+            }
         }
 
     }

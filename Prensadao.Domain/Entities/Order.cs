@@ -32,8 +32,29 @@ public class Order
     public Customer Customer { get; set; }
     public ICollection<OrderItem> OrderItems { get; set; }
 
-    public void AtualizaStatusPreparacao() => OrderStatus = OrderStatusEnum.EmPreparacao;
-    public void AtualizaStatusPronto() => OrderStatus = OrderStatusEnum.Pronto;
-    public void AtualizaStatusSaiuParaEntrega() => OrderStatus = OrderStatusEnum.SaiuParaEntrega;
-    public void AtualizaStatusFinalizado() => OrderStatus = OrderStatusEnum.Finalizado;
+
+    public void UpdateStatus(OrderStatusEnum status)
+    {
+        switch (status)
+        {
+            case OrderStatusEnum.Criado:
+                OrderStatus = OrderStatusEnum.Criado;
+                break;
+            case OrderStatusEnum.EmPreparacao:
+                OrderStatus = OrderStatusEnum.EmPreparacao;
+                break;
+            case OrderStatusEnum.Pronto:
+                OrderStatus = OrderStatusEnum.Pronto;
+                break;
+            case OrderStatusEnum.SaiuParaEntrega:
+                OrderStatus = Delivery ? OrderStatusEnum.SaiuParaEntrega : OrderStatusEnum.Finalizado;
+                break;
+            case OrderStatusEnum.Finalizado:
+                OrderStatus = OrderStatusEnum.Finalizado;
+                break;
+            default:
+                OrderStatus = OrderStatusEnum.Error;
+                break;
+        }
+    }
 }

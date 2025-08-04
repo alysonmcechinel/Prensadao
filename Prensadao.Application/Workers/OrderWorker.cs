@@ -34,10 +34,11 @@ public class OrderWorker : BackgroundService
                 return;
             }
 
-            order.AtualizaStatusPreparacao();
-            await orderRepository.Update(order);
+            // TODO: atualizar prox status
+            //order.AtualizaStatusPreparacao();
+            //await orderRepository.Update(order);
 
-            Console.WriteLine($"Pedido #{order.OrderId} atualizado para Em Preparacao");
+            Console.WriteLine($"Pedido #{order.OrderId} atualizado para {order.OrderStatus}");
         });
 
         return Task.CompletedTask;

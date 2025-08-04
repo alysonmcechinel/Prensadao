@@ -1,4 +1,5 @@
-﻿using Prensadao.Application.Models.Request;
+﻿using Prensadao.Application.DTOs.Request;
+using Prensadao.Application.Models.Request;
 using Prensadao.Application.Models.Response;
 
 namespace Prensadao.Application.Interfaces
@@ -7,5 +8,6 @@ namespace Prensadao.Application.Interfaces
     {
         Task<List<OrderReponseDto>> GetOrders();
         Task<int> OrderCreate(OrderRequestDto dto);
+        Task<OrderReponseDto> UpdateStatus(UpdateStatusDTO dto);
     }
 }

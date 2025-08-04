@@ -28,6 +28,8 @@ namespace Prensadao.Infra.Persistence.Repositories
 
         public async Task<Order?> GetById(int id) => await _dbContext.Orders
             .Include(x => x.OrderItems)
+                .ThenInclude(o => o.Product)
+            .Include(x => x.Customer)
             .SingleOrDefaultAsync(o => o.OrderId == id);
 
         public async Task<List<Order>> GetOrders() => 

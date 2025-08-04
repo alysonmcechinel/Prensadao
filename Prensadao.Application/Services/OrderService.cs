@@ -1,4 +1,5 @@
 ﻿using Prensadao.Application.DTOs;
+using Prensadao.Application.DTOs.Request;
 using Prensadao.Application.Interfaces;
 using Prensadao.Application.Models.Request;
 using Prensadao.Application.Models.Response;
@@ -65,6 +66,23 @@ namespace Prensadao.Application.Services
             return order.OrderId;
         }
 
+        public async Task<OrderReponseDto> UpdateStatus(UpdateStatusDTO dto)
+        {
+            var order = await _orderRepository.GetById(dto.OrderId);
+
+            if (order is null)
+                throw new ArgumentException("Pedido não encontrado.");
+
+            if(order.OrderStatus != dto.OrderStatus)
+            {
+                order.UpdateStatus(dto.OrderStatus);
+                await _orderRepository.Update(order);
+                return OrderReponseDto.ToDto(order);
+            }
+            else
+                throw new ArgumentException("Status não pode ser atualizado");
+        }
+
         // Privates
         private async Task<Dictionary<int, decimal>> GetPrices(OrderRequestDto dto)
         {
@@ -104,6 +122,8 @@ namespace Prensadao.Application.Services
             };
 
             await _bus.Publish(messageDto, RabbitMqConstants.Exchanges.OrderExchange);
-        }        
+        }
+
+        
     }
 }
