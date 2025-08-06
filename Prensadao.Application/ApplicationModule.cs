@@ -51,6 +51,7 @@ namespace Prensadao.Application
         public static IServiceCollection AddWorkers(this IServiceCollection services) 
         {
             services.AddHostedService<OrderWorker>();
+            services.AddHostedService<NotifyWorker>();
 
             return services;
         }
