@@ -3,6 +3,7 @@ using Microsoft.Extensions.Hosting;
 using Prensadao.Application.Consumers;
 using Prensadao.Application.DTOs;
 using Prensadao.Application.Interfaces;
+using Prensadao.Application.Publish;
 using Prensadao.Domain.Enum;
 using Prensadao.Domain.Repositories;
 
@@ -26,6 +27,7 @@ public class OrderWorker : BackgroundService
         {
             using var scope = _serviceProvider.CreateScope();
             var orderRepository = scope.ServiceProvider.GetRequiredService<IOrderRepository>();
+            var bus = scope.ServiceProvider.GetRequiredService<IBus>();
 
             var order = await orderRepository.GetById(message.OrderId);
 
@@ -41,6 +43,17 @@ public class OrderWorker : BackgroundService
                 await orderRepository.Update(order);
 
                 Console.WriteLine($"Pedido #{order.OrderId} atualizado para {order.OrderStatus}");
+
+                var notify = new NotifyMessageDTO
+                {
+                    OrderId = order.OrderId,
+                    ConsumerName = order.Customer.Name,
+                    Delivery = order.Delivery,
+                    OrderStatus = order.OrderStatus,
+                    Phone = order.Customer.Phone
+                };
+
+                await bus.Publish(notify, RabbitMqConstants.Exchanges.NotifyExchange, "");
             }
             
         });

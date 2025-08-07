@@ -5,6 +5,7 @@
         public static class Exchanges
         {
             public const string OrderExchange = "prensado.order";
+            public const string NotifyExchange = "prensado.notify";
         }
 
         public static class RoutingKeys

@@ -8,6 +8,6 @@ namespace Prensadao.Application.DTOs
         public OrderStatusEnum OrderStatus { get; set; }
         public bool Delivery { get; set; }
         public string ConsumerName { get; set; }
-        public int Phone { get; set; }
+        public long Phone { get; set; }
     }
 }
