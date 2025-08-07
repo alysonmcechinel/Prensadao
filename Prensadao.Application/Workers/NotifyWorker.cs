@@ -25,14 +25,13 @@ public class NotifyWorker : BackgroundService
         _consumer.Listen<NotifyMessageDTO>(RabbitMqConstants.Queues.OrderNotifyQueue, async message =>
         {
             using var scope = _serviceProvider.CreateScope();
-            //var orderRepository = scope.ServiceProvider.GetRequiredService<IOrderRepository>();
 
             if (message.OrderStatus == OrderStatusEnum.EmPreparacao)
                 Console.WriteLine($"O seu pedido N°{message.OrderId} está em {OrderStatusEnum.EmPreparacao.GetDescription()}!!");
             else if(message.OrderStatus == OrderStatusEnum.Pronto && !message.Delivery)
-                Console.WriteLine($"O seu pedido N°{message.OrderId} está {OrderStatusEnum.EmPreparacao.GetDescription()}, pode vir buscalo!");
+                Console.WriteLine($"O seu pedido N°{message.OrderId} está {OrderStatusEnum.Pronto.GetDescription()}, pode vir buscalo!");
             else if (message.OrderStatus == OrderStatusEnum.SaiuParaEntrega)
-                Console.WriteLine($"O seu pedido N°{message.OrderId} {OrderStatusEnum.EmPreparacao.GetDescription()}!!");
+                Console.WriteLine($"O seu pedido N°{message.OrderId} {OrderStatusEnum.SaiuParaEntrega.GetDescription()}!!");
             else if (message.OrderStatus == OrderStatusEnum.Finalizado)
                 Console.WriteLine($"O seu pedido N°{message.OrderId} foi concluido, agradeços a preferencia otimo apetite!!");
         });

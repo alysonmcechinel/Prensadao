@@ -77,6 +77,18 @@ namespace Prensadao.Application.Services
             {
                 order.UpdateStatus(dto.OrderStatus);
                 await _orderRepository.Update(order);
+
+                var notify = new NotifyMessageDTO
+                {
+                    OrderId = order.OrderId,
+                    ConsumerName = order.Customer.Name,
+                    Delivery = order.Delivery,
+                    OrderStatus = order.OrderStatus,
+                    Phone = order.Customer.Phone
+                };
+
+                await _bus.Publish(notify, RabbitMqConstants.Exchanges.NotifyExchange, "");
+
                 return OrderReponseDto.ToDto(order);
             }
             else
