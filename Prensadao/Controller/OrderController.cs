@@ -58,5 +58,18 @@ namespace Prensadao.API.Controller
             }
         }
 
+        [HttpPut("Enabled")]
+        public async Task<IActionResult> Enabled(int id)
+        {
+            try
+            {
+                await _orderService.Enabled(id);
+                return Ok("Pedido cancelado com sucesso.");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"{ex.Message}");
+            }
+        }
     }
 }

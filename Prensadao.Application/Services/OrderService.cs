@@ -1,10 +1,12 @@
 ﻿using Prensadao.Application.DTOs;
 using Prensadao.Application.DTOs.Request;
+using Prensadao.Application.Helpers;
 using Prensadao.Application.Interfaces;
 using Prensadao.Application.Models.Request;
 using Prensadao.Application.Models.Response;
 using Prensadao.Application.Publish;
 using Prensadao.Domain.Entities;
+using Prensadao.Domain.Enum;
 using Prensadao.Domain.Repositories;
 using System.Threading.Tasks;
 using System.Transactions;
@@ -95,6 +97,21 @@ namespace Prensadao.Application.Services
                 throw new ArgumentException("Status não pode ser atualizado");
         }
 
+        public async Task Enabled(int id)
+        {
+            var order = await _orderRepository.GetById(id);
+
+            if (order is null)
+                throw new ArgumentException("Pedido não encontrado.");
+
+            if (order.OrderStatus == OrderStatusEnum.EmPreparacao || order.OrderStatus == OrderStatusEnum.Criado)
+                order.UpdateStatus(OrderStatusEnum.Cancelado);
+            else
+                throw new ArgumentException($"Pedido não pode ser cancelado pois, já esta com status: {order.OrderStatus.GetDescription()}");
+
+            _orderRepository.Update(order);
+        }
+
         // Privates
         private async Task<Dictionary<int, decimal>> GetPrices(OrderRequestDto dto)
         {
@@ -134,8 +151,6 @@ namespace Prensadao.Application.Services
             };
 
             await _bus.Publish(messageDto, RabbitMqConstants.Exchanges.OrderExchange);
-        }
-
-        
+        }        
     }
 }

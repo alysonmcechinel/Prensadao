@@ -51,6 +51,9 @@ public class Order
             case OrderStatusEnum.Finalizado:
                 OrderStatus = OrderStatusEnum.Finalizado;
                 break;
+            case OrderStatusEnum.Cancelado:
+                OrderStatus = OrderStatusEnum.Cancelado;
+                break;
             default:
                 OrderStatus = OrderStatusEnum.Error;
                 break;
