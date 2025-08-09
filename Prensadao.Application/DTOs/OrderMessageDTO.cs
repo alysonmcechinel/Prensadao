@@ -1,4 +1,6 @@
-﻿namespace Prensadao.Application.DTOs
+﻿using Prensadao.Domain.Enum;
+
+namespace Prensadao.Application.DTOs
 {
     public class OrderMessageDTO
     {

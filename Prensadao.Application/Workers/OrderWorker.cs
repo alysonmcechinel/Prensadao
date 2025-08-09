@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Hosting;
 using Prensadao.Application.Consumers;
 using Prensadao.Application.DTOs;
+using Prensadao.Application.Helpers;
 using Prensadao.Application.Interfaces;
 using Prensadao.Application.Publish;
 using Prensadao.Domain.Enum;
@@ -42,7 +43,7 @@ public class OrderWorker : BackgroundService
                 order.NextStatus();
                 await orderRepository.Update(order);
 
-                Console.WriteLine($"Pedido #{order.OrderId} atualizado para {order.OrderStatus}");
+                Console.WriteLine($"Pedido #{order.OrderId} atualizado para {order.OrderStatus.GetDescription()}");
 
                 var notify = new NotifyMessageDTO
                 {

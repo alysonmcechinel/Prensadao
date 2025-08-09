@@ -79,23 +79,13 @@ namespace Prensadao.Application.Services
             {
                 order.UpdateStatus(dto.OrderStatus);
                 await _orderRepository.Update(order);
-
-                var notify = new NotifyMessageDTO
-                {
-                    OrderId = order.OrderId,
-                    ConsumerName = order.Customer.Name,
-                    Delivery = order.Delivery,
-                    OrderStatus = order.OrderStatus,
-                    Phone = order.Customer.Phone
-                };
-
-                await _bus.Publish(notify, RabbitMqConstants.Exchanges.NotifyExchange, "");
+                await MessageNotify(order);
 
                 return OrderReponseDto.ToDto(order);
             }
             else
                 throw new ArgumentException("Status não pode ser atualizado");
-        }
+        }        
 
         public async Task Enabled(int id)
         {
@@ -109,7 +99,8 @@ namespace Prensadao.Application.Services
             else
                 throw new ArgumentException($"Pedido não pode ser cancelado pois, já esta com status: {order.OrderStatus.GetDescription()}");
 
-            _orderRepository.Update(order);
+            await _orderRepository.Update(order);
+            await MessageNotify(order);
         }
 
         // Privates
@@ -151,6 +142,20 @@ namespace Prensadao.Application.Services
             };
 
             await _bus.Publish(messageDto, RabbitMqConstants.Exchanges.OrderExchange);
-        }        
+        }
+
+        private async Task MessageNotify(Order order)
+        {
+            var notify = new NotifyMessageDTO
+            {
+                OrderId = order.OrderId,
+                ConsumerName = order.Customer.Name,
+                Delivery = order.Delivery,
+                OrderStatus = order.OrderStatus,
+                Phone = order.Customer.Phone
+            };
+
+            await _bus.Publish(notify, RabbitMqConstants.Exchanges.NotifyExchange);
+        }
     }
 }
