@@ -1,9 +1,11 @@
 ﻿using AutoFixture.Xunit2;
 using FakeItEasy;
+using Prensadao.Application.Helpers;
 using Prensadao.Application.Models.Request;
 using Prensadao.Application.Publish;
 using Prensadao.Application.Services;
 using Prensadao.Domain.Entities;
+using Prensadao.Domain.Enum;
 using Prensadao.Domain.Repositories;
 using System.Reflection;
 
@@ -130,5 +132,27 @@ public class OrderServiceTest
         // Assert
         Assert.Equal("Pedido não pode ser feito com produtos inativos.", ex.Message);
         A.CallTo(() => orderRepository.CreateOrder(A<Order>._)).MustNotHaveHappened();
+    }
+
+    [Theory, AutoFakeItEasyData]
+    public async Task Enabled_DeveLancar_JaEstaComStatusNaoCancelavel(
+       [Frozen] IOrderRepository orderRepository,
+       OrderService orderService)
+    {
+        // Arrange: pedido em status que NÃO pode ser cancelado (ex.: Pronto)
+        var order = new Order(delivery: true, value: 10m, observation: "obs", customerId: 1);
+        order.UpdateStatus(OrderStatusEnum.Pronto);
+
+        A.CallTo(() => orderRepository.GetById(123))
+            .Returns(order);
+
+        // Act
+        var ex = await Assert.ThrowsAsync<ArgumentException>(() => orderService.Enabled(123));
+
+        // Assert
+        var esperado = $"Pedido não pode ser cancelado pois, já esta com status: {order.OrderStatus.GetDescription()}";
+        Assert.Equal(esperado, ex.Message);
+
+        A.CallTo(() => orderRepository.Update(A<Order>._)).MustNotHaveHappened();
     }
 }

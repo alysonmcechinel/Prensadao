@@ -15,6 +15,8 @@ public class AutoFakeItEasyDataAttribute : AutoDataAttribute
                     ConfigureMembers = true // Faz com que membros das interfaces sejam simulados automaticamente
                 });
 
+            fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+
             return fixture;
         })
         { }
