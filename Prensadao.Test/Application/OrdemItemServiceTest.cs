@@ -9,7 +9,7 @@ namespace Prensadao.Test.Application;
 public class OrdemItemServiceTest
 {
     [Theory, AutoFakeItEasyData]
-    public async Task AddOrderItem_DeveAdicionarItemComSucesso(
+    public async Task AddOrderItem_DeveAdicionar_ItemComSucesso(
         [Frozen] IOrderItemRepository orderItemRepository,
         OrderItemService orderItemService,
         OrderItem ordemItem)
@@ -21,7 +21,7 @@ public class OrdemItemServiceTest
     }
 
     [Theory, AutoFakeItEasyData]
-    public async Task GetOrderItems_DeveRetornarListaDeItens(
+    public async Task GetOrderItems_DeveRetornar_ListaDeItens(
         [Frozen] IOrderItemRepository orderItemRepository,
         OrderItemService orderItemService,
         List<OrderItem> ordemItems)
