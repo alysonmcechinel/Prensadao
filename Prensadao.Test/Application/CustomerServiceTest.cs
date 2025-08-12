@@ -49,7 +49,6 @@ public class CustomerServiceTest
         A.CallTo(() => customerRepository.PhoneIsExists(dto.Phone)).MustHaveHappenedOnceExactly();
     }
 
-    // 3) SUCESSO: retorna o ID e chama AddCustomer exatamente 1x
     [Theory, AutoFakeItEasyData]
     public async Task AddCustomer_DeveRetornarId_QuandoSucesso(
         [Frozen] ICustomerRepository customerRepository,
@@ -81,4 +80,53 @@ public class CustomerServiceTest
         // Verifica a chamada de verificação de existência
         A.CallTo(() => customerRepository.PhoneIsExists(dto.Phone)).MustHaveHappenedOnceExactly();
     }
+
+    [Theory, AutoFakeItEasyData]
+    public async Task GetById_DeveLancar_ClienteNaoEncontrado(
+        [Frozen] ICustomerRepository customerRepository,
+        CustomerService customerService)
+    {
+        // Arrange
+        int idInexistente = 999;
+        A.CallTo(() => customerRepository.GetById(idInexistente)).Returns(Task.FromResult<Customer>(null));
+
+        // Act & Assert
+        var ex = await Assert.ThrowsAsync<Exception>(() => customerService.GetById(idInexistente));
+        Assert.Equal("Cliente não encontrado", ex.Message);
+    }
+
+    [Theory, AutoFakeItEasyData]
+    public async Task GetById_DeveRetornar_CustomerResponseDto(
+    [Frozen] ICustomerRepository customerRepository,
+    CustomerService customerService)
+    {
+        // Arrange
+        var customer = new Customer("John Doe", 48988887777, "Street 1", "District A", "100", "CityX", "Near Park", 123456);
+        typeof(Customer).GetProperty("CustomerId").SetValue(customer, 1);
+
+        A.CallTo(() => customerRepository.GetById(customer.CustomerId)).Returns(Task.FromResult(customer));
+
+        // Act
+        var response = await customerService.GetById(customer.CustomerId);
+
+        // Assert
+        Assert.Equal(customer.CustomerId, response.CustomerId);
+    }
+
+    [Theory, AutoFakeItEasyData]
+    public async Task Update_DeveLancar_ClienteNaoEncontrado(
+        [Frozen] ICustomerRepository customerRepository,
+        CustomerService customerService,
+        CustomerRequestDto dto)
+    {
+        // Arrange: simular customer inexistente
+        A.CallTo(() => customerRepository.GetById(dto.CustomerId)).Returns(Task.FromResult<Customer>(null));
+
+        // Act & Assert
+        var ex = await Assert.ThrowsAsync<Exception>(() => customerService.Update(dto));
+        Assert.Equal("Cliente não encontrado", ex.Message);
+
+        // Verificar que o método Update do repository não foi chamado
+        A.CallTo(() => customerRepository.Update(A<Customer>._)).MustNotHaveHappened();
+    }    
 }
