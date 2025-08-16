@@ -1,13 +1,11 @@
 ﻿using AutoFixture.Xunit2;
 using FakeItEasy;
+using Prensadao.Application.DTOs.Requests;
 using Prensadao.Application.Helpers;
-using Prensadao.Application.Models.Request;
-using Prensadao.Application.Publish;
 using Prensadao.Application.Services;
 using Prensadao.Domain.Entities;
-using Prensadao.Domain.Enum;
+using Prensadao.Domain.Enums;
 using Prensadao.Domain.Repositories;
-using System.Reflection;
 
 namespace Prensadao.Test.Application;
 

@@ -1,4 +1,4 @@
-﻿namespace Prensadao.Application.Consumers;
+﻿namespace Prensadao.Application.Interfaces;
 
 public interface IConsumer
 {

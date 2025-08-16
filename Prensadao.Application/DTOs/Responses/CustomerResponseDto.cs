@@ -1,7 +1,7 @@
 ﻿using Prensadao.Domain.Entities;
 using System.ComponentModel.DataAnnotations;
 
-namespace Prensadao.Application.Models.Response;
+namespace Prensadao.Application.DTOs.Responses;
 
 public class CustomerResponseDto
 {

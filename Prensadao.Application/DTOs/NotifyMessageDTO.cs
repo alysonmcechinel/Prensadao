@@ -1,13 +1,12 @@
-﻿using Prensadao.Domain.Enum;
+﻿using Prensadao.Domain.Enums;
 
-namespace Prensadao.Application.DTOs
+namespace Prensadao.Application.DTOs;
+
+public class NotifyMessageDto
 {
-    public class NotifyMessageDTO
-    {
-        public int OrderId { get; set; }
-        public OrderStatusEnum OrderStatus { get; set; }
-        public bool Delivery { get; set; }
-        public string ConsumerName { get; set; }
-        public long Phone { get; set; }
-    }
+    public int OrderId { get; set; }
+    public OrderStatusEnum OrderStatus { get; set; }
+    public bool Delivery { get; set; }
+    public string ConsumerName { get; set; } = string.Empty;
+    public long Phone { get; set; }
 }

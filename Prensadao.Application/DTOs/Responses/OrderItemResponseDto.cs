@@ -1,4 +1,4 @@
-﻿namespace Prensadao.Application.Models.Response
+﻿namespace Prensadao.Application.DTOs.Responses
 {
     public class OrderItemResponseDto
     {

@@ -1,4 +1,4 @@
-﻿using Prensadao.Domain.Enum;
+﻿using Prensadao.Domain.Enums;
 using System.ComponentModel.DataAnnotations;
 
 namespace Prensadao.Domain.Entities;

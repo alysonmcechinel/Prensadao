@@ -1,9 +1,9 @@
 ﻿using Prensadao.Application.Helpers;
 using Prensadao.Domain.Entities;
-using Prensadao.Domain.Enum;
+using Prensadao.Domain.Enums;
 using System.ComponentModel.DataAnnotations;
 
-namespace Prensadao.Application.Models.Response
+namespace Prensadao.Application.DTOs.Responses
 {
     public class OrderReponseDto
     {

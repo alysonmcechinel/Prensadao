@@ -1,12 +1,10 @@
 ﻿using Prensadao.Application.DTOs;
-using Prensadao.Application.DTOs.Request;
+using Prensadao.Application.DTOs.Requests;
+using Prensadao.Application.DTOs.Responses;
 using Prensadao.Application.Helpers;
 using Prensadao.Application.Interfaces;
-using Prensadao.Application.Models.Request;
-using Prensadao.Application.Models.Response;
-using Prensadao.Application.Publish;
 using Prensadao.Domain.Entities;
-using Prensadao.Domain.Enum;
+using Prensadao.Domain.Enums;
 using Prensadao.Domain.Repositories;
 using System.Threading.Tasks;
 using System.Transactions;
@@ -136,7 +134,7 @@ namespace Prensadao.Application.Services
 
         private async Task Message(Order order)
         {
-            var messageDto = new OrderMessageDTO
+            var messageDto = new OrderMessageDto
             {
                 OrderId = order.OrderId
             };
@@ -146,7 +144,7 @@ namespace Prensadao.Application.Services
 
         private async Task MessageNotify(Order order)
         {
-            var notify = new NotifyMessageDTO
+            var notify = new NotifyMessageDto
             {
                 OrderId = order.OrderId,
                 ConsumerName = order.Customer.Name,

@@ -1,4 +1,4 @@
-﻿namespace Prensadao.Application.Publish;
+﻿namespace Prensadao.Application.Interfaces;
 
 public interface IBus
 {

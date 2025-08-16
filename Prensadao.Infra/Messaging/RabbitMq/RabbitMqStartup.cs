@@ -1,12 +1,13 @@
 ﻿using Microsoft.Extensions.Hosting;
+using Prensadao.Application.Interfaces;
 
-namespace Prensadao.Application.Services
+namespace Prensadao.Infra.Messaging.RabbitMq
 {
-    public class RabbitMqStartupService : IHostedService
+    public class RabbitMqStartup : IHostedService
     {
-        private readonly IRabbitMqConfigService _rabbitMqConfig;
+        private readonly IRabbitMqConfig _rabbitMqConfig;
 
-        public RabbitMqStartupService(IRabbitMqConfigService rabbitMqConfig)
+        public RabbitMqStartup(IRabbitMqConfig rabbitMqConfig)
         {
             _rabbitMqConfig = rabbitMqConfig;
         }

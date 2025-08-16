@@ -1,6 +1,6 @@
 ﻿using AutoFixture.Xunit2;
 using FakeItEasy;
-using Prensadao.Application.Models.Request;
+using Prensadao.Application.DTOs.Requests;
 using Prensadao.Application.Services;
 using Prensadao.Domain.Entities;
 using Prensadao.Domain.Repositories;

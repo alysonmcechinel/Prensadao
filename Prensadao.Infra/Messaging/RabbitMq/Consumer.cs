@@ -1,16 +1,16 @@
-﻿using Prensadao.Application.Services;
+﻿using Prensadao.Application.Interfaces;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System.Text;
 using System.Text.Json;
 
-namespace Prensadao.Application.Consumers;
+namespace Prensadao.Infra.Messaging.RabbitMq;
 
 public class Consumer : IConsumer
 {
-    private readonly IRabbitMqConfigService _rabbitMqConfigService;
+    private readonly IRabbitMqConfig _rabbitMqConfigService;
 
-    public Consumer(IRabbitMqConfigService rabbitMqConfigService)
+    public Consumer(IRabbitMqConfig rabbitMqConfigService)
     {
         _rabbitMqConfigService = rabbitMqConfigService;
     }

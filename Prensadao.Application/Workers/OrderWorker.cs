@@ -1,11 +1,9 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Prensadao.Application.Consumers;
 using Prensadao.Application.DTOs;
 using Prensadao.Application.Helpers;
 using Prensadao.Application.Interfaces;
-using Prensadao.Application.Publish;
-using Prensadao.Domain.Enum;
+using Prensadao.Domain.Enums;
 using Prensadao.Domain.Repositories;
 
 namespace Prensadao.Application.Workers;
@@ -24,7 +22,7 @@ public class OrderWorker : BackgroundService
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
         // WORKER QUE RECEBE E ATUALIZA PEDIDOS ENVIADOS PARA COZINHA.
-        _consumer.Listen<OrderMessageDTO>(RabbitMqConstants.Queues.OrderCozinhaQueue, async message =>
+        _consumer.Listen<OrderMessageDto>(RabbitMqConstants.Queues.OrderCozinhaQueue, async message =>
         {
             using var scope = _serviceProvider.CreateScope();
             var orderRepository = scope.ServiceProvider.GetRequiredService<IOrderRepository>();
@@ -45,7 +43,7 @@ public class OrderWorker : BackgroundService
 
                 Console.WriteLine($"Pedido #{order.OrderId} atualizado para {order.OrderStatus.GetDescription()}");
 
-                var notify = new NotifyMessageDTO
+                var notify = new NotifyMessageDto
                 {
                     OrderId = order.OrderId,
                     ConsumerName = order.Customer.Name,

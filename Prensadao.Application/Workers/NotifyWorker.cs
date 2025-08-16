@@ -1,9 +1,9 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Prensadao.Application.Consumers;
 using Prensadao.Application.DTOs;
 using Prensadao.Application.Helpers;
-using Prensadao.Domain.Enum;
+using Prensadao.Application.Interfaces;
+using Prensadao.Domain.Enums;
 using Prensadao.Domain.Repositories;
 
 namespace Prensadao.Application.Workers;
@@ -22,7 +22,7 @@ public class NotifyWorker : BackgroundService
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
         // WORKER QUE RECEBE NOTIFICA CLIENTE DO STATUS DO PEDIDO.
-        _consumer.Listen<NotifyMessageDTO>(RabbitMqConstants.Queues.OrderNotifyQueue, async message =>
+        _consumer.Listen<NotifyMessageDto>(RabbitMqConstants.Queues.OrderNotifyQueue, async message =>
         {
             if (message.OrderStatus == OrderStatusEnum.EmPreparacao)
                 Console.WriteLine($"O seu pedido N°{message.OrderId} está em {OrderStatusEnum.EmPreparacao.GetDescription()}!!");

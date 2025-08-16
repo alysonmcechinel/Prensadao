@@ -1,6 +1,6 @@
-﻿using Prensadao.Application.Interfaces;
-using Prensadao.Application.Models.Request;
-using Prensadao.Application.Models.Response;
+﻿using Prensadao.Application.DTOs.Requests;
+using Prensadao.Application.DTOs.Responses;
+using Prensadao.Application.Interfaces;
 using Prensadao.Domain.Entities;
 using Prensadao.Domain.Repositories;
 

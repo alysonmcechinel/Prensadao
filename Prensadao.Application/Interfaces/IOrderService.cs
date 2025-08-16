@@ -1,6 +1,5 @@
-﻿using Prensadao.Application.DTOs.Request;
-using Prensadao.Application.Models.Request;
-using Prensadao.Application.Models.Response;
+﻿using Prensadao.Application.DTOs.Requests;
+using Prensadao.Application.DTOs.Responses;
 
 namespace Prensadao.Application.Interfaces
 {

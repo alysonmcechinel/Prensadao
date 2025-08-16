@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace Prensadao.Domain.Enum
+namespace Prensadao.Domain.Enums
 {
     public enum OrderStatusEnum
     {

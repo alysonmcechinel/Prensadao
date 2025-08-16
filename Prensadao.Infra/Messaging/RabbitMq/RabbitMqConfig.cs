@@ -1,12 +1,14 @@
-﻿using RabbitMQ.Client;
+﻿using Prensadao.Application;
+using Prensadao.Application.Interfaces;
+using RabbitMQ.Client;
 
-namespace Prensadao.Application.Services
+namespace Prensadao.Infra.Messaging.RabbitMq
 {
-    public class RabbitMqConfigService : IRabbitMqConfigService
+    public class RabbitMqConfig : IRabbitMqConfig
     {
         private readonly IConnection _connection;
 
-        public RabbitMqConfigService()
+        public RabbitMqConfig()
         {
             var factory = new ConnectionFactory
             {

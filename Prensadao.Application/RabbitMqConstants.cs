@@ -1,5 +1,6 @@
 ﻿namespace Prensadao.Application
 {
+    //TODO: deixar aqui por enquanto depois decidir o lugar certo
     public static class RabbitMqConstants
     {
         public static class Exchanges

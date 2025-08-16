@@ -1,15 +1,15 @@
-﻿using Prensadao.Application.Services;
+﻿using Prensadao.Application.Interfaces;
 using RabbitMQ.Client;
 using System.Text;
 using System.Text.Json;
 
-namespace Prensadao.Application.Publish;
+namespace Prensadao.Infra.Messaging.RabbitMq;
 
 public class Bus : IBus
 {
-    private readonly IRabbitMqConfigService _rabbitMqConfigService;
+    private readonly IRabbitMqConfig _rabbitMqConfigService;
 
-    public Bus(IRabbitMqConfigService rabbitMqConfigService)
+    public Bus(IRabbitMqConfig rabbitMqConfigService)
     {
         _rabbitMqConfigService = rabbitMqConfigService;
     }

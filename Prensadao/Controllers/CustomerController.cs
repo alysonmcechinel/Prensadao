@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Prensadao.Application.DTOs.Requests;
 using Prensadao.Application.Interfaces;
-using Prensadao.Application.Models.Request;
 
-namespace Prensadao.API.Controller
+namespace Prensadao.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]

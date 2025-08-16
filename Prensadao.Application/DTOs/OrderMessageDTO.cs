@@ -1,8 +1,6 @@
-﻿using Prensadao.Domain.Enum;
-
-namespace Prensadao.Application.DTOs
+﻿namespace Prensadao.Application.DTOs
 {
-    public class OrderMessageDTO
+    public class OrderMessageDto
     {
         public int OrderId { get; set; }
     }

@@ -1,8 +1,8 @@
 ﻿using RabbitMQ.Client;
 
-namespace Prensadao.Application.Services
+namespace Prensadao.Application.Interfaces
 {
-    public interface IRabbitMqConfigService
+    public interface IRabbitMqConfig
     {
         IModel CreateChannel();
         Task Config();
