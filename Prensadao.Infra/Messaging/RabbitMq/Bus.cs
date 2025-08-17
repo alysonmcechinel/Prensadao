@@ -27,7 +27,10 @@ public class Bus : IBus
 
         using var channel = _rabbitMqConfigService.CreateChannel();
 
-        channel.BasicPublish(exchange, routingKey, null, byteArray);
+        var props = channel.CreateBasicProperties();
+        props.Persistent = true; // garante persistência ao publicar
+
+        channel.BasicPublish(exchange, routingKey, props, byteArray);
 
         return Task.CompletedTask;
     }

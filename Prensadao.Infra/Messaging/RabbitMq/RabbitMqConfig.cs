@@ -12,7 +12,8 @@ namespace Prensadao.Infra.Messaging.RabbitMq
         {
             var factory = new ConnectionFactory
             {
-                HostName = "localhost"
+                HostName = "localhost",
+                DispatchConsumersAsync = true
             };
 
             _connection = factory.CreateConnection("prensadao-app");
@@ -38,5 +39,7 @@ namespace Prensadao.Infra.Messaging.RabbitMq
 
             return Task.CompletedTask;
         }
+
+        public void Dispose() => _connection.Dispose();
     }
 }

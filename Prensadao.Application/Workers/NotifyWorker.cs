@@ -1,10 +1,8 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
+﻿using Microsoft.Extensions.Hosting;
 using Prensadao.Application.DTOs;
 using Prensadao.Application.Helpers;
 using Prensadao.Application.Interfaces;
 using Prensadao.Domain.Enums;
-using Prensadao.Domain.Repositories;
 
 namespace Prensadao.Application.Workers;
 
@@ -36,6 +34,6 @@ public class NotifyWorker : BackgroundService
                 Console.WriteLine($"O seu pedido N°{message.OrderId} foi concluido, agradeços a preferencia otimo apetite!!");
         });
 
-        return Task.CompletedTask;
+        return Task.Delay(Timeout.Infinite, stoppingToken);
     }
 }

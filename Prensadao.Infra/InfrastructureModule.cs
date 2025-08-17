@@ -37,17 +37,11 @@ namespace Prensadao.Infra
         // Configuração do rabbitMQ, injeção de dependecia services e inicialiação do RabbitMQ
         public static IServiceCollection AddRabbitMQ(this IServiceCollection services)
         {
-            services.AddScoped<IBus, Bus>();
+            services.AddSingleton<IBus, Bus>();
             services.AddSingleton<IConsumer, Consumer>();
 
-            services.AddHostedService<RabbitMqStartup>();
             services.AddSingleton<IRabbitMqConfig, RabbitMqConfig>();
-
-            services.AddScoped<IModel>(x =>
-            {
-                var rabbitConfig = x.GetRequiredService<RabbitMqConfig>();
-                return rabbitConfig.CreateChannel();
-            });
+            services.AddHostedService<RabbitMqStartup>();
 
             return services;
         }

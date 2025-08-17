@@ -12,11 +12,13 @@ public class OrderWorker : BackgroundService
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly IConsumer _consumer;
+    private readonly IBus _bus;
 
-    public OrderWorker(IServiceProvider serviceProvider, IConsumer consumer)
+    public OrderWorker(IServiceProvider serviceProvider, IConsumer consumer, IBus bus)
     {
         _serviceProvider = serviceProvider;
         _consumer = consumer;
+        _bus = bus;
     }
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -26,7 +28,6 @@ public class OrderWorker : BackgroundService
         {
             using var scope = _serviceProvider.CreateScope();
             var orderRepository = scope.ServiceProvider.GetRequiredService<IOrderRepository>();
-            var bus = scope.ServiceProvider.GetRequiredService<IBus>();
 
             var order = await orderRepository.GetById(message.OrderId);
 
@@ -52,11 +53,11 @@ public class OrderWorker : BackgroundService
                     Phone = order.Customer.Phone
                 };
 
-                await bus.Publish(notify, RabbitMqConstants.Exchanges.NotifyExchange, "");
+                await _bus.Publish(notify, RabbitMqConstants.Exchanges.NotifyExchange, "");
             }
             
         });
 
-        return Task.CompletedTask;
+        return Task.Delay(Timeout.Infinite, stoppingToken);
     }
 }

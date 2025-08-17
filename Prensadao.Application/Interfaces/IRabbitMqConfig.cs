@@ -6,5 +6,6 @@ namespace Prensadao.Application.Interfaces
     {
         IModel CreateChannel();
         Task Config();
+        void Dispose();
     }
 }

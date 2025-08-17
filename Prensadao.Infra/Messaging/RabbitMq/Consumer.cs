@@ -22,8 +22,11 @@ public class Consumer : IConsumer
 
         var channel = _rabbitMqConfigService.CreateChannel();
 
+        // Limita entregas não confirmadas por consumidor
+        channel.BasicQos(0, prefetchCount: 10, global: false);
 
-        var consumer = new EventingBasicConsumer(channel);
+        // async-safe
+        var consumer = new AsyncEventingBasicConsumer(channel);
 
         consumer.Received += async (model, eventArgs) =>
         {
@@ -47,9 +50,12 @@ public class Consumer : IConsumer
             catch (Exception ex)
             {
                 Console.WriteLine($"Erro ao processar a mensagem: {ex.Message}");
-            }            
+                //TODO: Implementar dead-letter ou log de falhas
+            }
         };
 
         channel.BasicConsume(queue, autoAck: false, consumer);
+
+        await Task.CompletedTask;
     }
 }
