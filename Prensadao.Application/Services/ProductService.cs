@@ -35,25 +35,25 @@ namespace Prensadao.Application.Services
         public async Task<ProductResponseDto> GetById(int id)
         {
             if (id <= 0)
-                throw new ArgumentException("O ID informado incorretamente");
+                throw new ArgumentException("O ID informado está incorreto.");
             
              var product = await _productRepository.GetById(id);
 
             if (product == null)
-                throw new ArgumentException("Produto não encontrado");
+                throw new ArgumentException("Produto não encontrado.");
 
             return ProductResponseDto.ToDto(product);
         }
 
         public async Task Update(ProductRequestDto dto)
         {
-            if (dto.ProductId <= 0)
-                throw new ArgumentException("O ID informado incorretamente");
+            if (!dto.ProductId.HasValue || dto.ProductId <= 0)
+                throw new ArgumentException("O ID informado está incorreto.");
 
             var product = await _productRepository.GetById(dto.ProductId!.Value);
 
             if (product == null)
-                throw new ArgumentException("Produto não encontrado");
+                throw new ArgumentException("Produto não encontrado.");
 
             product.Update(dto.Name, dto.Enabled, dto.Value, dto.Description);
             await _productRepository.Update(product);
@@ -66,7 +66,7 @@ namespace Prensadao.Application.Services
             var product = await _productRepository.GetById(dto.ProductId);
 
             if (product == null)
-                throw new ArgumentException("Produto não encontrado");
+                throw new ArgumentException("Produto não encontrado.");
 
             if (product.Enabled != dto.Enabled)
                 product.EnabledProduct(dto.Enabled);

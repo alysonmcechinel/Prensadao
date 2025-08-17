@@ -59,7 +59,7 @@ public class OrderServiceTest
         var ex = await Assert.ThrowsAsync<ArgumentException>(() => orderService.OrderCreate(dto));
 
         // Assert
-        Assert.Equal("Pedido não pode ser feito sem items.", ex.Message);
+        Assert.Equal("Pedido não pode ser feito sem itens.", ex.Message);
         A.CallTo(() => orderRepository.CreateOrder(A<Order>._)).MustNotHaveHappened();
         A.CallTo(() => productRepository.ExistsInactiveProduct(A<List<int>>._)).MustNotHaveHappened();
     }
@@ -81,7 +81,7 @@ public class OrderServiceTest
         var ex = await Assert.ThrowsAsync<ArgumentException>(() => orderService.OrderCreate(dto));
 
         // Assert
-        Assert.Equal("Pedido contém Id inválido.", ex.Message);
+        Assert.Equal("Pedido contém itens com ProductId inválido.", ex.Message);
         A.CallTo(() => orderRepository.CreateOrder(A<Order>._)).MustNotHaveHappened();
         A.CallTo(() => productRepository.ExistsInactiveProduct(A<List<int>>._)).MustNotHaveHappened();
     }

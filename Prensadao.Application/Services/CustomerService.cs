@@ -22,7 +22,7 @@ namespace Prensadao.Application.Services
                 throw new Exception("Telefone já cadastrado.");
 
             if (!PhoneIsValid(dto.Phone))
-                throw new Exception("Numero de telefone invalido.");
+                throw new Exception("Número de telefone inválido.");
 
             var customer = new Customer(dto.Name, dto.Phone, dto.Street, dto.District, dto.Number, dto.City, dto.ReferencePoint, dto.Cep);
 
@@ -34,7 +34,7 @@ namespace Prensadao.Application.Services
             var customer = await _customerRepository.GetById(id);
 
             if (customer == null)
-                throw new Exception("Cliente não encontrado");
+                throw new Exception("Cliente não encontrado.");
 
             return CustomerResponseDto.ToDto(customer);
         }
@@ -52,7 +52,7 @@ namespace Prensadao.Application.Services
                 throw new Exception("Cliente não encontrado.");
 
             if (!PhoneIsValid(dto.Phone))
-                throw new Exception("Numero de telefone invalido.");
+                throw new Exception("Número de telefone inválido.");
 
             customer.Update(dto.Name, dto.Phone, dto.Street, dto.District, dto.Number, dto.City, dto.ReferencePoint, dto.Cep);
             await _customerRepository.Update(customer);

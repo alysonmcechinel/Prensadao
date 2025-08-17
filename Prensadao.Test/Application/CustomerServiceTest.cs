@@ -41,7 +41,7 @@ public class CustomerServiceTest
 
         // Act + Assert
         var ex = await Assert.ThrowsAsync<Exception>(() => customerService.AddCustomer(dto));
-        Assert.Equal("Numero de telefone invalido.", ex.Message);
+        Assert.Equal("Número de telefone inválido.", ex.Message);
 
         // Não deve tentar inserir
         A.CallTo(() => customerRepository.AddCustomer(A<Customer>._)).MustNotHaveHappened();
@@ -92,7 +92,7 @@ public class CustomerServiceTest
 
         // Act & Assert
         var ex = await Assert.ThrowsAsync<Exception>(() => customerService.GetById(idInexistente));
-        Assert.Equal("Cliente não encontrado", ex.Message);
+        Assert.Equal("Cliente não encontrado.", ex.Message);
     }
 
     [Theory, AutoFakeItEasyData]

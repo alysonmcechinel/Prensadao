@@ -6,7 +6,6 @@ using Prensadao.Application.Interfaces;
 using Prensadao.Domain.Entities;
 using Prensadao.Domain.Enums;
 using Prensadao.Domain.Repositories;
-using System.Threading.Tasks;
 using System.Transactions;
 
 namespace Prensadao.Application.Services
@@ -53,7 +52,7 @@ namespace Prensadao.Application.Services
             await ValidationsOrderItem(dto);
             Dictionary<int, decimal> prices = await GetPrices(dto);
 
-            decimal totalAmountOrder = Math.Round(dto.OrderItems.Sum(i => prices[i.ProductId] * i.Quantity));
+            decimal totalAmountOrder = Math.Round(dto.OrderItems.Sum(i => prices[i.ProductId] * i.Quantity), 2, MidpointRounding.AwayFromZero);
 
             var order = new Order(dto.Delivery, totalAmountOrder, dto.Observation, dto.CustomerId);
 
@@ -79,20 +78,17 @@ namespace Prensadao.Application.Services
         public async Task<OrderResponseDto> UpdateStatus(UpdateStatusDto dto)
         {
             var order = await _orderRepository.GetById(dto.OrderId);
-
             if (order is null)
                 throw new ArgumentException("Pedido não encontrado.");
 
-            if (order.OrderStatus != dto.OrderStatus)
-            {
-                order.UpdateStatus(dto.OrderStatus);
-                await _orderRepository.Update(order);
-                await MessageNotify(order);
+            if (order.OrderStatus == dto.OrderStatus)
+                throw new ArgumentException("Status do pedido já está definido como o informado.");
 
-                return OrderResponseDto.ToDto(order);
-            }
-            else
-                throw new ArgumentException("Status não pode ser atualizado");
+            order.UpdateStatus(dto.OrderStatus);
+            await _orderRepository.Update(order);
+            await MessageNotify(order);
+
+            return OrderResponseDto.ToDto(order);
         }        
 
         public async Task Enabled(int id)
@@ -128,10 +124,10 @@ namespace Prensadao.Application.Services
         private async Task ValidationsOrderItem(OrderRequestDto dto)
         {
             if (!dto.OrderItems.Any())
-                throw new ArgumentException("Pedido não pode ser feito sem items.");
+                throw new ArgumentException("Pedido não pode ser feito sem itens.");
 
             if (dto.OrderItems.Any(x => x.ProductId <= 0))
-                throw new ArgumentException("Pedido contém Id inválido.");
+                throw new ArgumentException("Pedido contém itens com ProductId inválido.");
 
             if (dto.OrderItems.Any(x => x.Quantity <= 0))
                 throw new ArgumentException("Pedido contém itens com quantidade inválida.");
