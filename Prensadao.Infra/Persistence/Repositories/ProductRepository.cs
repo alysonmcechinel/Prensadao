@@ -33,6 +33,7 @@ namespace Prensadao.Infra.Persistence.Repositories
 
         public async Task<List<Product>> GetProducts() => await _dbContext.Products
             .Include(x => x.OrderItems)
+            .AsNoTracking()
             .ToListAsync();        
 
         public async Task<bool> NameAlreadyExists(string name) => await _dbContext.Products.AnyAsync(x => x.Name == name);

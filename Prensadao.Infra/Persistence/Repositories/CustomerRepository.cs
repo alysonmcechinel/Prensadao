@@ -30,6 +30,7 @@ namespace Prensadao.Infra.Persistence.Repositories
             .Include(x => x.Orders)
                 .ThenInclude(o => o.OrderItems)
                 .ThenInclude(p => p.Product)
+            .AsNoTracking()
             .ToListAsync();
 
         public async Task Update(Customer customer)

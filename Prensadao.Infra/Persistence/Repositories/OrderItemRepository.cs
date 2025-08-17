@@ -22,6 +22,7 @@ namespace Prensadao.Infra.Persistence.Repositories
         public async Task<List<OrderItem>> GetOrderItems() => await _dbContext.OrderItems
             .Include(x => x.Order)
             .Include(x => x.Product)
+            .AsNoTracking()
             .ToListAsync();
     }
 }

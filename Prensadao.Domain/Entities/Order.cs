@@ -30,7 +30,7 @@ public class Order
 
     // Relationship
     public Customer Customer { get; set; }
-    public ICollection<OrderItem> OrderItems { get; set; }
+    public ICollection<OrderItem> OrderItems { get; set; } = [];
 
     public void UpdateStatus(OrderStatusEnum status)
     {
@@ -56,7 +56,7 @@ public class Order
                 break;
             default:
                 OrderStatus = OrderStatusEnum.Error;
-                break;
+                throw new ArgumentException("Transição de status inválida.");
         }
     }
 
@@ -77,7 +77,7 @@ public class Order
                 OrderStatus = OrderStatusEnum.Finalizado;
                 break;
             default:
-                throw new ArgumentException("Status não pode ser atualizado");
+                throw new ArgumentException("Status não pode ser atualizado.");
         }
     }
 }

@@ -6,7 +6,7 @@ namespace Prensadao.Domain.Enums
     {
         [Description("Criado")]
         Criado = 0,
-        [Description("Em preparacao")]
+        [Description("Em preparação")]
         EmPreparacao = 1,
         [Description("Pronto")]
         Pronto = 2,
@@ -16,7 +16,7 @@ namespace Prensadao.Domain.Enums
         Finalizado = 4,
         [Description("Cancelado")]
         Cancelado = 5,
-        [Description("Error")]
+        [Description("Erro")]
         Error = 99
     }
 }

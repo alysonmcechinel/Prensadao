@@ -4,7 +4,7 @@ using Prensadao.Domain.Entities;
 
 namespace Prensadao.Infra.Persistence.Configurations
 {
-    public class OrdemItemConfig : IEntityTypeConfiguration<OrderItem>
+    public class OrderItemConfig : IEntityTypeConfiguration<OrderItem>
     {
         public void Configure(EntityTypeBuilder<OrderItem> builder)
         {

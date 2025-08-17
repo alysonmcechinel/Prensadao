@@ -15,7 +15,6 @@ namespace Prensadao.Infra.Persistence.Configurations
                 .IsRequired();
 
             builder.Property(x => x.Phone)
-                .HasMaxLength(11)
                 .IsRequired();
 
             builder.Property(x => x.Street)
@@ -33,8 +32,7 @@ namespace Prensadao.Infra.Persistence.Configurations
             builder.Property(x => x.ReferencePoint)
                 .HasMaxLength(500);
 
-            builder.Property(x => x.Cep)
-                .HasMaxLength(9);
+            builder.Property(x => x.Cep);
         }
     }
 }
