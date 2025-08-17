@@ -32,6 +32,16 @@ namespace Prensadao.Application.Services
             return OrderResponseDto.ToListDto(result);
         }
 
+        public async Task<OrderResponseDto> GetById(int id)
+        {
+            var order = await _orderRepository.GetById(id);
+
+            if (order == null)
+                throw new Exception("Pedido não encontrado.");
+
+            return OrderResponseDto.ToDto(order);
+        }
+
         public async Task<int> OrderCreate(OrderRequestDto dto)
         {
             if (dto is null)
@@ -154,6 +164,6 @@ namespace Prensadao.Application.Services
             };
 
             await _bus.Publish(notify, RabbitMqConstants.Exchanges.NotifyExchange);
-        }
+        }        
     }
 }

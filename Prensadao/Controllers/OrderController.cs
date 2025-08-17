@@ -1,12 +1,15 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Prensadao.Application.DTOs.Requests;
+using Prensadao.Application.DTOs.Responses;
 using Prensadao.Application.Interfaces;
+using Prensadao.Application.Services;
 using System.Data;
 
 namespace Prensadao.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Produces("application/json")]
     public class OrderController : ControllerBase
     {
         private readonly IOrderService _orderService;
@@ -17,33 +20,62 @@ namespace Prensadao.API.Controllers
         }
 
         [HttpPost]
+        [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Post([FromBody] OrderRequestDto order)
         {
             try
             {
                 var result = await _orderService.OrderCreate(order);
 
-                return Ok(new
-                {
-                    message = "Pedido criado com sucesso",
-                    data = result
-                });
+                return Ok( new { message = "Pedido criado com sucesso.", data = result });
             }
             catch (Exception ex)
             {
-                return BadRequest($"Erro ao criar pedido {ex.Message}");
+                return BadRequest($"Erro ao criar pedido, motivo: {ex.Message}");
             }
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get()
+        [ProducesResponseType(typeof(IEnumerable<OrderResponseDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetAll()
         {
-            var result = await _orderService.GetOrders();
+            try
+            {
+                var result = await _orderService.GetOrders();
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"{ex.Message}");
+            }
+        }
 
-            return Ok(result);
+        [HttpGet("GetById")]
+        [ProducesResponseType(typeof(ProductResponseDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetById([FromQuery] int id)
+        {
+            try
+            {
+                var result = await _orderService.GetById(id);
+
+                if (result is null)
+                    return NotFound("Pedido não encontrado.");
+                else
+                    return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Erro ao localizar o pedido, {ex.Message}");
+            }
         }
 
         [HttpPut("UpdateStatus")]
+        [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> UpdateStatus([FromBody] UpdateStatusDTO dto)
         {
             try
@@ -53,12 +85,14 @@ namespace Prensadao.API.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest($"Erro ao atualizar o pedido {ex.Message}");
+                return BadRequest($"Erro ao atualizar o pedido, motivo: {ex.Message}");
             }
         }
 
         [HttpPut("Enabled")]
-        public async Task<IActionResult> Enabled(int id)
+        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Enabled([FromQuery] int id)
         {
             try
             {

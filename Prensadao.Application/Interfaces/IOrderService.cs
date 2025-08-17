@@ -7,6 +7,7 @@ namespace Prensadao.Application.Interfaces
     {
         Task Enabled(int id);
         Task<List<OrderResponseDto>> GetOrders();
+        Task<OrderResponseDto> GetById(int id);
         Task<int> OrderCreate(OrderRequestDto dto);
         Task<OrderResponseDto> UpdateStatus(UpdateStatusDTO dto);
     }
