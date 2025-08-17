@@ -1,5 +1,5 @@
 ﻿using Prensadao.Application;
-using Prensadao.Application.Interfaces;
+using Prensadao.Infra.Messaging.Interfaces;
 using RabbitMQ.Client;
 
 namespace Prensadao.Infra.Messaging.RabbitMq

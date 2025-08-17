@@ -1,8 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Prensadao.Application.Interfaces;
 using Prensadao.Application.Services;
-using Prensadao.Application.Workers;
-using RabbitMQ.Client;
 
 namespace Prensadao.Application
 {
@@ -11,8 +9,7 @@ namespace Prensadao.Application
         public static IServiceCollection AddAplications(this IServiceCollection services)
         {
             services
-                .AddServices()
-                .AddWorkers();
+                .AddServices();
 
             return services;
         }
@@ -24,14 +21,6 @@ namespace Prensadao.Application
             services.AddScoped<IOrderItemService, OrderItemService>();
             services.AddScoped<ICustomerService, CustomerService>();
             services.AddScoped<IProductService, ProductService>();
-
-            return services;
-        }        
-
-        public static IServiceCollection AddWorkers(this IServiceCollection services) 
-        {
-            services.AddHostedService<OrderWorker>();
-            services.AddHostedService<NotifyWorker>();
 
             return services;
         }

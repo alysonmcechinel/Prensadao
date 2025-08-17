@@ -1,12 +1,13 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Prensadao.Application;
 using Prensadao.Application.DTOs;
 using Prensadao.Application.Helpers;
 using Prensadao.Application.Interfaces;
 using Prensadao.Domain.Enums;
 using Prensadao.Domain.Repositories;
 
-namespace Prensadao.Application.Workers;
+namespace Prensadao.Infra.Messaging.Workers;
 
 public class OrderWorker : BackgroundService
 {

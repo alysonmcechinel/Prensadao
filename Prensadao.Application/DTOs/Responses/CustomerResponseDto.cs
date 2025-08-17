@@ -5,7 +5,7 @@ namespace Prensadao.Application.DTOs.Responses;
 
 public class CustomerResponseDto
 {
-    public CustomerResponseDto(int id, string name, long phone, string street, string district, string number, string city, string referencePoint, int cep, List<OrderReponseDto> orders)
+    public CustomerResponseDto(int id, string name, long phone, string street, string district, string number, string city, string referencePoint, int cep, List<OrderResponseDto> orders)
     {
         CustomerId = id;
         Name = name;
@@ -31,14 +31,14 @@ public class CustomerResponseDto
     public string ReferencePoint { get; set; }
     public int Cep { get; set; }
 
-    public List<OrderReponseDto> Orders { get; set; }
+    public List<OrderResponseDto> Orders { get; set; }
 
     #region Mapeamento
     public static CustomerResponseDto ToDto(Customer customer)
     {
-        var custumerOrders = new List<OrderReponseDto>();
+        var custumerOrders = new List<OrderResponseDto>();
         if (customer.Orders != null)
-            custumerOrders = customer.Orders.Select(o => OrderReponseDto.ToDto(o)).ToList();
+            custumerOrders = customer.Orders.Select(o => OrderResponseDto.ToDto(o)).ToList();
 
         return new CustomerResponseDto(customer.CustomerId, customer.Name, customer.Phone, customer.Street, customer.District, customer.Number, customer.City, customer.ReferencePoint, customer.Cep, custumerOrders);
     }

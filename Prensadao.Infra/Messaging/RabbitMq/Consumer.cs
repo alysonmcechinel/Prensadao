@@ -1,4 +1,5 @@
 ﻿using Prensadao.Application.Interfaces;
+using Prensadao.Infra.Messaging.Interfaces;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System.Text;

@@ -4,10 +4,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Prensadao.Application.Interfaces;
 using Prensadao.Domain.Entities;
 using Prensadao.Domain.Repositories;
+using Prensadao.Infra.Messaging.Interfaces;
 using Prensadao.Infra.Messaging.RabbitMq;
+using Prensadao.Infra.Messaging.Workers;
 using Prensadao.Infra.Persistence;
 using Prensadao.Infra.Persistence.Repositories;
-using RabbitMQ.Client;
 
 namespace Prensadao.Infra
 {
@@ -18,6 +19,7 @@ namespace Prensadao.Infra
             services
                 .AddData(configuration)
                 .AddRabbitMQ()
+                .AddWorkers()
                 .AddRepositories();
 
             return services;
@@ -42,6 +44,15 @@ namespace Prensadao.Infra
 
             services.AddSingleton<IRabbitMqConfig, RabbitMqConfig>();
             services.AddHostedService<RabbitMqStartup>();
+
+            return services;
+        }
+
+        // Injeção de dependencia dos workers
+        public static IServiceCollection AddWorkers(this IServiceCollection services)
+        {
+            services.AddHostedService<OrderWorker>();
+            services.AddHostedService<NotifyWorker>();
 
             return services;
         }

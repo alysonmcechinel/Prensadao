@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.Hosting;
-using Prensadao.Application.Interfaces;
+using Prensadao.Infra.Messaging.Interfaces;
 
 namespace Prensadao.Infra.Messaging.RabbitMq
 {

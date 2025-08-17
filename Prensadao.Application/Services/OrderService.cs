@@ -26,10 +26,10 @@ namespace Prensadao.Application.Services
             _productRepository = productRepository;
         }
 
-        public async Task<List<OrderReponseDto>> GetOrders()
+        public async Task<List<OrderResponseDto>> GetOrders()
         {
             var result = await _orderRepository.GetOrders();
-            return OrderReponseDto.ToListDto(result);
+            return OrderResponseDto.ToListDto(result);
         }
 
         public async Task<int> OrderCreate(OrderRequestDto dto)
@@ -66,7 +66,7 @@ namespace Prensadao.Application.Services
             return order.OrderId;
         }
 
-        public async Task<OrderReponseDto> UpdateStatus(UpdateStatusDTO dto)
+        public async Task<OrderResponseDto> UpdateStatus(UpdateStatusDTO dto)
         {
             var order = await _orderRepository.GetById(dto.OrderId);
 
@@ -79,7 +79,7 @@ namespace Prensadao.Application.Services
                 await _orderRepository.Update(order);
                 await MessageNotify(order);
 
-                return OrderReponseDto.ToDto(order);
+                return OrderResponseDto.ToDto(order);
             }
             else
                 throw new ArgumentException("Status não pode ser atualizado");
