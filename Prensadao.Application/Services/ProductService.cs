@@ -50,7 +50,7 @@ namespace Prensadao.Application.Services
             if (dto.ProductId <= 0)
                 throw new ArgumentException("O ID informado incorretamente");
 
-            var product = await _productRepository.GetById(dto.ProductId);
+            var product = await _productRepository.GetById(dto.ProductId!.Value);
 
             if (product == null)
                 throw new ArgumentException("Produto não encontrado");

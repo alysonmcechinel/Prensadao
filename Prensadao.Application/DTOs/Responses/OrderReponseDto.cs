@@ -21,16 +21,15 @@ namespace Prensadao.Application.DTOs.Responses
             OrderItems = ordemItems;
         }
 
-        [Key]
         public int? OrderId { get; set; }
         public string OrderStatus { get; set; }
         public bool Delivery { get; set; }
         public decimal Value { get; set; }
         public string? Observation { get; set; }
         public int CustomerId { get; set; }
-        public string CustomerName { get; set; }
+        public string CustomerName { get; set; } = string.Empty;
         public DateTime DateOrder { get; set; }
-        public List<OrderItemResponseDto> OrderItems { get; set; }
+        public List<OrderItemResponseDto> OrderItems { get; set; } = [];
 
         #region Mapeamento
         public static OrderResponseDto ToDto(Order order) => new OrderResponseDto(order.OrderId, order.OrderStatus, order.Delivery, order.Value, order.Observation, order.CustomerId, order.Customer.Name, order.DateOrder, ToListItens(order.OrderItems.ToList()));
@@ -61,5 +60,3 @@ namespace Prensadao.Application.DTOs.Responses
         #endregion
     }
 }
-
-

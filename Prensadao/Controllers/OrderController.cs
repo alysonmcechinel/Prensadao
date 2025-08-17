@@ -76,7 +76,7 @@ namespace Prensadao.API.Controllers
         [HttpPut("UpdateStatus")]
         [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> UpdateStatus([FromBody] UpdateStatusDTO dto)
+        public async Task<IActionResult> UpdateStatus([FromBody] UpdateStatusDto dto)
         {
             try
             {

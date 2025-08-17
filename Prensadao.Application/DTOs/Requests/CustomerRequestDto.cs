@@ -1,18 +1,15 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace Prensadao.Application.DTOs.Requests
+﻿namespace Prensadao.Application.DTOs.Requests
 {
     public class CustomerRequestDto
     {
-        [Key]
-        public int CustomerId { get; set; }
-        public string Name { get; set; }
+        public int? CustomerId { get; set; }
+        public string Name { get; set; } = string.Empty;
         public long Phone { get; set; }
-        public string Street { get; set; }
-        public string District { get; set; }
-        public string Number { get; set; }
-        public string City { get; set; }
-        public string ReferencePoint { get; set; }
+        public string Street { get; set; } = string.Empty;
+        public string District { get; set; } = string.Empty;
+        public string Number { get; set; } = string.Empty;
+        public string City { get; set; } = string.Empty;
+        public string ReferencePoint { get; set; } = string.Empty;
         public int Cep { get; set; }
     }
 }

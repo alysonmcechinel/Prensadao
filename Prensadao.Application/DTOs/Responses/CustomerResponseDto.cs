@@ -1,5 +1,4 @@
 ﻿using Prensadao.Domain.Entities;
-using System.ComponentModel.DataAnnotations;
 
 namespace Prensadao.Application.DTOs.Responses;
 
@@ -20,18 +19,17 @@ public class CustomerResponseDto
         Orders = orders;
     }
 
-    [Key]
     public int CustomerId { get; set; }
-    public string Name { get; set; }
+    public string Name { get; set; } = string.Empty;
     public long Phone { get; set; }
-    public string Street { get; set; }
-    public string District { get; set; }
-    public string Number { get; set; }
-    public string City { get; set; }
-    public string ReferencePoint { get; set; }
+    public string Street { get; set; } = string.Empty;
+    public string District { get; set; } = string.Empty;
+    public string Number { get; set; } = string.Empty;
+    public string City { get; set; } = string.Empty;
+    public string? ReferencePoint { get; set; }
     public int Cep { get; set; }
 
-    public List<OrderResponseDto> Orders { get; set; }
+    public List<OrderResponseDto> Orders { get; set; } = [];
 
     #region Mapeamento
     public static CustomerResponseDto ToDto(Customer customer)

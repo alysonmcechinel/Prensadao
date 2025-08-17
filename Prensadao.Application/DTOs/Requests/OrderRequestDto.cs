@@ -4,7 +4,6 @@ namespace Prensadao.Application.DTOs.Requests;
 
 public class OrderRequestDto
 {
-    [Key]
     public int? OrderId { get; set; }
 
     [Required]

@@ -76,7 +76,7 @@ namespace Prensadao.Application.Services
             return order.OrderId;
         }
 
-        public async Task<OrderResponseDto> UpdateStatus(UpdateStatusDTO dto)
+        public async Task<OrderResponseDto> UpdateStatus(UpdateStatusDto dto)
         {
             var order = await _orderRepository.GetById(dto.OrderId);
 

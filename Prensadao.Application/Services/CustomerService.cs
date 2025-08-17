@@ -43,10 +43,13 @@ namespace Prensadao.Application.Services
 
         public async Task Update(CustomerRequestDto dto)
         {
-            var customer = await _customerRepository.GetById(dto.CustomerId);
+            if (!dto.CustomerId.HasValue)
+                throw new Exception("O ID informado incorretamente.");
+
+            var customer = await _customerRepository.GetById(dto.CustomerId!.Value);
 
             if (customer == null)
-                throw new Exception("Cliente não encontrado");
+                throw new Exception("Cliente não encontrado.");
 
             if (!PhoneIsValid(dto.Phone))
                 throw new Exception("Numero de telefone invalido.");

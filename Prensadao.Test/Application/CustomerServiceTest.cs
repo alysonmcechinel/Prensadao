@@ -120,11 +120,11 @@ public class CustomerServiceTest
         CustomerRequestDto dto)
     {
         // Arrange: simular customer inexistente
-        A.CallTo(() => customerRepository.GetById(dto.CustomerId)).Returns(Task.FromResult<Customer>(null));
+        A.CallTo(() => customerRepository.GetById(dto.CustomerId!.Value)).Returns(Task.FromResult<Customer>(null));
 
         // Act & Assert
         var ex = await Assert.ThrowsAsync<Exception>(() => customerService.Update(dto));
-        Assert.Equal("Cliente não encontrado", ex.Message);
+        Assert.Equal("Cliente não encontrado.", ex.Message);
 
         // Verificar que o método Update do repository não foi chamado
         A.CallTo(() => customerRepository.Update(A<Customer>._)).MustNotHaveHappened();
