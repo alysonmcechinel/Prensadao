@@ -4,6 +4,9 @@ using Prensadao.Infra.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Ignora logs de queries do EF Core || limpar o console
+builder.Logging.AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.None);
+
 // Aqui esta as configurações => do modulo de aplicação (application) e do modulo Infrastructure (Infra)
 builder.Services
     .AddAplications()
