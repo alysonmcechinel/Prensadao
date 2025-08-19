@@ -16,9 +16,9 @@ O Prensadão é um sistema de gestão de pedidos para uma hamburgueria, desenvol
 
 ## Migrações do EF Core
 
-Gerar: <code>dotnet ef migrations add Initial --project src/Prensadao.Infrastructure --startup-project src/Prensadao.API</code>
+Gerar: <code>dotnet ef migrations add Initial --project ../../Prensadao.Infra.csproj --startup-project ../../../Prensadao/Prensadao.API.csproj</code>
 
-Aplicar: <code>dotnet ef database update --project src/Prensadao.Infrastructure --startup-project src/Prensadao.API</code>
+Aplicar: <code>dotnet ef database update --project ../../Prensadao.Infra.csproj --startup-project ../../../Prensadao/Prensadao.API.csproj</code>
 
 ## Executando com Docker Compose
 
