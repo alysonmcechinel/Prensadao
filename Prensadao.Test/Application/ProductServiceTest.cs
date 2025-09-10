@@ -12,7 +12,7 @@ public class ProductServiceTest
     // _: é utilizado como coringa de argumento: que significa qualquer valor desse tipo seria o equivalente a (Moq: It.IsAny<T>()) ou (NSubstitute: Arg.Any<T>())
 
     [Fact]
-    public async Task AddProduct_when_valid()
+    public async Task AddProduct_When_Success()
     {
         // Arrange
         var repository = A.Fake<IProductRepository>();  // cria um fake do repositório (mock)
@@ -39,7 +39,7 @@ public class ProductServiceTest
     }
 
     [Fact]
-    public async Task AddProduct_ShouldThrow_WhenNameIsEmpty()
+    public async Task AddProduct_When_NameIsEmpty()
     {
         // Arrange
         var repository = A.Fake<IProductRepository>();
@@ -61,7 +61,7 @@ public class ProductServiceTest
     }
 
     [Fact]
-    public async Task AddProduct_SholdThrow_WhenNameAlreadyExists()
+    public async Task AddProduct_When_NameAlreadyExists()
     {
         // Arrange
         var repository = A.Fake<IProductRepository>();
@@ -85,7 +85,7 @@ public class ProductServiceTest
     }
 
     [Fact]
-    public async Task AddProduct_SholdThrow_WhenValueEqualToZero()
+    public async Task AddProduct_When_ValueEqualToZero()
     {
         // Arrange
         var repository = A.Fake<IProductRepository>();
@@ -115,8 +115,8 @@ public class ProductServiceTest
         var repository = A.Fake<IProductRepository>();
         var productService = new ProductService(repository);
 
-        var product = new Product( "X Salada", 12.30m, "O melhor x da região");
-        A.CallTo(() => repository.GetById(A<int>.That.Matches(id => id == 1))).Returns(Task.FromResult<Product?>(product));
+        var product = new Product("X Salada", 12.30m, "O melhor x da região");
+        A.CallTo(() => repository.GetById(1)).Returns(Task.FromResult<Product?>(product));
 
         // act
         var result = await productService.GetById(1);
@@ -148,7 +148,7 @@ public class ProductServiceTest
         var repository = A.Fake<IProductRepository>();
         var productService = new ProductService(repository);
         
-        A.CallTo(() => repository.GetById(A<int>.That.Matches(id => id == 1))).Returns(Task.FromResult<Product?>(null));
+        A.CallTo(() => repository.GetById(1)).Returns(Task.FromResult<Product?>(null));
 
         // Act
         var act = () => productService.GetById(1);
@@ -156,5 +156,90 @@ public class ProductServiceTest
         // Assert
         await Assert.ThrowsAsync<ArgumentException>(async () => await act());
         A.CallTo(() => repository.GetById(1)).MustHaveHappenedOnceExactly();
+    }
+
+    [Fact]
+    public async Task Update_When_Success()
+    {
+        // Arrange
+        var repository = A.Fake<IProductRepository>();
+        var productService = new ProductService(repository);
+
+        var product = new Product("X Salada", 12.30m, "O melhor x da região");
+        var dto = new ProductRequestDto
+        {
+            ProductId = 1,
+            Name = "X-Salada",
+            Description = "O melhor x salada da região",
+            Enabled = true,
+            Value = 10.50m
+        };
+
+        A.CallTo(() => repository.GetById(1)).Returns(Task.FromResult<Product?>(product));
+        A.CallTo(() => repository.Update(A<Product>._)).Returns(Task.CompletedTask);
+
+        // Act
+        await productService.Update(dto);
+
+        // Arrange
+        A.CallTo(() => repository.GetById(1)).MustHaveHappenedOnceExactly();        
+        A.CallTo(() => repository.Update(
+            A<Product>.That.Matches(p =>
+                p.Name == dto.Name &&
+                p.Description == dto.Description &&
+                p.Value == dto.Value &&
+                p.Enabled == dto.Enabled)))
+         .MustHaveHappenedOnceExactly(); // Verifica que chamou Update com um Product que tem os valores esperados
+    }
+
+    [Fact]
+    public async Task Update_When_IDIsNull()
+    {
+        var repository = A.Fake<IProductRepository>();
+        var productService = new ProductService(repository);
+
+        var dto = new ProductRequestDto
+        {
+            Name = "X-Salada",
+            Description = "O melhor x salada da região",
+            Enabled = true,
+            Value = 10.50m
+        };
+
+        //A.CallTo(() => repository.GetById(dto.ProductId!.Value)).Returns(Task.FromResult<Product?>(null)!);
+
+        // Act
+        var act = () => productService.Update(dto);
+
+        // Assert
+        await Assert.ThrowsAsync<ArgumentException>(async () => await act());
+        A.CallTo(() => repository.GetById(A<int>._)).MustNotHaveHappened();
+        A.CallTo(() => repository.Update(A<Product>._)).MustNotHaveHappened();
+    }
+
+    [Fact]
+    public async Task Update_When_ProductNotFound()
+    {
+        var repository = A.Fake<IProductRepository>();
+        var productService = new ProductService(repository);
+
+        var dto = new ProductRequestDto
+        {
+            ProductId = 1,
+            Name = "X-Salada",
+            Description = "O melhor x salada da região",
+            Enabled = true,
+            Value = 10.50m
+        };
+
+        A.CallTo(() => repository.GetById(dto.ProductId!.Value)).Returns(Task.FromResult<Product?>(null)!);
+
+        // Act
+        var act = () => productService.Update(dto);
+
+        // Assert
+        await Assert.ThrowsAsync<ArgumentException>(async () => await act());
+        A.CallTo(() => repository.GetById(A<int>._)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => repository.Update(A<Product>._)).MustNotHaveHappened();
     }
 }
