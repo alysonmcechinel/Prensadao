@@ -12,7 +12,7 @@ public class ProductServiceTest
     // _: é utilizado como coringa de argumento: que significa qualquer valor desse tipo seria o equivalente a (Moq: It.IsAny<T>()) ou (NSubstitute: Arg.Any<T>())
 
     [Fact]
-    public async Task AddProduct_When_Success()
+    public async Task AddProduct_ShouldReturnId_WhenValid()
     {
         // Arrange
         var repository = A.Fake<IProductRepository>();  // cria um fake do repositório (mock)
@@ -39,7 +39,7 @@ public class ProductServiceTest
     }
 
     [Fact]
-    public async Task AddProduct_When_NameIsEmpty()
+    public async Task AddProduct_ShouldThrow_WhenNameIsEmpty()
     {
         // Arrange
         var repository = A.Fake<IProductRepository>();
@@ -61,7 +61,7 @@ public class ProductServiceTest
     }
 
     [Fact]
-    public async Task AddProduct_When_NameAlreadyExists()
+    public async Task AddProduct_ShouldThrow_WhenNameAlreadyExists()
     {
         // Arrange
         var repository = A.Fake<IProductRepository>();
@@ -85,7 +85,7 @@ public class ProductServiceTest
     }
 
     [Fact]
-    public async Task AddProduct_When_ValueEqualToZero()
+    public async Task AddProduct_ShouldThrow_WhenValueIsNotPositive()
     {
         // Arrange
         var repository = A.Fake<IProductRepository>();
@@ -109,7 +109,7 @@ public class ProductServiceTest
     }
 
     [Fact]
-    public async Task GetById_When_Success()
+    public async Task GetById_ShouldReturnDto_WhenFound()
     {
         // Arrange
         var repository = A.Fake<IProductRepository>();
@@ -127,7 +127,7 @@ public class ProductServiceTest
     }
 
     [Fact]
-    public async Task GetById_When_InvalidID()
+    public async Task GetById_ShouldThrow_WhenIdIsInvalid()
     {
         // Arrange
         var repository = A.Fake<IProductRepository>();
@@ -138,11 +138,11 @@ public class ProductServiceTest
 
         // Assert
         await Assert.ThrowsAsync<ArgumentException>(async () => await act());
-        A.CallTo(() => repository.GetById(0)).MustNotHaveHappened();
+        A.CallTo(() => repository.GetById(A<int>._)).MustNotHaveHappened();
     }
 
     [Fact]
-    public async Task GetById_When_ProductIsNull()
+    public async Task GetById_ShouldThrow_WhenProductNotFound()
     {
         // Arrange
         var repository = A.Fake<IProductRepository>();
@@ -159,7 +159,7 @@ public class ProductServiceTest
     }
 
     [Fact]
-    public async Task Update_When_Success()
+    public async Task Update_ShouldApplyChangesAndPersist_WhenValid()
     {
         // Arrange
         var repository = A.Fake<IProductRepository>();
@@ -181,7 +181,7 @@ public class ProductServiceTest
         // Act
         await productService.Update(dto);
 
-        // Arrange
+        // Assert
         A.CallTo(() => repository.GetById(1)).MustHaveHappenedOnceExactly();        
         A.CallTo(() => repository.Update(
             A<Product>.That.Matches(p =>
@@ -192,8 +192,11 @@ public class ProductServiceTest
          .MustHaveHappenedOnceExactly(); // Verifica que chamou Update com um Product que tem os valores esperados
     }
 
-    [Fact]
-    public async Task Update_When_IDIsNull()
+    [Theory]
+    [InlineData(null)]
+    [InlineData(0)]
+    [InlineData(-1)]
+    public async Task Update_ShouldThrow_WhenIdMissingOrInvalid(int? id)
     {
         // Arrange
         var repository = A.Fake<IProductRepository>();
@@ -201,6 +204,7 @@ public class ProductServiceTest
 
         var dto = new ProductRequestDto
         {
+            ProductId = id,
             Name = "X-Salada",
             Description = "O melhor x salada da região",
             Enabled = true,
@@ -217,7 +221,7 @@ public class ProductServiceTest
     }
 
     [Fact]
-    public async Task Update_When_ProductNotFound()
+    public async Task Update_ShouldThrow_WhenProductNotFound()
     {
         // Arrange
         var repository = A.Fake<IProductRepository>();
@@ -244,32 +248,33 @@ public class ProductServiceTest
     }
 
     [Fact]
-    public async Task Enabled_When_Success()
+    public async Task Enabled_ShouldSetFlagAndPersist_WhenFound()
     {
         // Arrange
         var repository = A.Fake<IProductRepository>();
         var productService = new ProductService(repository);
-
+        var product = new Product("X Salada", 12.30m, "O melhor x da região");
         var dto = new ProductEnabledDto
         {
             ProductId = 1,
             Enabled = true
         };
 
+        A.CallTo(() => repository.GetById(dto.ProductId)).Returns(Task.FromResult<Product?>(product)!);
+        A.CallTo(() => repository.Update(product)).Returns(Task.CompletedTask);
+
         // Act
         await productService.Enabled(dto);
 
         // Assert
-        A.CallTo(() => repository.GetById(A<int>._)).MustHaveHappenedOnceExactly();
-        A.CallTo(() => repository.Update(A<Product>._)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => repository.GetById(dto.ProductId)).MustHaveHappenedOnceExactly();
         A.CallTo(() => repository.Update(
             A<Product>.That.Matches(p =>
-            p.Enabled == dto.Enabled
-            && p.ProductId == dto.ProductId)));
+            p.Enabled == dto.Enabled)));
     }
 
     [Fact]
-    public async Task Enabled_When_ProductNotFound()
+    public async Task Enabled_ShouldThrow_WhenProductNotFound()
     {
         // Arrange
         var repository = A.Fake<IProductRepository>();
