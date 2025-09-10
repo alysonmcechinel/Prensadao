@@ -1,4 +1,5 @@
 ﻿using FakeItEasy;
+using FluentAssertions;
 using Prensadao.Application.DTOs.Requests;
 using Prensadao.Application.Services;
 using Prensadao.Domain.Entities;
@@ -84,8 +85,10 @@ public class ProductServiceTest
         A.CallTo(() => repository.AddProduct(A<Product>._)).MustNotHaveHappened();
     }
 
-    [Fact]
-    public async Task AddProduct_ShouldThrow_WhenValueIsNotPositive()
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    public async Task AddProduct_ShouldThrow_WhenValueIsNotPositive(decimal value)
     {
         // Arrange
         var repository = A.Fake<IProductRepository>();
@@ -94,7 +97,7 @@ public class ProductServiceTest
         {
             Name = "X Salada",
             Description = "O melhor x da região",
-            Value = 0
+            Value = value
         };
 
         A.CallTo(() => repository.NameAlreadyExists("X Salada")).Returns(Task.FromResult(false));
@@ -122,7 +125,10 @@ public class ProductServiceTest
         var result = await productService.GetById(1);
 
         // Assert
-        Assert.NotNull(result );
+        Assert.NotNull(result);
+        result.Name.Should().Be("X Salada");
+        result.Value.Should().Be(12.30m);
+        result.Description.Should().Be("O melhor x da região");
         A.CallTo(() => repository.GetById(1)).MustHaveHappenedOnceExactly();
     }
 
@@ -182,6 +188,11 @@ public class ProductServiceTest
         await productService.Update(dto);
 
         // Assert
+        product.Name.Should().Be(dto.Name);
+        product.Description.Should().Be(dto.Description);
+        product.Value.Should().Be(dto.Value);
+        product.Enabled.Should().Be(dto.Enabled);
+
         A.CallTo(() => repository.GetById(1)).MustHaveHappenedOnceExactly();        
         A.CallTo(() => repository.Update(
             A<Product>.That.Matches(p =>
@@ -267,10 +278,9 @@ public class ProductServiceTest
         await productService.Enabled(dto);
 
         // Assert
+        product.Enabled.Should().BeTrue();
         A.CallTo(() => repository.GetById(dto.ProductId)).MustHaveHappenedOnceExactly();
-        A.CallTo(() => repository.Update(
-            A<Product>.That.Matches(p =>
-            p.Enabled == dto.Enabled)));
+        A.CallTo(() => repository.Update(A<Product>.That.Matches(p => p.Enabled == dto.Enabled)));
     }
 
     [Fact]
