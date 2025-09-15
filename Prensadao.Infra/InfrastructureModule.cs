@@ -68,6 +68,7 @@ namespace Prensadao.Infra
             return services;
         }
 
+        /* TODO: Remover no futuro por enquanto sem necessidade
         public static void Seed(PrensadaoDbContext dbContext)
         {
             var customer = new Customer("Teste legal", 123456789, "rua joao", "Centro", "S/N", "Criciuma", "Predio bonito", 88850000);
@@ -80,6 +81,6 @@ namespace Prensadao.Infra
             dbContext.AddRange(product, product2);
 
             dbContext.SaveChanges();
-        }
+        }*/
     }
 }
