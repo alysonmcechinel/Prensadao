@@ -8,6 +8,9 @@ namespace Prensadao.Test.Application;
 
 public class OrdemItemServiceTest
 {
+    // Nesses testes foi deixado o (OrderItem ordemItem) e (List<OrderItem> ordemItems) serem criados automaticamente pelo AutoFakeItEasyData
+    // porque não tem regras de negócio a serem validadas para a entidade OrderItem, então não há necessidade de customização dos dados.
+
     [Theory, AutoFakeItEasyData]
     public async Task AddOrderItem_DeveAdicionar_ItemComSucesso(
         [Frozen] IOrderItemRepository orderItemRepository,
@@ -16,6 +19,7 @@ public class OrdemItemServiceTest
     {
         // Act
         await orderItemService.AddOrderItem(ordemItem);
+
         // Assert
         A.CallTo(() => orderItemRepository.AddOrderItem(ordemItem)).MustHaveHappenedOnceExactly();
     }

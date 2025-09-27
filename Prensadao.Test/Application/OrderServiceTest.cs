@@ -1,7 +1,11 @@
 ﻿using AutoFixture.Xunit2;
+using Castle.Core.Resource;
 using FakeItEasy;
+using Prensadao.Application;
+using Prensadao.Application.DTOs;
 using Prensadao.Application.DTOs.Requests;
 using Prensadao.Application.Helpers;
+using Prensadao.Application.Interfaces;
 using Prensadao.Application.Services;
 using Prensadao.Domain.Entities;
 using Prensadao.Domain.Enums;
@@ -14,14 +18,13 @@ public class OrderServiceTest
     [Theory, AutoFakeItEasyData]
     public async Task OrderCreate_DeveLancar_PedidoNaoPodeSerNulo(
         [Frozen] IOrderRepository orderRepository,
-        OrderService orderService,
-        OrderRequestDto dto)
+        OrderService orderService)
     {
         // Arrange
-        dto = null;
+        OrderRequestDto? dto = null;
 
         // Act
-        var ex = await Assert.ThrowsAsync<ArgumentException>(() => orderService.OrderCreate(dto));
+        var ex = await Assert.ThrowsAsync<ArgumentException>(() => orderService.OrderCreate(dto!));
 
         // Assert
         Assert.Equal("O pedido não pode ser nulo.", ex.Message);
@@ -121,8 +124,7 @@ public class OrderServiceTest
             new(){ ProductId = 10, Quantity = 1 }
         };
 
-        A.CallTo(() => productRepository.ExistsInactiveProduct(A<List<int>>._))
-            .Returns(true); // força caminho de produto inativo
+        A.CallTo(() => productRepository.ExistsInactiveProduct(A<List<int>>._)).Returns(true); // força caminho de produto inativo
 
         // Act
         var ex = await Assert.ThrowsAsync<ArgumentException>(() => orderService.OrderCreate(dto));
@@ -135,22 +137,46 @@ public class OrderServiceTest
     [Theory, AutoFakeItEasyData]
     public async Task Enabled_DeveLancar_JaEstaComStatusNaoCancelavel(
        [Frozen] IOrderRepository orderRepository,
-       OrderService orderService)
+       OrderService orderService,
+       int pedidoId)
     {
         // Arrange: pedido em status que NÃO pode ser cancelado (ex.: Pronto)
         var order = new Order(delivery: true, value: 10m, observation: "obs", customerId: 1);
         order.UpdateStatus(OrderStatusEnum.Pronto);
-
-        A.CallTo(() => orderRepository.GetById(123))
-            .Returns(order);
+        A.CallTo(() => orderRepository.GetById(pedidoId)).Returns(order);
 
         // Act
-        var ex = await Assert.ThrowsAsync<ArgumentException>(() => orderService.Enabled(123));
+        var ex = await Assert.ThrowsAsync<ArgumentException>(() => orderService.Enabled(pedidoId));
 
         // Assert
         var esperado = $"Pedido não pode ser cancelado pois, já esta com status: {order.OrderStatus.GetDescription()}";
         Assert.Equal(esperado, ex.Message);
-
         A.CallTo(() => orderRepository.Update(A<Order>._)).MustNotHaveHappened();
+    }
+
+    [Theory, AutoFakeItEasyData]
+    public async Task Enabled_DeveCancelar_PedidoComStatusCancelavel(
+       [Frozen] IOrderRepository orderRepository,
+       OrderService orderService,
+       int orderId,
+       int customerId)
+    {
+        // Arrange: pedido em status que pode ser cancelado (ex.: EmPreparacao)
+        var custumer = new Customer("Nome", 48999999999, "Rua", "Bairro", "123", "Cidade", "Ponto de referência", 88000000);
+        typeof(Customer).GetProperty("CustomerId").SetValue(custumer, customerId);
+
+        var order = new Order(delivery: true, value: 10m, observation: "obs", customerId: customerId);
+        typeof(Order).GetProperty("OrderId").SetValue(order, orderId);
+        order.Customer = custumer;
+
+        order.UpdateStatus(OrderStatusEnum.EmPreparacao);
+        A.CallTo(() => orderRepository.GetById(orderId)).Returns(order);
+
+        // Act
+        await orderService.Enabled(orderId);
+
+        // Assert
+        Assert.Equal(OrderStatusEnum.Cancelado, order.OrderStatus);
+        A.CallTo(() => orderRepository.Update(A<Order>._)).MustHaveHappenedOnceExactly();
     }
 }
