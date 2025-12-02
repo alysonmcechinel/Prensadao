@@ -1,6 +1,5 @@
 using Prensadao.Application;
 using Prensadao.Infra;
-using Prensadao.Infra.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 

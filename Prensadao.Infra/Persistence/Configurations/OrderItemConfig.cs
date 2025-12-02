@@ -13,7 +13,7 @@ namespace Prensadao.Infra.Persistence.Configurations
             builder.Property(x => x.Quantity)
                 .IsRequired();
 
-            builder.Property(x => x.Value)
+            builder.Property(x => x.UnitPrice)
                 .IsRequired();
 
             builder.Property(x => x.OrderId)
