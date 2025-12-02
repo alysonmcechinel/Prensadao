@@ -23,16 +23,28 @@ public class NotifyWorker : BackgroundService
         // WORKER QUE RECEBE NOTIFICA CLIENTE DO STATUS DO PEDIDO.
         _consumer.Listen<NotifyMessageDto>(RabbitMqConstants.Queues.OrderNotifyQueue, async message =>
         {
-            if (message.OrderStatus == OrderStatusEnum.EmPreparacao)
-                Console.WriteLine($"O seu pedido N°{message.OrderId} está em {OrderStatusEnum.EmPreparacao.GetDescription()}!!");
-            else if(message.OrderStatus == OrderStatusEnum.Pronto && !message.Delivery)
-                Console.WriteLine($"O seu pedido N°{message.OrderId} está {OrderStatusEnum.Pronto.GetDescription()}, pode vir buscalo!");
-            else if (message.OrderStatus == OrderStatusEnum.SaiuParaEntrega)
-                Console.WriteLine($"O seu pedido N°{message.OrderId} {OrderStatusEnum.SaiuParaEntrega.GetDescription()}!!");
-            else if(message.OrderStatus == OrderStatusEnum.Cancelado)
-                Console.WriteLine($"O seu pedido N°{message.OrderId} foi {OrderStatusEnum.Cancelado.GetDescription()} :(");
-            else if (message.OrderStatus == OrderStatusEnum.Finalizado)
-                Console.WriteLine($"O seu pedido N°{message.OrderId} foi concluido, agradeços a preferencia otimo apetite!!");
+            switch (message.OrderStatus)
+            {
+                case OrderStatusEnum.EmPreparacao:
+                    Console.WriteLine($"O seu pedido N°{message.OrderId} está em {OrderStatusEnum.EmPreparacao.GetDescription()}!!");
+                    break;
+                case OrderStatusEnum.Pronto:
+                    if (message.Delivery)
+                        Console.WriteLine($"O seu pedido N°{message.OrderId} está {OrderStatusEnum.Pronto.GetDescription()}, pode vir buscalo!");
+                    break;
+                case OrderStatusEnum.SaiuParaEntrega:
+                    Console.WriteLine($"O seu pedido N°{message.OrderId} {OrderStatusEnum.SaiuParaEntrega.GetDescription()}!!");
+                    break;
+                case OrderStatusEnum.Cancelado:
+                    Console.WriteLine($"O seu pedido N°{message.OrderId} foi {OrderStatusEnum.Cancelado.GetDescription()} :(");
+                    break;
+                case OrderStatusEnum.Finalizado:
+                    Console.WriteLine($"O seu pedido N°{message.OrderId} foi concluido, agradeços a preferencia otimo apetite!!");
+                    break;
+                default:
+                    Console.WriteLine($"O seu pedido N°{message.OrderId} com status, não identificado.");
+                    break;
+            }
         });
 
         return Task.Delay(Timeout.Infinite, stoppingToken);
