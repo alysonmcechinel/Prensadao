@@ -10,6 +10,7 @@ using System.Transactions;
 
 namespace Prensadao.Application.Services
 {
+    //TODO: implementar FluentValidation
     public class OrderService : IOrderService
     {
         private readonly IBus _bus;

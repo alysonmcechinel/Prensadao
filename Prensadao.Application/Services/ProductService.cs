@@ -6,6 +6,7 @@ using Prensadao.Domain.Repositories;
 
 namespace Prensadao.Application.Services
 {
+    //TODO: implementar FluentValidation
     public class ProductService : IProductService
     {
         private readonly IProductRepository _productRepository;

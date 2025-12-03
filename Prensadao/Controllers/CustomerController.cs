@@ -5,6 +5,7 @@ using Prensadao.Application.Interfaces;
 
 namespace Prensadao.API.Controllers
 {
+    //TODO: autenticacao e respostas.
     [ApiController]
     [Route("api/[controller]")]
     [Produces("application/json")]

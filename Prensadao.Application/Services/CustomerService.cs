@@ -6,6 +6,7 @@ using Prensadao.Domain.Repositories;
 
 namespace Prensadao.Application.Services
 {
+    //TODO: implementar FluentValidation
     public class CustomerService : ICustomerService
     {
         private readonly ICustomerRepository _customerRepository;
@@ -14,7 +15,7 @@ namespace Prensadao.Application.Services
         {
             _customerRepository = customerRepository;
         }
-
+        
         public async Task<int> AddCustomer(CustomerRequestDto dto)
         {
             bool phoneIsExists = await _customerRepository.PhoneIsExists(dto.Phone);

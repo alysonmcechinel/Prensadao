@@ -4,6 +4,7 @@ using Prensadao.Domain.Repositories;
 
 namespace Prensadao.Application.Services
 {
+    //TODO: implementar FluentValidation
     public class OrderItemService : IOrderItemService
     {
         private readonly IOrderItemRepository _orderItemRepository;
