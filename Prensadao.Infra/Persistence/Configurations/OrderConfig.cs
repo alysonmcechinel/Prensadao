@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Prensadao.Domain.Entities;
+using Prensadao.Infra.Persistence.Converters;
 
 namespace Prensadao.Infra.Persistence.Configurations
 {
@@ -8,10 +9,13 @@ namespace Prensadao.Infra.Persistence.Configurations
     {
         public void Configure(EntityTypeBuilder<Order> builder)
         {
+            var converter = new InstantConverter();
+
             builder.HasKey(x => x.OrderId);
 
             builder.Property(x => x.DateOrder)
-                .IsRequired();
+                .IsRequired()
+                .HasConversion(converter);
 
             builder.Property(x => x.OrderStatus)
                 .IsRequired();

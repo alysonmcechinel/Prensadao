@@ -1,3 +1,5 @@
+using NodaTime;
+using NodaTime.Serialization.SystemTextJson;
 using Prensadao.Application;
 using Prensadao.Infra;
 
@@ -11,7 +13,12 @@ builder.Services
     .AddAplications()
     .AddInfrastructure(builder.Configuration);
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(opt =>
+    {
+        opt.JsonSerializerOptions.ConfigureForNodaTime(DateTimeZoneProviders.Tzdb);
+    });
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 

@@ -55,7 +55,7 @@ namespace Prensadao.Application.Services
 
             decimal totalAmountOrder = Math.Round(dto.OrderItems.Sum(i => prices[i.ProductId] * i.Quantity), 2, MidpointRounding.AwayFromZero);
 
-            var order = new Order(dto.Delivery, totalAmountOrder, dto.Observation, dto.CustomerId);
+            var order = new Order(dto.Delivery, totalAmountOrder, dto.Observation, dto.CustomerId, NodaTimeExtensions.NowUtc());
 
             using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {

@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using NodaTime;
 using Prensadao.Application.Interfaces;
 using Prensadao.Domain.Entities;
 using Prensadao.Domain.Repositories;
@@ -20,6 +21,7 @@ namespace Prensadao.Infra
                 .AddData(configuration)
                 .AddRabbitMQ()
                 .AddWorkers()
+                .AddNodaTime()
                 .AddRepositories();
 
             return services;
@@ -64,6 +66,14 @@ namespace Prensadao.Infra
             services.AddScoped<IOrderItemRepository, OrderItemRepository>();
             services.AddScoped<ICustomerRepository, CustomerRepository>();
             services.AddScoped<IProductRepository, ProductRepository>();
+
+            return services;
+        }
+
+        // Injeção de dependencia do NodaTime
+        public static IServiceCollection AddNodaTime(this IServiceCollection services)
+        {
+            services.AddSingleton<IClock>(SystemClock.Instance);
 
             return services;
         }

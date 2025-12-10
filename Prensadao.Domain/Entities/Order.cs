@@ -7,9 +7,9 @@ public class Order
 {
     public Order() { }
 
-    public Order(bool delivery, decimal value, string observation, int customerId)
+    public Order(bool delivery, decimal value, string observation, int customerId, DateTime dateOrder)
     {
-        DateOrder = DateTime.UtcNow;
+        DateOrder = dateOrder;
         OrderStatus = OrderStatusEnum.Criado;
         Delivery = delivery;
         Value = value;

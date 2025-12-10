@@ -141,7 +141,7 @@ public class OrderServiceTest
        int pedidoId)
     {
         // Arrange: pedido em status que NÃO pode ser cancelado (ex.: Pronto)
-        var order = new Order(delivery: true, value: 10m, observation: "obs", customerId: 1);
+        var order = new Order(delivery: true, value: 10m, observation: "obs", customerId: 1, NodaTimeExtensions.NowUtc());
         order.UpdateStatus(OrderStatusEnum.Pronto);
         A.CallTo(() => orderRepository.GetById(pedidoId)).Returns(order);
 
@@ -165,7 +165,7 @@ public class OrderServiceTest
         var custumer = new Customer("Nome", 48999999999, "Rua", "Bairro", "123", "Cidade", "Ponto de referência", 88000000);
         typeof(Customer).GetProperty("CustomerId").SetValue(custumer, customerId);
 
-        var order = new Order(delivery: true, value: 10m, observation: "obs", customerId: customerId);
+        var order = new Order(delivery: true, value: 10m, observation: "obs", customerId: customerId, NodaTimeExtensions.NowUtc());
         typeof(Order).GetProperty("OrderId").SetValue(order, orderId);
         order.Customer = custumer;
 
