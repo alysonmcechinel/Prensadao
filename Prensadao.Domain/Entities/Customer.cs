@@ -32,7 +32,7 @@ public class Customer
     public int Cep { get; private set; }
 
     // Relationship
-    public ICollection<Order> Orders { get; set; } = [];
+    public ICollection<Order> Orders { get; private set; } = [];
 
     public void Update(string name, long phone, string street, string district, string number, string city, string refencePoint, int cep)
     {

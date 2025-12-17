@@ -163,11 +163,11 @@ public class OrderServiceTest
     {
         // Arrange: pedido em status que pode ser cancelado (ex.: EmPreparacao)
         var custumer = new Customer("Nome", 48999999999, "Rua", "Bairro", "123", "Cidade", "Ponto de referência", 88000000);
-        typeof(Customer).GetProperty("CustomerId").SetValue(custumer, customerId);
+        typeof(Customer).GetProperty("CustomerId")!.SetValue(custumer, customerId);
 
         var order = new Order(delivery: true, value: 10m, observation: "obs", customerId: customerId, NodaTimeExtensions.NowUtc());
-        typeof(Order).GetProperty("OrderId").SetValue(order, orderId);
-        order.Customer = custumer;
+        typeof(Order).GetProperty("OrderId")!.SetValue(order, orderId);
+        typeof(Order).GetProperty("Customer")!.SetValue(order, custumer);
 
         order.UpdateStatus(OrderStatusEnum.EmPreparacao);
         A.CallTo(() => orderRepository.GetById(orderId)).Returns(order);

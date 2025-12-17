@@ -29,8 +29,8 @@ public class Order
     public int CustomerId { get; private set; }
 
     // Relationship
-    public Customer Customer { get; set; }
-    public ICollection<OrderItem> OrderItems { get; set; } = [];
+    public Customer Customer { get; private set; }
+    public ICollection<OrderItem> OrderItems { get; private set; } = [];
 
     public void UpdateStatus(OrderStatusEnum status)
     {
