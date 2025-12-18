@@ -1,9 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Hangfire;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NodaTime;
 using Prensadao.Application.Interfaces;
-using Prensadao.Domain.Entities;
 using Prensadao.Domain.Repositories;
 using Prensadao.Infra.Messaging.Interfaces;
 using Prensadao.Infra.Messaging.RabbitMq;
@@ -20,6 +20,7 @@ namespace Prensadao.Infra
             services
                 .AddData(configuration)
                 .AddRabbitMQ()
+                .AddHangFire()
                 .AddWorkers()
                 .AddNodaTime()
                 .AddRepositories();
@@ -55,6 +56,19 @@ namespace Prensadao.Infra
         {
             services.AddHostedService<OrderWorker>();
             services.AddHostedService<NotifyWorker>();
+
+            return services;
+        }
+
+        // Configuração do Hangfire
+        public static IServiceCollection AddHangFire(this IServiceCollection services)
+        {
+            //services.AddHangFire((x, config) =>
+            //{
+            //    config.UseSqlServerStorage(connectionString);
+            //});
+
+            services.AddHangfireServer();
 
             return services;
         }

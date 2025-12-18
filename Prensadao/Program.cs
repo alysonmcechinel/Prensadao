@@ -1,3 +1,4 @@
+using Hangfire;
 using NodaTime;
 using NodaTime.Serialization.SystemTextJson;
 using Prensadao.Application;
@@ -31,6 +32,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseHangfireDashboard();
 
 app.UseAuthorization();
 
