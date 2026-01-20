@@ -162,7 +162,7 @@ public class OrderServiceTest
        int customerId)
     {
         // Arrange: pedido em status que pode ser cancelado (ex.: EmPreparacao)
-        var custumer = new Customer("Nome", 48999999999, "Rua", "Bairro", "123", "Cidade", "Ponto de referência", 88000000);
+        var custumer = new Customer("Nome", "48999999999", "Rua", "Bairro", "123", "Cidade", "Ponto de referência", 88000000);
         typeof(Customer).GetProperty("CustomerId")!.SetValue(custumer, customerId);
 
         var order = new Order(delivery: true, value: 10m, observation: "obs", customerId: customerId, NodaTimeExtensions.NowUtc());

@@ -25,7 +25,7 @@ namespace Prensadao.API.Controllers
         {
             try
             {
-                var result = await _customerService.AddCustomer(dto);
+                var result = await _customerService.AddCustomerAsync(dto);
 
                 return Ok(new
                 {

@@ -15,19 +15,19 @@ namespace Prensadao.Application.Services
         {
             _customerRepository = customerRepository;
         }
-        
-        public async Task<int> AddCustomer(CustomerRequestDto dto)
-        {
-            bool phoneIsExists = await _customerRepository.PhoneIsExists(dto.Phone);
-            if (phoneIsExists)
-                throw new Exception("Telefone já cadastrado.");
 
-            if (!PhoneIsValid(dto.Phone))
-                throw new Exception("Número de telefone inválido.");
+        // Encapsulando a verificação e usando Eliding Async/Await no wrapper.
+        // Aqui o método continua async porque precisamos do await para tomar decisão (if).
+        public async Task<int> AddCustomerAsync(CustomerRequestDto dto)
+        {
+            ValidatePhone(dto.Phone);
+
+            if (await PhoneExistsAsync(dto.Phone))
+                throw new InvalidOperationException("Telefone já cadastrado.");
 
             var customer = new Customer(dto.Name, dto.Phone, dto.Street, dto.District, dto.Number, dto.City, dto.ReferencePoint, dto.Cep);
 
-            return await _customerRepository.AddCustomer(customer);
+            return await _customerRepository.AddCustomerAsync(customer);
         }
 
         public async Task<CustomerResponseDto> GetById(int id)
@@ -44,6 +44,8 @@ namespace Prensadao.Application.Services
 
         public async Task Update(CustomerRequestDto dto)
         {
+            ValidatePhone(dto.Phone);
+
             if (!dto.CustomerId.HasValue)
                 throw new Exception("O ID informado incorretamente.");
 
@@ -52,19 +54,24 @@ namespace Prensadao.Application.Services
             if (customer == null)
                 throw new Exception("Cliente não encontrado.");
 
-            if (!PhoneIsValid(dto.Phone))
-                throw new Exception("Número de telefone inválido.");
-
             customer.Update(dto.Name, dto.Phone, dto.Street, dto.District, dto.Number, dto.City, dto.ReferencePoint, dto.Cep);
             await _customerRepository.Update(customer);
         }
 
         // privates
 
-        public bool PhoneIsValid(long phone)
+        // Eliding Async/Await: wrapper puro, sem lógica extra (sem state machine desnecessária)
+        private Task<bool> PhoneExistsAsync(string phone) => _customerRepository.PhoneIsExists(phone);
+
+        // Validação síncrona (não tem porque ser async)
+        private void ValidatePhone(string phone)
         {
-            string phoneText = phone.ToString();
-            return phoneText.Length == 10 || phoneText.Length == 11;
+            phone = phone.Trim();
+            if (!(phone.Length == 10 || phone.Length == 11))
+            {
+                throw new ArgumentException("Número de telefone inválido.");
+            }
         }
+
     }
 }
