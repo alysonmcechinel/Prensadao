@@ -5,10 +5,10 @@ namespace Prensadao.Domain.Repositories
     public interface ICustomerRepository
     {
         Task<int> AddCustomerAsync(Customer customer);
-        Task<Customer> GetById(int id);
-        Task<List<Customer>> GetCustomers();
-        Task Update(Customer customer);
-        Task<bool> PhoneIsExists(string phone);
+        Task<Customer> GetByIdAsync(int id);
+        Task<List<Customer>> GetCustomersAsync();
+        Task UpdateAsync(Customer customer);
+        Task<bool> PhoneIsExistsAsync(string phone);
         
     }
 }
