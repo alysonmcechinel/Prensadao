@@ -4,7 +4,7 @@ namespace Prensadao.Application.Interfaces
 {
     public interface IOrderItemService
     {
-        Task AddOrderItem(OrderItem ordemItem);
+        Task AddOrderItemAsync(OrderItem ordemItem);
         Task<List<OrderItem>> GetOrderItems();
     }
 }

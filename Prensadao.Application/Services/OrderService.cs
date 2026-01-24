@@ -65,7 +65,7 @@ namespace Prensadao.Application.Services
                 {
                     var unitPrice = prices[item.ProductId];
                     var orderItem = new OrderItem(item.Quantity, unitPrice, order.OrderId, item.ProductId);
-                    await _orderItemRepository.AddOrderItem(orderItem);
+                    await _orderItemRepository.AddOrderItemAsync(orderItem);
                 }
 
                 scope.Complete();
