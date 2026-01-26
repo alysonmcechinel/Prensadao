@@ -26,7 +26,7 @@ namespace Prensadao.Infra.Persistence.Repositories
             await _dbContext.SaveChangesAsync();
         }
 
-        public async Task<Order?> GetById(int id) => await _dbContext.Orders
+        public async Task<Order?> GetByIdAsync(int id) => await _dbContext.Orders
             .Include(x => x.OrderItems)
                 .ThenInclude(o => o.Product)
             .Include(x => x.Customer)

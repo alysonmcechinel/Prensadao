@@ -61,7 +61,7 @@ namespace Prensadao.API.Controllers
         {
             try
             {
-                var result = await _orderService.GetById(id);
+                var result = await _orderService.GetByIdAsync(id);
 
                 if (result is null)
                     return NotFound("Pedido não encontrado.");
@@ -97,7 +97,7 @@ namespace Prensadao.API.Controllers
         {
             try
             {
-                await _orderService.Enabled(id);
+                await _orderService.EnabledAsync(id);
                 return Ok("Pedido cancelado com sucesso.");
             }
             catch (Exception ex)

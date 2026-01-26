@@ -146,7 +146,7 @@ public class OrderServiceTest
         A.CallTo(() => orderRepository.GetById(pedidoId)).Returns(order);
 
         // Act
-        var ex = await Assert.ThrowsAsync<ArgumentException>(() => orderService.Enabled(pedidoId));
+        var ex = await Assert.ThrowsAsync<ArgumentException>(() => orderService.EnabledAsync(pedidoId));
 
         // Assert
         var esperado = $"Pedido não pode ser cancelado pois, já esta com status: {order.OrderStatus.GetDescription()}";
@@ -173,7 +173,7 @@ public class OrderServiceTest
         A.CallTo(() => orderRepository.GetById(orderId)).Returns(order);
 
         // Act
-        await orderService.Enabled(orderId);
+        await orderService.EnabledAsync(orderId);
 
         // Assert
         Assert.Equal(OrderStatusEnum.Cancelado, order.OrderStatus);

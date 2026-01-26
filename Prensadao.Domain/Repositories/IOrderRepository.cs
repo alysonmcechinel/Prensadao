@@ -7,6 +7,6 @@ namespace Prensadao.Domain.Repositories
         Task<int> CreateOrder(Order order);
         Task Update(Order order);
         Task<List<Order>> GetOrders();
-        Task<Order?> GetById(int id);
+        Task<Order?> GetByIdAsync(int id);
     }
 }
