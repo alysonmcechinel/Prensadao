@@ -44,7 +44,7 @@ namespace Prensadao.API.Controllers
         {
             try
             {
-                var result = await _orderService.GetOrders();
+                var result = await _orderService.GetOrdersAsync();
                 return Ok(result);
             }
             catch (Exception ex)

@@ -30,7 +30,7 @@ public class OrderWorker : BackgroundService
             using var scope = _serviceProvider.CreateScope();
             var orderRepository = scope.ServiceProvider.GetRequiredService<IOrderRepository>();
 
-            var order = await orderRepository.GetById(message.OrderId);
+            var order = await orderRepository.GetByIdAsync(message.OrderId);
 
             if (order is null) 
             {
