@@ -38,7 +38,7 @@ namespace Prensadao.Application.Services
             return OrderResponseDto.ToDto(order);
         }
 
-        public async Task<int> OrderCreate(OrderRequestDto dto)
+        public async Task<int> OrderCreateAsync(OrderRequestDto dto)
         {
             if (dto is null)
                 throw new ArgumentException("O pedido não pode ser nulo.");
@@ -72,7 +72,7 @@ namespace Prensadao.Application.Services
             return order.OrderId;
         }
 
-        public async Task<OrderResponseDto> UpdateStatus(UpdateStatusDto dto)
+        public async Task<OrderResponseDto> UpdateStatusAsync(UpdateStatusDto dto)
         {
             var order = await _orderRepository.GetByIdAsync(dto.OrderId);
             if (order is null)

@@ -27,7 +27,7 @@ namespace Prensadao.API.Controllers
         {
             try
             {
-                var result = await _orderService.OrderCreate(order);
+                var result = await _orderService.OrderCreateAsync(order);
 
                 return Ok( new { message = "Pedido criado com sucesso.", data = result });
             }
@@ -81,7 +81,7 @@ namespace Prensadao.API.Controllers
         {
             try
             {
-                var result = await _orderService.UpdateStatus(dto);
+                var result = await _orderService.UpdateStatusAsync(dto);
                 return Ok( new { message = "Status do pedido atualizado com sucesso.", data = result });
             }
             catch (Exception ex)

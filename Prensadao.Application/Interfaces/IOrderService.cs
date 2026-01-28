@@ -8,7 +8,7 @@ namespace Prensadao.Application.Interfaces
         Task EnabledAsync(int id);
         Task<List<OrderResponseDto>> GetOrdersAsync();
         Task<OrderResponseDto> GetByIdAsync(int id);
-        Task<int> OrderCreate(OrderRequestDto dto);
-        Task<OrderResponseDto> UpdateStatus(UpdateStatusDto dto);
+        Task<int> OrderCreateAsync(OrderRequestDto dto);
+        Task<OrderResponseDto> UpdateStatusAsync(UpdateStatusDto dto);
     }
 }

@@ -24,7 +24,7 @@ public class OrderServiceTest
         OrderRequestDto? dto = null;
 
         // Act
-        var ex = await Assert.ThrowsAsync<ArgumentException>(() => orderService.OrderCreate(dto!));
+        var ex = await Assert.ThrowsAsync<ArgumentException>(() => orderService.OrderCreateAsync(dto!));
 
         // Assert
         Assert.Equal("O pedido não pode ser nulo.", ex.Message);
@@ -41,7 +41,7 @@ public class OrderServiceTest
         dto.CustomerId = 0;
 
         // Act
-        var ex = await Assert.ThrowsAsync<ArgumentException>(() => orderService.OrderCreate(dto));
+        var ex = await Assert.ThrowsAsync<ArgumentException>(() => orderService.OrderCreateAsync(dto));
 
         // Assert
         Assert.Equal("Pedido não pode ser feito sem cliente cadastrado.", ex.Message);
@@ -59,7 +59,7 @@ public class OrderServiceTest
         dto.OrderItems = new List<OrderItemRequestDto>(); // vazio
 
         // Act
-        var ex = await Assert.ThrowsAsync<ArgumentException>(() => orderService.OrderCreate(dto));
+        var ex = await Assert.ThrowsAsync<ArgumentException>(() => orderService.OrderCreateAsync(dto));
 
         // Assert
         Assert.Equal("Pedido não pode ser feito sem itens.", ex.Message);
@@ -81,7 +81,7 @@ public class OrderServiceTest
         };
 
         // Act
-        var ex = await Assert.ThrowsAsync<ArgumentException>(() => orderService.OrderCreate(dto));
+        var ex = await Assert.ThrowsAsync<ArgumentException>(() => orderService.OrderCreateAsync(dto));
 
         // Assert
         Assert.Equal("Pedido contém itens com ProductId inválido.", ex.Message);
@@ -103,7 +103,7 @@ public class OrderServiceTest
         };
 
         // Act
-        var ex = await Assert.ThrowsAsync<ArgumentException>(() => orderService.OrderCreate(dto));
+        var ex = await Assert.ThrowsAsync<ArgumentException>(() => orderService.OrderCreateAsync(dto));
 
         // Assert
         Assert.Equal("Pedido contém itens com quantidade inválida.", ex.Message);
@@ -127,7 +127,7 @@ public class OrderServiceTest
         A.CallTo(() => productRepository.ExistsInactiveProduct(A<List<int>>._)).Returns(true); // força caminho de produto inativo
 
         // Act
-        var ex = await Assert.ThrowsAsync<ArgumentException>(() => orderService.OrderCreate(dto));
+        var ex = await Assert.ThrowsAsync<ArgumentException>(() => orderService.OrderCreateAsync(dto));
 
         // Assert
         Assert.Equal("Pedido não pode ser feito com produtos inativos.", ex.Message);
