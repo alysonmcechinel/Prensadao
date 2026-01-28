@@ -143,7 +143,7 @@ public class OrderServiceTest
         // Arrange: pedido em status que NÃO pode ser cancelado (ex.: Pronto)
         var order = new Order(delivery: true, value: 10m, observation: "obs", customerId: 1, NodaTimeExtensions.NowUtc());
         order.UpdateStatus(OrderStatusEnum.Pronto);
-        A.CallTo(() => orderRepository.GetById(pedidoId)).Returns(order);
+        A.CallTo(() => orderRepository.GetByIdAsync(pedidoId)).Returns(order);
 
         // Act
         var ex = await Assert.ThrowsAsync<ArgumentException>(() => orderService.EnabledAsync(pedidoId));
@@ -170,7 +170,7 @@ public class OrderServiceTest
         typeof(Order).GetProperty("Customer")!.SetValue(order, custumer);
 
         order.UpdateStatus(OrderStatusEnum.EmPreparacao);
-        A.CallTo(() => orderRepository.GetById(orderId)).Returns(order);
+        A.CallTo(() => orderRepository.GetByIdAsync(orderId)).Returns(order);
 
         // Act
         await orderService.EnabledAsync(orderId);
