@@ -1,11 +1,7 @@
 ﻿using AutoFixture.Xunit2;
-using Castle.Core.Resource;
 using FakeItEasy;
-using Prensadao.Application;
-using Prensadao.Application.DTOs;
 using Prensadao.Application.DTOs.Requests;
 using Prensadao.Application.Helpers;
-using Prensadao.Application.Interfaces;
 using Prensadao.Application.Services;
 using Prensadao.Domain.Entities;
 using Prensadao.Domain.Enums;

@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Prensadao.Domain.DTOs;
 using Prensadao.Domain.Entities;
 using Prensadao.Domain.Repositories;
+using Prensadao.Domain.Views;
 
 namespace Prensadao.Infra.Persistence.Repositories
 {
@@ -40,13 +40,9 @@ namespace Prensadao.Infra.Persistence.Repositories
 
         public async Task<bool> ExistsInactiveProduct(List<int> productsIDs) => await _dbContext.Products.AnyAsync(x => productsIDs.Contains(x.ProductId) && !x.Enabled);
 
-        public async Task<List<ProductValueDTO>> ValueOfProducts(List<int> ids) => await _dbContext.Products
+        public async Task<List<ProductValueModels>> ValueOfProducts(List<int> ids) => await _dbContext.Products
             .Where(x => ids.Contains(x.ProductId))
-            .Select(x => new ProductValueDTO
-                {
-                    ProductId = x.ProductId,
-                    Value = x.Value
-                })
+            .Select(x => new ProductValueModels(x.ProductId, x.Value))
             .ToListAsync();
     }
 }
