@@ -52,11 +52,26 @@ namespace Prensadao.Application.Services
             decimal totalAmountOrder = Math.Round(dto.OrderItems.Sum(i => prices[i.ProductId] * i.Quantity), 2, MidpointRounding.AwayFromZero);
 
             var order = new Order(dto.Delivery, totalAmountOrder, dto.Observation, dto.CustomerId, NodaTimeExtensions.NowUtc());
+            await OrderCreateAsync(dto, prices, order);
 
+            await MessageOrderAsync(order);
+
+            return order.OrderId;
+        }
+
+        // Exemplo de metodo  Atomico
+        private async Task OrderCreateAsync(OrderRequestDto dto, Dictionary<int, decimal> prices, Order order)
+        {
+            // 1. A GARANTIA DA ATOMICIDADE
+            // O TransactionScope cria uma "bolha". Tudo que acontece aqui dentro
+            // precisa funcionar, ou nada será salvo no banco ("Tudo ou Nada").
             using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 await _orderRepository.CreateOrder(order);
 
+                // 2. Operações Dependentes
+                // Se ocorrer um erro neste loop (ex: erro de banco),
+                // o pedido criado na linha acima será revertido (Rollback) automaticamente.
                 foreach (var item in dto.OrderItems)
                 {
                     var unitPrice = prices[item.ProductId];
@@ -64,12 +79,11 @@ namespace Prensadao.Application.Services
                     await _orderItemRepository.AddOrderItemAsync(orderItem);
                 }
 
+                // 3. O "Commit" Final
+                // Apenas se o código chegar nesta linha, os dados são persistidos.
+                // Se sair do 'using' sem passar aqui, tudo é cancelado.
                 scope.Complete();
-            };           
-
-            await MessageOrderAsync(order);
-
-            return order.OrderId;
+            };
         }
 
         public async Task<OrderResponseDto> UpdateStatusAsync(UpdateStatusDto dto)
