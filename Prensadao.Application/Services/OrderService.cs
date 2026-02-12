@@ -10,6 +10,7 @@ using System.Transactions;
 
 namespace Prensadao.Application.Services
 {
+    //TODO: implementar FluentValidation
     public class OrderService : IOrderService
     {
         private readonly IBus _bus;
@@ -25,23 +26,19 @@ namespace Prensadao.Application.Services
             _productRepository = productRepository;
         }
 
-        public async Task<List<OrderResponseDto>> GetOrders()
-        {
-            var result = await _orderRepository.GetOrders();
-            return OrderResponseDto.ToListDto(result);
-        }
+        public async Task<List<OrderResponseDto>> GetOrdersAsync() => OrderResponseDto.ToListDto(await _orderRepository.GetOrders());
 
-        public async Task<OrderResponseDto> GetById(int id)
+        public async Task<OrderResponseDto> GetByIdAsync(int id)
         {
-            var order = await _orderRepository.GetById(id);
+            var order = await _orderRepository.GetByIdAsync(id);
 
             if (order == null)
-                throw new Exception("Pedido não encontrado.");
+                throw new ArgumentException("Pedido não encontrado.");
 
             return OrderResponseDto.ToDto(order);
         }
 
-        public async Task<int> OrderCreate(OrderRequestDto dto)
+        public async Task<int> OrderCreateAsync(OrderRequestDto dto)
         {
             if (dto is null)
                 throw new ArgumentException("O pedido não pode ser nulo.");
@@ -49,35 +46,49 @@ namespace Prensadao.Application.Services
             if (dto.CustomerId <= 0)
                 throw new ArgumentException("Pedido não pode ser feito sem cliente cadastrado.");
 
-            await ValidationsOrderItem(dto);
-            Dictionary<int, decimal> prices = await GetPrices(dto);
+            await ValidationsOrderItemAsync(dto);
+            Dictionary<int, decimal> prices = await GetPricesAsync(dto);
 
             decimal totalAmountOrder = Math.Round(dto.OrderItems.Sum(i => prices[i.ProductId] * i.Quantity), 2, MidpointRounding.AwayFromZero);
 
-            var order = new Order(dto.Delivery, totalAmountOrder, dto.Observation, dto.CustomerId);
+            var order = new Order(dto.Delivery, totalAmountOrder, dto.Observation, dto.CustomerId, NodaTimeExtensions.NowUtc());
+            await OrderCreateAsync(dto, prices, order);
 
-            using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
-            {
-                await _orderRepository.CreateOrder(order);
-
-                foreach (var item in dto.OrderItems)
-                {
-                    var unitPrice = prices[item.ProductId];
-                    var orderItem = new OrderItem(item.Quantity, unitPrice, order.OrderId, item.ProductId);
-                    await _orderItemRepository.AddOrderItem(orderItem);
-                }
-
-                scope.Complete();
-            };           
-
-            await Message(order);
+            await MessageOrderAsync(order);
 
             return order.OrderId;
         }
 
-        public async Task<OrderResponseDto> UpdateStatus(UpdateStatusDto dto)
+        // Exemplo de metodo  Atomico
+        private async Task OrderCreateAsync(OrderRequestDto dto, Dictionary<int, decimal> prices, Order order)
         {
-            var order = await _orderRepository.GetById(dto.OrderId);
+            // 1. A GARANTIA DA ATOMICIDADE
+            // O TransactionScope cria uma "bolha". Tudo que acontece aqui dentro
+            // precisa funcionar, ou nada será salvo no banco ("Tudo ou Nada").
+            using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {
+                await _orderRepository.CreateOrder(order);
+
+                // 2. Operações Dependentes
+                // Se ocorrer um erro neste loop (ex: erro de banco),
+                // o pedido criado na linha acima será revertido (Rollback) automaticamente.
+                foreach (var item in dto.OrderItems)
+                {
+                    var unitPrice = prices[item.ProductId];
+                    var orderItem = new OrderItem(item.Quantity, unitPrice, order.OrderId, item.ProductId);
+                    await _orderItemRepository.AddOrderItemAsync(orderItem);
+                }
+
+                // 3. O "Commit" Final
+                // Apenas se o código chegar nesta linha, os dados são persistidos.
+                // Se sair do 'using' sem passar aqui, tudo é cancelado.
+                scope.Complete();
+            };
+        }
+
+        public async Task<OrderResponseDto> UpdateStatusAsync(UpdateStatusDto dto)
+        {
+            var order = await _orderRepository.GetByIdAsync(dto.OrderId);
             if (order is null)
                 throw new ArgumentException("Pedido não encontrado.");
 
@@ -86,14 +97,14 @@ namespace Prensadao.Application.Services
 
             order.UpdateStatus(dto.OrderStatus);
             await _orderRepository.Update(order);
-            await MessageNotify(order);
+            await MessageNotifyAsync(order);
 
             return OrderResponseDto.ToDto(order);
         }        
 
-        public async Task Enabled(int id)
+        public async Task EnabledAsync(int id)
         {
-            var order = await _orderRepository.GetById(id);
+            var order = await _orderRepository.GetByIdAsync(id);
 
             if (order is null)
                 throw new ArgumentException("Pedido não encontrado.");
@@ -104,11 +115,11 @@ namespace Prensadao.Application.Services
                 throw new ArgumentException($"Pedido não pode ser cancelado pois, já esta com status: {order.OrderStatus.GetDescription()}");
 
             await _orderRepository.Update(order);
-            await MessageNotify(order);
+            await MessageNotifyAsync(order);
         }
 
         // Privates
-        private async Task<Dictionary<int, decimal>> GetPrices(OrderRequestDto dto)
+        private async Task<Dictionary<int, decimal>> GetPricesAsync(OrderRequestDto dto)
         {
             var productIds = dto.OrderItems.Select(i => i.ProductId).Distinct().ToList();
             var products = await _productRepository.ValueOfProducts(productIds);
@@ -121,7 +132,7 @@ namespace Prensadao.Application.Services
             return prices;
         }
 
-        private async Task ValidationsOrderItem(OrderRequestDto dto)
+        private async Task ValidationsOrderItemAsync(OrderRequestDto dto)
         {
             if (!dto.OrderItems.Any())
                 throw new ArgumentException("Pedido não pode ser feito sem itens.");
@@ -138,7 +149,7 @@ namespace Prensadao.Application.Services
                 throw new ArgumentException("Pedido não pode ser feito com produtos inativos.");
         }
 
-        private async Task Message(Order order)
+        private async Task MessageOrderAsync(Order order)
         {
             var messageDto = new OrderMessageDto
             {
@@ -148,7 +159,7 @@ namespace Prensadao.Application.Services
             await _bus.Publish(messageDto, RabbitMqConstants.Exchanges.OrderExchange);
         }
 
-        private async Task MessageNotify(Order order)
+        private async Task MessageNotifyAsync(Order order)
         {
             var notify = new NotifyMessageDto
             {

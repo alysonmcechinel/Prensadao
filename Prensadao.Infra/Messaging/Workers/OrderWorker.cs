@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Hosting;
 using Prensadao.Application;
 using Prensadao.Application.DTOs;
-using Prensadao.Application.Helpers;
 using Prensadao.Application.Interfaces;
 using Prensadao.Domain.Enums;
 using Prensadao.Domain.Repositories;
@@ -22,43 +21,35 @@ public class OrderWorker : BackgroundService
         _bus = bus;
     }
 
-    protected override Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        // WORKER QUE RECEBE E ATUALIZA PEDIDOS ENVIADOS PARA COZINHA.
+    // Exemplo de metodo com IDEMPOTÊNCIA
+    protected override Task ExecuteAsync(CancellationToken stoppingToken) => 
         _consumer.Listen<OrderMessageDto>(RabbitMqConstants.Queues.OrderCozinhaQueue, async message =>
         {
             using var scope = _serviceProvider.CreateScope();
-            var orderRepository = scope.ServiceProvider.GetRequiredService<IOrderRepository>();
+            var orderRepository = scope.ServiceProvider.GetService<IOrderRepository>();
+            var order = await orderRepository.GetByIdAsync(message.OrderId);
 
-            var order = await orderRepository.GetById(message.OrderId);
-
-            if (order is null) 
-            {
-                Console.WriteLine($"Pedido {message.OrderId} não encontrado.");
+            // 1. AQUI ESTÁ A IDEMPOTÊNCIA
+            // Se o pedido já saiu do status 'Criado', ignoramos a mensagem.
+            // Isso evita processar duas vezes se o RabbitMQ reenviar.
+            if (order is null || order.OrderStatus != OrderStatusEnum.Criado)
                 return;
-            }
 
-            if (order.OrderStatus == OrderStatusEnum.Criado)
+            // 2. Execução Segura
+            order.NextStatus(); // Muda para 'Em Preparação'
+            await orderRepository.Update(order);
+
+            // 3. Notifica apenas se a atualização ocorreu
+            var notify = new NotifyMessageDto
             {
-                order.NextStatus();
-                await orderRepository.Update(order);
+                OrderId = order.OrderId,
+                ConsumerName = order.Customer.Name,
+                Delivery = order.Delivery,
+                OrderStatus = order.OrderStatus,
+                Phone = order.Customer.Phone
+            };
+            await _bus.Publish(notify, RabbitMqConstants.Exchanges.NotifyExchange, "");
 
-                Console.WriteLine($"Pedido #{order.OrderId} atualizado para {order.OrderStatus.GetDescription()}");
-
-                var notify = new NotifyMessageDto
-                {
-                    OrderId = order.OrderId,
-                    ConsumerName = order.Customer.Name,
-                    Delivery = order.Delivery,
-                    OrderStatus = order.OrderStatus,
-                    Phone = order.Customer.Phone
-                };
-
-                await _bus.Publish(notify, RabbitMqConstants.Exchanges.NotifyExchange, "");
-            }
-            
+            Console.WriteLine($"Pedido #{order.OrderId} atualizado com sucesso.");
         });
-
-        return Task.Delay(Timeout.Infinite, stoppingToken);
-    }
 }

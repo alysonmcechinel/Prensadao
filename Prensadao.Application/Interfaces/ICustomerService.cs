@@ -5,9 +5,9 @@ namespace Prensadao.Application.Interfaces
 {
     public interface ICustomerService
     {
-        Task<int> AddCustomer(CustomerRequestDto dto);
-        Task<CustomerResponseDto> GetById(int id);
-        Task<List<CustomerResponseDto>> GetCustomers();
-        Task Update(CustomerRequestDto dto);
+        Task<int> AddCustomerAsync(CustomerRequestDto dto);
+        Task<CustomerResponseDto> GetByIdAsync(int id);
+        Task<List<CustomerResponseDto>> GetCustomersAsync();
+        Task UpdateAsync(CustomerRequestDto dto);
     }
 }

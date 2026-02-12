@@ -1,11 +1,7 @@
 ﻿using AutoFixture.Xunit2;
-using Castle.Core.Resource;
 using FakeItEasy;
-using Prensadao.Application;
-using Prensadao.Application.DTOs;
 using Prensadao.Application.DTOs.Requests;
 using Prensadao.Application.Helpers;
-using Prensadao.Application.Interfaces;
 using Prensadao.Application.Services;
 using Prensadao.Domain.Entities;
 using Prensadao.Domain.Enums;
@@ -24,7 +20,7 @@ public class OrderServiceTest
         OrderRequestDto? dto = null;
 
         // Act
-        var ex = await Assert.ThrowsAsync<ArgumentException>(() => orderService.OrderCreate(dto!));
+        var ex = await Assert.ThrowsAsync<ArgumentException>(() => orderService.OrderCreateAsync(dto!));
 
         // Assert
         Assert.Equal("O pedido não pode ser nulo.", ex.Message);
@@ -41,7 +37,7 @@ public class OrderServiceTest
         dto.CustomerId = 0;
 
         // Act
-        var ex = await Assert.ThrowsAsync<ArgumentException>(() => orderService.OrderCreate(dto));
+        var ex = await Assert.ThrowsAsync<ArgumentException>(() => orderService.OrderCreateAsync(dto));
 
         // Assert
         Assert.Equal("Pedido não pode ser feito sem cliente cadastrado.", ex.Message);
@@ -59,7 +55,7 @@ public class OrderServiceTest
         dto.OrderItems = new List<OrderItemRequestDto>(); // vazio
 
         // Act
-        var ex = await Assert.ThrowsAsync<ArgumentException>(() => orderService.OrderCreate(dto));
+        var ex = await Assert.ThrowsAsync<ArgumentException>(() => orderService.OrderCreateAsync(dto));
 
         // Assert
         Assert.Equal("Pedido não pode ser feito sem itens.", ex.Message);
@@ -81,7 +77,7 @@ public class OrderServiceTest
         };
 
         // Act
-        var ex = await Assert.ThrowsAsync<ArgumentException>(() => orderService.OrderCreate(dto));
+        var ex = await Assert.ThrowsAsync<ArgumentException>(() => orderService.OrderCreateAsync(dto));
 
         // Assert
         Assert.Equal("Pedido contém itens com ProductId inválido.", ex.Message);
@@ -103,7 +99,7 @@ public class OrderServiceTest
         };
 
         // Act
-        var ex = await Assert.ThrowsAsync<ArgumentException>(() => orderService.OrderCreate(dto));
+        var ex = await Assert.ThrowsAsync<ArgumentException>(() => orderService.OrderCreateAsync(dto));
 
         // Assert
         Assert.Equal("Pedido contém itens com quantidade inválida.", ex.Message);
@@ -127,7 +123,7 @@ public class OrderServiceTest
         A.CallTo(() => productRepository.ExistsInactiveProduct(A<List<int>>._)).Returns(true); // força caminho de produto inativo
 
         // Act
-        var ex = await Assert.ThrowsAsync<ArgumentException>(() => orderService.OrderCreate(dto));
+        var ex = await Assert.ThrowsAsync<ArgumentException>(() => orderService.OrderCreateAsync(dto));
 
         // Assert
         Assert.Equal("Pedido não pode ser feito com produtos inativos.", ex.Message);
@@ -141,12 +137,12 @@ public class OrderServiceTest
        int pedidoId)
     {
         // Arrange: pedido em status que NÃO pode ser cancelado (ex.: Pronto)
-        var order = new Order(delivery: true, value: 10m, observation: "obs", customerId: 1);
+        var order = new Order(delivery: true, value: 10m, observation: "obs", customerId: 1, NodaTimeExtensions.NowUtc());
         order.UpdateStatus(OrderStatusEnum.Pronto);
-        A.CallTo(() => orderRepository.GetById(pedidoId)).Returns(order);
+        A.CallTo(() => orderRepository.GetByIdAsync(pedidoId)).Returns(order);
 
         // Act
-        var ex = await Assert.ThrowsAsync<ArgumentException>(() => orderService.Enabled(pedidoId));
+        var ex = await Assert.ThrowsAsync<ArgumentException>(() => orderService.EnabledAsync(pedidoId));
 
         // Assert
         var esperado = $"Pedido não pode ser cancelado pois, já esta com status: {order.OrderStatus.GetDescription()}";
@@ -162,18 +158,18 @@ public class OrderServiceTest
        int customerId)
     {
         // Arrange: pedido em status que pode ser cancelado (ex.: EmPreparacao)
-        var custumer = new Customer("Nome", 48999999999, "Rua", "Bairro", "123", "Cidade", "Ponto de referência", 88000000);
-        typeof(Customer).GetProperty("CustomerId").SetValue(custumer, customerId);
+        var custumer = new Customer("Nome", "48999999999", "Rua", "Bairro", "123", "Cidade", "Ponto de referência", 88000000);
+        typeof(Customer).GetProperty("CustomerId")!.SetValue(custumer, customerId);
 
-        var order = new Order(delivery: true, value: 10m, observation: "obs", customerId: customerId);
-        typeof(Order).GetProperty("OrderId").SetValue(order, orderId);
-        order.Customer = custumer;
+        var order = new Order(delivery: true, value: 10m, observation: "obs", customerId: customerId, NodaTimeExtensions.NowUtc());
+        typeof(Order).GetProperty("OrderId")!.SetValue(order, orderId);
+        typeof(Order).GetProperty("Customer")!.SetValue(order, custumer);
 
         order.UpdateStatus(OrderStatusEnum.EmPreparacao);
-        A.CallTo(() => orderRepository.GetById(orderId)).Returns(order);
+        A.CallTo(() => orderRepository.GetByIdAsync(orderId)).Returns(order);
 
         // Act
-        await orderService.Enabled(orderId);
+        await orderService.EnabledAsync(orderId);
 
         // Assert
         Assert.Equal(OrderStatusEnum.Cancelado, order.OrderStatus);

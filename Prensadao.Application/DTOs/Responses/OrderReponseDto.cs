@@ -1,4 +1,5 @@
-﻿using Prensadao.Application.Helpers;
+﻿using NodaTime.Extensions;
+using Prensadao.Application.Helpers;
 using Prensadao.Domain.Entities;
 using Prensadao.Domain.Enums;
 using System.ComponentModel.DataAnnotations;
@@ -16,7 +17,7 @@ namespace Prensadao.Application.DTOs.Responses
             Observation = observation;
             CustomerId = customerId;
             CustomerName = customerName;
-            DateOrder = dateOrder.ToBrasil();
+            DateOrder = dateOrder.LocalTime();
 
             OrderItems = ordemItems;
         }

@@ -1,11 +1,13 @@
 ﻿using Prensadao.Application.DTOs.Requests;
 using Prensadao.Application.DTOs.Responses;
+using Prensadao.Application.Helpers;
 using Prensadao.Application.Interfaces;
 using Prensadao.Domain.Entities;
 using Prensadao.Domain.Repositories;
 
 namespace Prensadao.Application.Services
 {
+    //TODO: implementar FluentValidation
     public class CustomerService : ICustomerService
     {
         private readonly ICustomerRepository _customerRepository;
@@ -15,55 +17,50 @@ namespace Prensadao.Application.Services
             _customerRepository = customerRepository;
         }
 
-        public async Task<int> AddCustomer(CustomerRequestDto dto)
+        // Encapsulando a verificação e usando Eliding Async/Await no wrapper.
+        // Aqui o método continua async porque precisamos do await para tomar decisão (if).
+        public async Task<int> AddCustomerAsync(CustomerRequestDto dto)
         {
-            bool phoneIsExists = await _customerRepository.PhoneIsExists(dto.Phone);
-            if (phoneIsExists)
-                throw new Exception("Telefone já cadastrado.");
+            dto.Phone.ValidatePhone();
 
-            if (!PhoneIsValid(dto.Phone))
-                throw new Exception("Número de telefone inválido.");
+            if (await PhoneExistsAsync(dto.Phone))
+                throw new InvalidOperationException("Telefone já cadastrado.");
 
             var customer = new Customer(dto.Name, dto.Phone, dto.Street, dto.District, dto.Number, dto.City, dto.ReferencePoint, dto.Cep);
 
-            return await _customerRepository.AddCustomer(customer);
+            return await _customerRepository.AddCustomerAsync(customer);
         }
 
-        public async Task<CustomerResponseDto> GetById(int id)
+        public async Task<CustomerResponseDto> GetByIdAsync(int id)
         {
-            var customer = await _customerRepository.GetById(id);
+            var customer = await _customerRepository.GetByIdAsync(id);
 
             if (customer == null)
-                throw new Exception("Cliente não encontrado.");
+                throw new ArgumentException("Cliente não encontrado.");
 
             return CustomerResponseDto.ToDto(customer);
         }
 
-        public async Task<List<CustomerResponseDto>> GetCustomers() => CustomerResponseDto.ToListDto(await _customerRepository.GetCustomers());
+        public async Task<List<CustomerResponseDto>> GetCustomersAsync() => CustomerResponseDto.ToListDto(await _customerRepository.GetCustomersAsync());
 
-        public async Task Update(CustomerRequestDto dto)
+        public async Task UpdateAsync(CustomerRequestDto dto)
         {
-            if (!dto.CustomerId.HasValue)
-                throw new Exception("O ID informado incorretamente.");
+            dto.Phone.ValidatePhone();
 
-            var customer = await _customerRepository.GetById(dto.CustomerId!.Value);
+            if (dto.CustomerId == 0)
+                throw new ArgumentException("O ID informado incorretamente.");
 
+            var customer = await _customerRepository.GetByIdAsync(dto.CustomerId);
             if (customer == null)
-                throw new Exception("Cliente não encontrado.");
-
-            if (!PhoneIsValid(dto.Phone))
-                throw new Exception("Número de telefone inválido.");
+                throw new ArgumentException("Cliente não encontrado.");
 
             customer.Update(dto.Name, dto.Phone, dto.Street, dto.District, dto.Number, dto.City, dto.ReferencePoint, dto.Cep);
-            await _customerRepository.Update(customer);
+            await _customerRepository.UpdateAsync(customer);
         }
 
         // privates
 
-        public bool PhoneIsValid(long phone)
-        {
-            string phoneText = phone.ToString();
-            return phoneText.Length == 10 || phoneText.Length == 11;
-        }
+        // Eliding Async/Await: wrapper puro, sem lógica extra (sem state machine desnecessária)
+        private Task<bool> PhoneExistsAsync(string phone) => _customerRepository.PhoneIsExistsAsync(phone);
     }
 }

@@ -24,7 +24,7 @@ public class Product
     public string Description { get; private set; }
 
     //Relationship
-    public ICollection<OrderItem> OrderItems { get; set; } = [];
+    public ICollection<OrderItem> OrderItems { get; private set; } = [];
 
     public void EnabledProduct(bool enabled) => Enabled = enabled;
 

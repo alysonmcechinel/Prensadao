@@ -12,7 +12,7 @@ namespace Prensadao.Infra.Persistence.Repositories
         {
             _dbContext = dbContext;
         }
-        public async Task<int> AddCustomer(Customer customer)
+        public async Task<int> AddCustomerAsync(Customer customer)
         {
             await _dbContext.AddAsync(customer);
             await _dbContext.SaveChangesAsync();
@@ -20,26 +20,26 @@ namespace Prensadao.Infra.Persistence.Repositories
             return customer.CustomerId;
         }
 
-        public async Task<Customer?> GetById(int id) => await _dbContext.Customers
+        public async Task<Customer?> GetByIdAsync(int id) => await _dbContext.Customers
             .Include(x => x.Orders)
                 .ThenInclude(o => o.OrderItems)
                 .ThenInclude(p => p.Product)
             .SingleOrDefaultAsync(c => c.CustomerId == id);
 
-        public async Task<List<Customer>> GetCustomers() => await _dbContext.Customers
+        public Task<List<Customer>> GetCustomersAsync() => _dbContext.Customers
             .Include(x => x.Orders)
                 .ThenInclude(o => o.OrderItems)
                 .ThenInclude(p => p.Product)
             .AsNoTracking()
             .ToListAsync();
 
-        public async Task Update(Customer customer)
+        public async Task UpdateAsync(Customer customer)
         {
             _dbContext.Customers.Update(customer);
             await _dbContext.SaveChangesAsync();
         }
 
-        public async Task<bool> PhoneIsExists(long phone) => await _dbContext.Customers
-            .AnyAsync(c => c.Phone == phone);
+        public Task<bool> PhoneIsExistsAsync(string phone) => _dbContext.Customers
+            .AnyAsync(c => c.Phone.Equals(phone));
     }
 }

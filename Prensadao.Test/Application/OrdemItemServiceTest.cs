@@ -18,10 +18,10 @@ public class OrdemItemServiceTest
         OrderItem ordemItem)
     {
         // Act
-        await orderItemService.AddOrderItem(ordemItem);
+        await orderItemService.AddOrderItemAsync(ordemItem);
 
         // Assert
-        A.CallTo(() => orderItemRepository.AddOrderItem(ordemItem)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => orderItemRepository.AddOrderItemAsync(ordemItem)).MustHaveHappenedOnceExactly();
     }
 
     [Theory, AutoFakeItEasyData]
@@ -31,13 +31,13 @@ public class OrdemItemServiceTest
         List<OrderItem> ordemItems)
     {
         // Arrange
-        A.CallTo(() => orderItemRepository.GetOrderItems()).Returns(ordemItems);
+        A.CallTo(() =>  orderItemRepository.GetOrderItemsAsync()).Returns(ordemItems);
         
         // Act
         var result = await orderItemService.GetOrderItems();
         
         // Assert
         Assert.Equal(ordemItems, result);
-        A.CallTo(() => orderItemRepository.GetOrderItems()).MustHaveHappenedOnceExactly();
+        A.CallTo(() => orderItemRepository.GetOrderItemsAsync()).MustHaveHappenedOnceExactly();
     }
 }

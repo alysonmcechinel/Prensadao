@@ -1,8 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Hangfire;
+using Hangfire.PostgreSql;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using NodaTime;
 using Prensadao.Application.Interfaces;
-using Prensadao.Domain.Entities;
 using Prensadao.Domain.Repositories;
 using Prensadao.Infra.Messaging.Interfaces;
 using Prensadao.Infra.Messaging.RabbitMq;
@@ -19,7 +21,9 @@ namespace Prensadao.Infra
             services
                 .AddData(configuration)
                 .AddRabbitMQ()
+                .AddHangFire(configuration)
                 .AddWorkers()
+                .AddNodaTime()
                 .AddRepositories();
 
             return services;
@@ -57,6 +61,18 @@ namespace Prensadao.Infra
             return services;
         }
 
+        // Configuração do Hangfire
+        public static IServiceCollection AddHangFire(this IServiceCollection services, IConfiguration configuration)
+        {
+            var connectionString = configuration.GetConnectionString("DefaultConnection");
+
+            services.AddHangfire(cfg => cfg.UsePostgreSqlStorage(connectionString));
+
+            services.AddHangfireServer();
+
+            return services;
+        }
+
         // Injeção de dependencia dos repositorios
         public static IServiceCollection AddRepositories(this IServiceCollection services)
         {
@@ -64,6 +80,14 @@ namespace Prensadao.Infra
             services.AddScoped<IOrderItemRepository, OrderItemRepository>();
             services.AddScoped<ICustomerRepository, CustomerRepository>();
             services.AddScoped<IProductRepository, ProductRepository>();
+
+            return services;
+        }
+
+        // Injeção de dependencia do NodaTime
+        public static IServiceCollection AddNodaTime(this IServiceCollection services)
+        {
+            services.AddSingleton<IClock>(SystemClock.Instance);
 
             return services;
         }

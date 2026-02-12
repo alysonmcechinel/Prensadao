@@ -4,6 +4,7 @@ using Prensadao.Domain.Repositories;
 
 namespace Prensadao.Application.Services
 {
+    //TODO: implementar FluentValidation
     public class OrderItemService : IOrderItemService
     {
         private readonly IOrderItemRepository _orderItemRepository;
@@ -13,8 +14,8 @@ namespace Prensadao.Application.Services
             _orderItemRepository = orderItemRepository;
         }
 
-        public async Task AddOrderItem(OrderItem ordemItem) => await _orderItemRepository.AddOrderItem(ordemItem);
+        public Task AddOrderItemAsync(OrderItem ordemItem) => _orderItemRepository.AddOrderItemAsync(ordemItem);
 
-        public async Task<List<OrderItem>> GetOrderItems() => await _orderItemRepository.GetOrderItems();
+        public Task<List<OrderItem>> GetOrderItems() => _orderItemRepository.GetOrderItemsAsync();
     }
 }

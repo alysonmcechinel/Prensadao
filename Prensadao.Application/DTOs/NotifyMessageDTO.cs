@@ -8,5 +8,5 @@ public class NotifyMessageDto
     public OrderStatusEnum OrderStatus { get; set; }
     public bool Delivery { get; set; }
     public string ConsumerName { get; set; } = string.Empty;
-    public long Phone { get; set; }
+    public string Phone { get; set; } = string.Empty;
 }

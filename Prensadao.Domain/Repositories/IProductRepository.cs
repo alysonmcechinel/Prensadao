@@ -1,5 +1,5 @@
-﻿using Prensadao.Domain.DTOs;
-using Prensadao.Domain.Entities;
+﻿using Prensadao.Domain.Entities;
+using Prensadao.Domain.Views;
 
 namespace Prensadao.Domain.Repositories
 {
@@ -11,6 +11,6 @@ namespace Prensadao.Domain.Repositories
         Task<List<Product>> GetProducts();
         Task<bool> NameAlreadyExists(string name);
         Task<bool> ExistsInactiveProduct(List<int> productsIDs);
-        Task<List<ProductValueDTO>> ValueOfProducts(List<int> ids);
+        Task<List<ProductValueModels>> ValueOfProducts(List<int> ids);
     }
 }

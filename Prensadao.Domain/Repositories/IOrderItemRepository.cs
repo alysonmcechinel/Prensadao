@@ -4,7 +4,7 @@ namespace Prensadao.Domain.Repositories
 {
     public interface IOrderItemRepository
     {
-        Task AddOrderItem(OrderItem ordemItem);
-        Task<List<OrderItem>> GetOrderItems();
+        Task AddOrderItemAsync(OrderItem ordemItem);
+        Task<List<OrderItem>> GetOrderItemsAsync();
     }
 }

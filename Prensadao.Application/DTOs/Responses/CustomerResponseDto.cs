@@ -4,7 +4,7 @@ namespace Prensadao.Application.DTOs.Responses;
 
 public class CustomerResponseDto
 {
-    public CustomerResponseDto(int id, string name, long phone, string street, string district, string number, string city, string referencePoint, int cep, List<OrderResponseDto> orders)
+    public CustomerResponseDto(int id, string name, string phone, string street, string district, string number, string city, string referencePoint, int cep, List<OrderResponseDto> orders)
     {
         CustomerId = id;
         Name = name;
@@ -21,7 +21,7 @@ public class CustomerResponseDto
 
     public int CustomerId { get; set; }
     public string Name { get; set; } = string.Empty;
-    public long Phone { get; set; }
+    public string Phone { get; set; } = string.Empty;
     public string Street { get; set; } = string.Empty;
     public string District { get; set; } = string.Empty;
     public string Number { get; set; } = string.Empty;

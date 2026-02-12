@@ -7,6 +7,7 @@ using System.Data;
 
 namespace Prensadao.API.Controllers
 {
+    //TODO: autenticacao e respostas.
     [ApiController]
     [Route("api/[controller]")]
     [Produces("application/json")]
@@ -26,7 +27,7 @@ namespace Prensadao.API.Controllers
         {
             try
             {
-                var result = await _orderService.OrderCreate(order);
+                var result = await _orderService.OrderCreateAsync(order);
 
                 return Ok( new { message = "Pedido criado com sucesso.", data = result });
             }
@@ -43,7 +44,7 @@ namespace Prensadao.API.Controllers
         {
             try
             {
-                var result = await _orderService.GetOrders();
+                var result = await _orderService.GetOrdersAsync();
                 return Ok(result);
             }
             catch (Exception ex)
@@ -60,7 +61,7 @@ namespace Prensadao.API.Controllers
         {
             try
             {
-                var result = await _orderService.GetById(id);
+                var result = await _orderService.GetByIdAsync(id);
 
                 if (result is null)
                     return NotFound("Pedido não encontrado.");
@@ -80,7 +81,7 @@ namespace Prensadao.API.Controllers
         {
             try
             {
-                var result = await _orderService.UpdateStatus(dto);
+                var result = await _orderService.UpdateStatusAsync(dto);
                 return Ok( new { message = "Status do pedido atualizado com sucesso.", data = result });
             }
             catch (Exception ex)
@@ -96,7 +97,7 @@ namespace Prensadao.API.Controllers
         {
             try
             {
-                await _orderService.Enabled(id);
+                await _orderService.EnabledAsync(id);
                 return Ok("Pedido cancelado com sucesso.");
             }
             catch (Exception ex)
