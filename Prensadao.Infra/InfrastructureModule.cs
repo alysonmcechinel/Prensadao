@@ -1,4 +1,5 @@
 ﻿using Hangfire;
+using Hangfire.PostgreSql;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,7 +21,7 @@ namespace Prensadao.Infra
             services
                 .AddData(configuration)
                 .AddRabbitMQ()
-                .AddHangFire()
+                .AddHangFire(configuration)
                 .AddWorkers()
                 .AddNodaTime()
                 .AddRepositories();
@@ -61,12 +62,11 @@ namespace Prensadao.Infra
         }
 
         // Configuração do Hangfire
-        public static IServiceCollection AddHangFire(this IServiceCollection services)
+        public static IServiceCollection AddHangFire(this IServiceCollection services, IConfiguration configuration)
         {
-            //services.AddHangFire((x, config) =>
-            //{
-            //    config.UseSqlServerStorage(connectionString);
-            //});
+            var connectionString = configuration.GetConnectionString("DefaultConnection");
+
+            services.AddHangfire(cfg => cfg.UsePostgreSqlStorage(connectionString));
 
             services.AddHangfireServer();
 

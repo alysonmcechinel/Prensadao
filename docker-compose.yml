@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   postgres:
     image: postgres:15
@@ -11,6 +13,8 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    networks:
+      - backend
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -23,11 +27,33 @@ services:
       - "15672:15672"
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - backend
+
+  hangfire:
+    image: prensadao/hangfire-worker:dev
+    container_name: prensadao_hangfire_local
+    build:
+      context: .
+      dockerfile: ./Prensadao/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - postgres
+      - rabbitmq
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=dbPrensadao;Username=devPrensadao;Password=devpass"
+      RabbitMq__Host: rabbitmq
+      RabbitMq__Port: "5672"
+      RabbitMq__User: guest
+      RabbitMq__Password: guest
+    networks:
+      - backend
       
 volumes:
   pgdata:
   rabbitmq_data:
-  
+
 networks:
   backend:
     driver: bridge
