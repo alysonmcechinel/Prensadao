@@ -31,6 +31,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+//app.UseMiddleware<RequestContextMiddleware>();
+
 app.UseHttpsRedirection();
 
 app.UseHangfireDashboard();

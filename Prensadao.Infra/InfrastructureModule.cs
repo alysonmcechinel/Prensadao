@@ -5,10 +5,13 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NodaTime;
 using Prensadao.Application.Interfaces;
+using Prensadao.Domain.Interfaces;
 using Prensadao.Domain.Repositories;
+using Prensadao.Infra.llm;
 using Prensadao.Infra.Messaging.Interfaces;
 using Prensadao.Infra.Messaging.RabbitMq;
 using Prensadao.Infra.Messaging.Workers;
+using Prensadao.Infra.Options;
 using Prensadao.Infra.Persistence;
 using Prensadao.Infra.Persistence.Repositories;
 
@@ -24,7 +27,8 @@ namespace Prensadao.Infra
                 .AddHangFire(configuration)
                 .AddWorkers()
                 .AddNodaTime()
-                .AddRepositories();
+                .AddRepositories()
+                .AddAzureOpenAi(configuration);
 
             return services;
         }
@@ -80,9 +84,20 @@ namespace Prensadao.Infra
             services.AddScoped<IOrderItemRepository, OrderItemRepository>();
             services.AddScoped<ICustomerRepository, CustomerRepository>();
             services.AddScoped<IProductRepository, ProductRepository>();
+            services.AddScoped<ISalesAnalyticsRepository, SalesAnalyticsRepository>();
 
             return services;
         }
+
+        public static IServiceCollection AddAzureOpenAi(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.Configure<AzureOpenAiOptions>(configuration.GetSection(AzureOpenAiOptions.SectionName));
+            services.AddScoped<IPromotionSuggestionService, AzureOpenAiPromotionService>();
+
+            return services;
+        }
+
+
 
         // Injeção de dependencia do NodaTime
         public static IServiceCollection AddNodaTime(this IServiceCollection services)
