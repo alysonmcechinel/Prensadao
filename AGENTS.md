@@ -24,3 +24,5 @@ Recent history favors short, imperative commit subjects with prefixes such as `r
 
 ## Configuration & Security Tips
 Keep secrets out of source control. Use environment variables or local user secrets for connection strings, RabbitMQ credentials, and Azure OpenAI settings. Treat `appsettings.Development.json` as local-only defaults and update EF migrations only when the model changes in `Prensadao.Infra/Persistence`.
+
+## Documentation & Code Comments
