@@ -20,10 +20,9 @@ public class OrderServiceTest
         OrderRequestDto? dto = null;
 
         // Act
-        var ex = await Assert.ThrowsAsync<ArgumentException>(() => orderService.OrderCreateAsync(dto!));
+        var ex = await Assert.ThrowsAsync<ArgumentNullException>(() => orderService.OrderCreateAsync(dto!));
 
         // Assert
-        Assert.Equal("O pedido não pode ser nulo.", ex.Message);
         A.CallTo(() => orderRepository.CreateOrder(A<Order>._)).MustNotHaveHappened();
     }
 

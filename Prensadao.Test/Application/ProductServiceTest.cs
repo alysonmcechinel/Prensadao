@@ -31,7 +31,7 @@ public class ProductServiceTest
             )).Returns(1); // adiciona um Product cujo os nomes batem com o DTO e retona com o ID 1.
 
         // Act
-        var id = await productService.AddProduct(dto);
+        var id = await productService.AddProductAsync(dto);
 
         // Assert
         Assert.Equal(1, id);
@@ -53,7 +53,7 @@ public class ProductServiceTest
         };
 
         // Act
-        var act = () => productService.AddProduct(dto);
+        var act = () => productService.AddProductAsync(dto);
 
         // Assert
         await Assert.ThrowsAsync<ArgumentException>(async () => await act());
@@ -77,7 +77,7 @@ public class ProductServiceTest
         A.CallTo(() => repository.NameAlreadyExists("X Salada")).Returns(Task.FromResult(true));
 
         // Act
-        var act = () => productService.AddProduct(dto);
+        var act = () => productService.AddProductAsync(dto);
 
         // Assert
         await Assert.ThrowsAsync<ArgumentException>(async () => await act());
@@ -103,11 +103,11 @@ public class ProductServiceTest
         A.CallTo(() => repository.NameAlreadyExists("X Salada")).Returns(Task.FromResult(false));
 
         // Act
-        var act = () => productService.AddProduct(dto);
+        var act = async () => await productService.AddProductAsync(dto);
 
         // Assert
         await Assert.ThrowsAsync<ArgumentException>(async () => await act());
-        A.CallTo(() => repository.NameAlreadyExists(A<string>._)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => repository.NameAlreadyExists(A<string>._)).MustNotHaveHappened();
         A.CallTo(() => repository.AddProduct(A<Product>._)).MustNotHaveHappened();
     }
 
@@ -122,7 +122,7 @@ public class ProductServiceTest
         A.CallTo(() => repository.GetById(1)).Returns(Task.FromResult<Product?>(product));
 
         // act
-        var result = await productService.GetById(1);
+        var result = await productService.GetByIdAsync(1);
 
         // Assert
         Assert.NotNull(result);
@@ -140,7 +140,7 @@ public class ProductServiceTest
         var productService = new ProductService(repository);
 
         // Act
-        var act = () => productService.GetById(0);
+        var act = () => productService.GetByIdAsync(0);
 
         // Assert
         await Assert.ThrowsAsync<ArgumentException>(async () => await act());
@@ -157,7 +157,7 @@ public class ProductServiceTest
         A.CallTo(() => repository.GetById(1)).Returns(Task.FromResult<Product?>(null));
 
         // Act
-        var act = () => productService.GetById(1);
+        var act = () => productService.GetByIdAsync(1);
 
         // Assert
         await Assert.ThrowsAsync<ArgumentException>(async () => await act());
@@ -185,7 +185,7 @@ public class ProductServiceTest
         A.CallTo(() => repository.Update(A<Product>._)).Returns(Task.CompletedTask);
 
         // Act
-        await productService.Update(dto);
+        await productService.UpdateAsync(dto);
 
         // Assert
         product.Name.Should().Be(dto.Name);
@@ -223,7 +223,7 @@ public class ProductServiceTest
         };
 
         // Act
-        var act = () => productService.Update(dto);
+        var act = () => productService.UpdateAsync(dto);
 
         // Assert
         await Assert.ThrowsAsync<ArgumentException>(async () => await act());
@@ -250,7 +250,7 @@ public class ProductServiceTest
         A.CallTo(() => repository.GetById(dto.ProductId!.Value)).Returns(Task.FromResult<Product?>(null)!);
 
         // Act
-        var act = () => productService.Update(dto);
+        var act = () => productService.UpdateAsync(dto);
 
         // Assert
         await Assert.ThrowsAsync<ArgumentException>(async () => await act());
@@ -275,7 +275,7 @@ public class ProductServiceTest
         A.CallTo(() => repository.Update(product)).Returns(Task.CompletedTask);
 
         // Act
-        await productService.Enabled(dto);
+        await productService.EnabledAsync(dto);
 
         // Assert
         product.Enabled.Should().BeTrue();
@@ -298,7 +298,7 @@ public class ProductServiceTest
         A.CallTo(() => repository.GetById(dto.ProductId)).Returns(Task.FromResult<Product?>(null)!);
 
         // Act
-        var act = () => productService.Enabled(dto);
+        var act = () => productService.EnabledAsync(dto);
 
         // Assert
         await Assert.ThrowsAsync<ArgumentException>(async () => await act());

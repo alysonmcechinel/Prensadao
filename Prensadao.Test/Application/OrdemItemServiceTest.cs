@@ -34,7 +34,7 @@ public class OrdemItemServiceTest
         A.CallTo(() =>  orderItemRepository.GetOrderItemsAsync()).Returns(ordemItems);
         
         // Act
-        var result = await orderItemService.GetOrderItems();
+        var result = await orderItemService.GetOrderItemsAsync();
         
         // Assert
         Assert.Equal(ordemItems, result);

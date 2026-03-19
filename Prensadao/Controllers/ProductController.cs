@@ -25,7 +25,7 @@ namespace Prensadao.API.Controllers
         {
             try
             {
-                var result = await _productService.AddProduct(dto);
+                var result = await _productService.AddProductAsync(dto);
 
                 return Ok(new
                 {
@@ -46,7 +46,7 @@ namespace Prensadao.API.Controllers
         {
             try
             {
-                var result = await _productService.GetProducts();
+                var result = await _productService.GetProductsAsync();
                 return Ok(result);
             }
             catch (Exception ex)
@@ -63,7 +63,7 @@ namespace Prensadao.API.Controllers
         {
             try
             {
-                var result = await _productService.GetById(id);
+                var result = await _productService.GetByIdAsync(id);
                 return Ok(result);
             }
             catch (Exception ex)
@@ -79,7 +79,7 @@ namespace Prensadao.API.Controllers
         {
             try
             {
-                await _productService.Enabled(dto);
+                await _productService.EnabledAsync(dto);
                 return Ok("Produto atualizado com sucesso.");
             }
             catch (Exception ex)
@@ -95,7 +95,7 @@ namespace Prensadao.API.Controllers
         {
             try
             {
-                await _productService.Update(dto);
+                await _productService.UpdateAsync(dto);
                 return Ok("Produto atualizado com sucesso.");
             }
             catch (Exception ex)
