@@ -1,39 +1,38 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Prensadao.Application.DTOs.Requests;
 using Prensadao.Application.DTOs.Responses;
 using Prensadao.Application.Interfaces;
-using Prensadao.Application.Services;
-using Prensadao.Domain.Entities;
 
-namespace Prensadao.API.Controllers;
-
-[ApiController]
-[Route("api/[controller]")]
-[Produces("application/json")]
-public class PromotionsController : ControllerBase
+namespace Prensadao.API.Controllers
 {
-    private readonly IPromotionGenerator _promotionGenerator;
-
-    public PromotionsController(IPromotionGenerator promotionGenerator)
+    [ApiController]
+    [Route("api/[controller]")]
+    [Produces("application/json")]
+    public class PromotionsController : ControllerBase
     {
-        _promotionGenerator = promotionGenerator;
-    }
+        private readonly IPromotionGenerator _promotionGenerator;
 
-    [HttpPost("generate")]
-    [ProducesResponseType(typeof(PromotionProductDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> Generate([FromBody] GeneratePromotionRequest request, CancellationToken cancellationToken)
-    {
-        try
+        public PromotionsController(IPromotionGenerator promotionGenerator)
         {
-            var result = await _promotionGenerator.GenerateWeeklyPromotionAsync(request, cancellationToken);
-            return Ok(result);
+            _promotionGenerator = promotionGenerator;
         }
-        catch (Exception ex)
+
+        [HttpPost("Generate")]
+        [ProducesResponseType(typeof(PromotionProductDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GenerateAsync([FromBody] GeneratePromotionRequest dto, CancellationToken cancellationToken)
         {
-            return BadRequest($"Erro ao criar promoção, {ex.Message}");
+            try
+            {
+                var result = await _promotionGenerator.GenerateWeeklyPromotionAsync(dto, cancellationToken);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Erro ao criar promoção, {ex.Message}");
+            }
         }
     }
 }
