@@ -268,7 +268,7 @@ public class ProductServiceTest
         var dto = new ProductEnabledDto
         {
             ProductId = 1,
-            Enabled = true
+            Enabled = false
         };
 
         A.CallTo(() => repository.GetById(dto.ProductId)).Returns(Task.FromResult<Product?>(product)!);
@@ -278,9 +278,10 @@ public class ProductServiceTest
         await productService.EnabledAsync(dto);
 
         // Assert
-        product.Enabled.Should().BeTrue();
+        product.Enabled.Should().BeFalse();
         A.CallTo(() => repository.GetById(dto.ProductId)).MustHaveHappenedOnceExactly();
-        A.CallTo(() => repository.Update(A<Product>.That.Matches(p => p.Enabled == dto.Enabled)));
+        A.CallTo(() => repository.Update(A<Product>.That.Matches(p => p.Enabled == dto.Enabled)))
+            .MustHaveHappenedOnceExactly();
     }
 
     [Fact]

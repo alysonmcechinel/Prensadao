@@ -49,8 +49,7 @@ public class CustomerServiceTest
         // Assert
         Assert.Equal("Número de telefone inválido.", ex.Message);
         A.CallTo(() => customerRepository.AddCustomerAsync(A<Customer>._)).MustNotHaveHappened(); // Não deve tentar inserir
-        A.CallTo(() => customerRepository.PhoneIsExistsAsync(dto.Phone)).MustNotHaveHappened(); // Verifica que a consulta aconteceu
-        A.CallTo(() => customerRepository.AddCustomerAsync(A<Customer>._)).MustNotHaveHappened();
+        A.CallTo(() => customerRepository.PhoneIsExistsAsync(dto.Phone)).MustNotHaveHappened(); // A validação deve falhar antes de consultar o repositório
     }
     
     [Theory, AutoFakeItEasyData]
@@ -120,15 +119,17 @@ public class CustomerServiceTest
         CustomerService customerService,
         CustomerRequestDto dto)
     {
-        // Arrange: simular customer inexistente
+        // Arrange: garantir que o cenário falhe por cliente não encontrado
+        dto.CustomerId = 1;
+        dto.Phone = "48999999999";
         A.CallTo(() => customerRepository.GetByIdAsync(dto.CustomerId)).Returns(Task.FromResult<Customer>(null));
-        dto.Phone = "5599999999";
 
         // Act
         var ex = await Assert.ThrowsAsync<ArgumentException>(() => customerService.UpdateAsync(dto));
 
         // Assert
         Assert.Equal("Cliente não encontrado.", ex.Message);
+        A.CallTo(() => customerRepository.GetByIdAsync(dto.CustomerId)).MustHaveHappenedOnceExactly();
         A.CallTo(() => customerRepository.UpdateAsync(A<Customer>._)).MustNotHaveHappened(); // Verificar que o método Update do repository não foi chamado
     }
 }
