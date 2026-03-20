@@ -59,10 +59,10 @@ public class OrderServiceTest
         A.CallTo(() => orderRepository.AddAsync(
             A<Order>.That.Matches(order =>
                 order.CustomerId == dto.CustomerId &&
-                order.Delivery == dto.Delivery &&
-                order.Observation == dto.Observation &&
-                order.Value == 39.00m &&
-                order.OrderStatus == OrderStatusEnum.Criado)))
+                order.IsDelivery == dto.Delivery &&
+                order.Notes == dto.Observation &&
+                order.TotalAmount == 39.00m &&
+                order.Status == OrderStatusEnum.Criado)))
             .MustHaveHappenedOnceExactly();
 
         A.CallTo(() => orderItemRepository.AddAsync(
@@ -213,15 +213,15 @@ public class OrderServiceTest
         int pedidoId)
     {
         // Arrange: pedido em status que NÃO pode ser cancelado (ex.: Pronto)
-        var order = new Order(delivery: true, value: 10m, observation: "obs", customerId: 1, NodaTimeExtensions.NowUtc());
-        order.UpdateStatus(OrderStatusEnum.Pronto);
+        var order = new Order(isDelivery: true, totalAmount: 10m, notes: "obs", customerId: 1, createdAt: NodaTimeExtensions.NowUtc());
+        order.SetStatus(OrderStatusEnum.Pronto);
         A.CallTo(() => orderRepository.GetByIdWithDetailsAsync(pedidoId)).Returns(order);
 
         // Act
         var ex = await Assert.ThrowsAsync<ArgumentException>(() => orderService.EnabledAsync(pedidoId));
 
         // Assert
-        var esperado = $"Pedido não pode ser cancelado pois, já esta com status: {order.OrderStatus.GetDescription()}";
+        var esperado = $"Pedido não pode ser cancelado pois, já esta com status: {order.Status.GetDescription()}";
         Assert.Equal(esperado, ex.Message);
         A.CallTo(() => orderRepository.UpdateAsync(A<Order>._)).MustNotHaveHappened();
     }
@@ -234,21 +234,21 @@ public class OrderServiceTest
         int customerId)
     {
         // Arrange: pedido em status que pode ser cancelado (ex.: EmPreparacao)
-        var custumer = new Customer("Nome", "48999999999", "Rua", "Bairro", "123", "Cidade", "Ponto de referência", 88000000);
-        typeof(Customer).GetProperty("CustomerId")!.SetValue(custumer, customerId);
+        var customer = new Customer("Nome", "48999999999", "Rua", "Bairro", "123", "Cidade", "Ponto de referência", 88000000);
+        typeof(Customer).GetProperty("CustomerId")!.SetValue(customer, customerId);
 
-        var order = new Order(delivery: true, value: 10m, observation: "obs", customerId: customerId, NodaTimeExtensions.NowUtc());
+        var order = new Order(isDelivery: true, totalAmount: 10m, notes: "obs", customerId: customerId, createdAt: NodaTimeExtensions.NowUtc());
         typeof(Order).GetProperty("OrderId")!.SetValue(order, orderId);
-        typeof(Order).GetProperty("Customer")!.SetValue(order, custumer);
+        typeof(Order).GetProperty("Customer")!.SetValue(order, customer);
 
-        order.UpdateStatus(OrderStatusEnum.EmPreparacao);
+        order.SetStatus(OrderStatusEnum.EmPreparacao);
         A.CallTo(() => orderRepository.GetByIdWithDetailsAsync(orderId)).Returns(order);
 
         // Act
         await orderService.EnabledAsync(orderId);
 
         // Assert
-        Assert.Equal(OrderStatusEnum.Cancelado, order.OrderStatus);
+        Assert.Equal(OrderStatusEnum.Cancelado, order.Status);
         A.CallTo(() => orderRepository.UpdateAsync(A<Order>._)).MustHaveHappenedOnceExactly();
     }
 }

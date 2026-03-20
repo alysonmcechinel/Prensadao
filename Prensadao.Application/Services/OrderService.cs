@@ -82,10 +82,10 @@ namespace Prensadao.Application.Services
 
             var order = await GetOrderByIdOrThrowAsync(dto.OrderId);
 
-            if (order.OrderStatus == dto.OrderStatus)
+            if (order.Status == dto.OrderStatus)
                 throw new ArgumentException("Status do pedido já está definido como o informado.");
 
-            order.UpdateStatus(dto.OrderStatus);
+            order.SetStatus(dto.OrderStatus);
             await _orderRepository.UpdateAsync(order);
             await PublishNotifyMessageAsync(order);
 
@@ -97,7 +97,7 @@ namespace Prensadao.Application.Services
             var order = await GetOrderByIdOrThrowAsync(id);
 
             ValidateOrderCanBeCanceled(order);
-            order.UpdateStatus(OrderStatusEnum.Cancelado);
+            order.SetStatus(OrderStatusEnum.Cancelado);
 
             await _orderRepository.UpdateAsync(order);
             await PublishNotifyMessageAsync(order);
@@ -118,7 +118,7 @@ namespace Prensadao.Application.Services
         }
 
         private static Order CreateOrder(OrderRequestDto dto, decimal totalAmountOrder)
-            => new(dto.Delivery, totalAmountOrder, dto.Observation, dto.CustomerId, NodaTimeExtensions.NowUtc());
+            => new(dto.Delivery, totalAmountOrder, dto.Observation ?? string.Empty, dto.CustomerId, NodaTimeExtensions.NowUtc());
 
         private static decimal CalculateTotalAmount(IEnumerable<OrderItemRequestDto> items, IReadOnlyDictionary<int, decimal> prices)
             => Math.Round(items.Sum(item => prices[item.ProductId] * item.Quantity), 2, MidpointRounding.AwayFromZero);
@@ -135,8 +135,8 @@ namespace Prensadao.Application.Services
 
         private static void ValidateOrderCanBeCanceled(Order order)
         {
-            if (order.OrderStatus != OrderStatusEnum.EmPreparacao && order.OrderStatus != OrderStatusEnum.Criado)
-                throw new ArgumentException($"Pedido não pode ser cancelado pois, já esta com status: {order.OrderStatus.GetDescription()}");
+            if (order.Status != OrderStatusEnum.EmPreparacao && order.Status != OrderStatusEnum.Criado)
+                throw new ArgumentException($"Pedido não pode ser cancelado pois, já esta com status: {order.Status.GetDescription()}");
         }
 
         private async Task<Dictionary<int, decimal>> GetPricesAsync(IEnumerable<OrderItemRequestDto> orderItems)
@@ -188,8 +188,8 @@ namespace Prensadao.Application.Services
             {
                 OrderId = order.OrderId,
                 ConsumerName = order.Customer.Name,
-                Delivery = order.Delivery,
-                OrderStatus = order.OrderStatus,
+                Delivery = order.IsDelivery,
+                OrderStatus = order.Status,
                 Phone = order.Customer.Phone
             };
     }

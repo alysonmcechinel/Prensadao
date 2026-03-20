@@ -51,7 +51,7 @@ namespace Prensadao.Application.Services
             => new(dto.Name, dto.Phone, dto.Street, dto.District, dto.Number, dto.City, dto.ReferencePoint, dto.Cep);
 
         private static void UpdateCustomer(Customer customer, CustomerRequestDto dto)
-            => customer.Update(dto.Name, dto.Phone, dto.Street, dto.District, dto.Number, dto.City, dto.ReferencePoint, dto.Cep);
+            => customer.UpdateDetails(dto.Name, dto.Phone, dto.Street, dto.District, dto.Number, dto.City, dto.ReferencePoint, dto.Cep);
 
         private static void ValidateCustomerRequest(CustomerRequestDto dto)
         {

@@ -24,7 +24,7 @@ public class ProductResponseDto
     #region Mapeamentos
     public static ProductResponseDto ToDto(Product product)
     {
-        return new ProductResponseDto(product.ProductId, product.Name, product.Enabled, product.Value, product.Description);
+        return new ProductResponseDto(product.ProductId, product.Name, product.Enabled, product.Price, product.Description);
     }
 
     public static List<ProductResponseDto> ToListDto(List<Product> products) => products.Select(p => ToDto(p)).ToList();

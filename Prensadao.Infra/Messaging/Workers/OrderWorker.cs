@@ -32,11 +32,11 @@ public class OrderWorker : BackgroundService
             // 1. AQUI ESTÁ A IDEMPOTÊNCIA
             // Se o pedido já saiu do status 'Criado', ignoramos a mensagem.
             // Isso evita processar duas vezes se o RabbitMQ reenviar.
-            if (order is null || order.OrderStatus != OrderStatusEnum.Criado)
+            if (order is null || order.Status != OrderStatusEnum.Criado)
                 return;
 
             // 2. Execução Segura
-            order.NextStatus(); // Muda para 'Em Preparação'
+            order.AdvanceStatus(); // Muda para 'Em Preparação'
             await orderRepository.UpdateAsync(order);
 
             // 3. Notifica apenas se a atualização ocorreu
@@ -44,8 +44,8 @@ public class OrderWorker : BackgroundService
             {
                 OrderId = order.OrderId,
                 ConsumerName = order.Customer.Name,
-                Delivery = order.Delivery,
-                OrderStatus = order.OrderStatus,
+                Delivery = order.IsDelivery,
+                OrderStatus = order.Status,
                 Phone = order.Customer.Phone
             };
             await _bus.Publish(notify, RabbitMqConstants.Exchanges.NotifyExchange, "");

@@ -10,18 +10,18 @@ namespace Prensadao.Infra.Persistence.Configurations
         {
             builder.HasKey(x => x.OrderId);
 
-            builder.Property(x => x.DateOrder)
+            builder.Property(x => x.CreatedAt)
                 .IsRequired();
 
-            builder.Property(x => x.OrderStatus)
+            builder.Property(x => x.Status)
                 .IsRequired();
 
-            builder.Property(x => x.Delivery);
+            builder.Property(x => x.IsDelivery);
 
-            builder.Property(x => x.Value)
+            builder.Property(x => x.TotalAmount)
                 .IsRequired();
 
-            builder.Property(x => x.Observation)
+            builder.Property(x => x.Notes)
                 .HasMaxLength(500);
 
             builder.Property(x => x.CustomerId)

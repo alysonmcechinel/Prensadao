@@ -43,7 +43,7 @@ namespace Prensadao.Infra.Persistence.Repositories
 
         public Task<List<ProductValueModels>> GetValuesByIdsAsync(IReadOnlyCollection<int> ids) => _dbContext.Products
             .Where(product => ids.Contains(product.ProductId))
-            .Select(product => new ProductValueModels(product.ProductId, product.Value))
+            .Select(product => new ProductValueModels(product.ProductId, product.Price))
             .AsNoTracking()
             .ToListAsync();
     }

@@ -27,7 +27,7 @@ public class ProductServiceTest
         
         A.CallTo(() => repository.ExistsByNameAsync("X Salada")).Returns(Task.FromResult(false)); // quando checar se o nome existe retorna "false" (não existe)
         A.CallTo(() => repository.AddAsync(
-            A<Product>.That.Matches(p => p.Name == dto.Name && p.Description == dto.Description && p.Value == dto.Value)
+            A<Product>.That.Matches(p => p.Name == dto.Name && p.Description == dto.Description && p.Price == dto.Value)
             )).Returns(1); // adiciona um Product cujo os nomes batem com o DTO e retona com o ID 1.
 
         // Act
@@ -190,7 +190,7 @@ public class ProductServiceTest
         // Assert
         product.Name.Should().Be(dto.Name);
         product.Description.Should().Be(dto.Description);
-        product.Value.Should().Be(dto.Value);
+        product.Price.Should().Be(dto.Value);
         product.Enabled.Should().Be(dto.Enabled);
 
         A.CallTo(() => repository.GetByIdAsync(1)).MustHaveHappenedOnceExactly();        
@@ -198,7 +198,7 @@ public class ProductServiceTest
             A<Product>.That.Matches(p =>
                 p.Name == dto.Name &&
                 p.Description == dto.Description &&
-                p.Value == dto.Value &&
+                p.Price == dto.Value &&
                 p.Enabled == dto.Enabled)))
          .MustHaveHappenedOnceExactly(); // Verifica que chamou Update com um Product que tem os valores esperados
     }

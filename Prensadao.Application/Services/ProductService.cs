@@ -51,7 +51,7 @@ namespace Prensadao.Application.Services
             if (product.Enabled == dto.Enabled)
                 return;
 
-            product.EnabledProduct(dto.Enabled);
+            product.SetEnabled(dto.Enabled);
             await _productRepository.UpdateAsync(product);
         }
 
@@ -59,7 +59,7 @@ namespace Prensadao.Application.Services
             => new(dto.Name, dto.Value, dto.Description);
 
         private static void UpdateProduct(Product product, ProductRequestDto dto)
-            => product.Update(dto.Name, dto.Enabled, dto.Value, dto.Description);
+            => product.UpdateDetails(dto.Name, dto.Enabled, dto.Value, dto.Description);
 
         private static void ValidateProductRequest(ProductRequestDto dto)
         {

@@ -34,11 +34,11 @@ public class CustomerResponseDto
     #region Mapeamento
     public static CustomerResponseDto ToDto(Customer customer)
     {
-        var custumerOrders = new List<OrderResponseDto>();
+        var customerOrders = new List<OrderResponseDto>();
         if (customer.Orders != null)
-            custumerOrders = customer.Orders.Select(o => OrderResponseDto.ToDto(o)).ToList();
+            customerOrders = customer.Orders.Select(o => OrderResponseDto.ToDto(o)).ToList();
 
-        return new CustomerResponseDto(customer.CustomerId, customer.Name, customer.Phone, customer.Street, customer.District, customer.Number, customer.City, customer.ReferencePoint, customer.Cep, custumerOrders);
+        return new CustomerResponseDto(customer.CustomerId, customer.Name, customer.Phone, customer.Street, customer.District, customer.Number, customer.City, customer.ReferencePoint, customer.Cep, customerOrders);
     }
 
     public static List<CustomerResponseDto> ToListDto(List<Customer> customers) => customers.Select(c => ToDto(c)).ToList();
