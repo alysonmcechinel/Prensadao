@@ -15,29 +15,29 @@ public class OrdemItemServiceTest
     public async Task AddOrderItem_DeveAdicionar_ItemComSucesso(
         [Frozen] IOrderItemRepository orderItemRepository,
         OrderItemService orderItemService,
-        OrderItem ordemItem)
+        OrderItem orderItem)
     {
         // Act
-        await orderItemService.AddOrderItemAsync(ordemItem);
+        await orderItemService.AddOrderItemAsync(orderItem);
 
         // Assert
-        A.CallTo(() => orderItemRepository.AddOrderItemAsync(ordemItem)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => orderItemRepository.AddAsync(orderItem)).MustHaveHappenedOnceExactly();
     }
 
     [Theory, AutoFakeItEasyData]
     public async Task GetOrderItems_DeveRetornar_ListaDeItens(
         [Frozen] IOrderItemRepository orderItemRepository,
         OrderItemService orderItemService,
-        List<OrderItem> ordemItems)
+        List<OrderItem> orderItems)
     {
         // Arrange
-        A.CallTo(() =>  orderItemRepository.GetOrderItemsAsync()).Returns(ordemItems);
+        A.CallTo(() => orderItemRepository.GetAllAsync()).Returns(orderItems);
         
         // Act
         var result = await orderItemService.GetOrderItemsAsync();
         
         // Assert
-        Assert.Equal(ordemItems, result);
-        A.CallTo(() => orderItemRepository.GetOrderItemsAsync()).MustHaveHappenedOnceExactly();
+        Assert.Equal(orderItems, result);
+        A.CallTo(() => orderItemRepository.GetAllAsync()).MustHaveHappenedOnceExactly();
     }
 }

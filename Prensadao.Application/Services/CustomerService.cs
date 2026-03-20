@@ -25,15 +25,15 @@ namespace Prensadao.Application.Services
 
             await EnsurePhoneIsAvailableAsync(dto.Phone);
 
-            return await _customerRepository.AddCustomerAsync(CreateCustomer(dto));
+            return await _customerRepository.AddAsync(CreateCustomer(dto));
         }
 
         public async Task<CustomerResponseDto> GetByIdAsync(int id)
         {
-            return CustomerResponseDto.ToDto(await GetCustomerByIdOrThrowAsync(id));
+            return CustomerResponseDto.ToDto(await GetCustomerDetailsByIdOrThrowAsync(id));
         }
 
-        public async Task<List<CustomerResponseDto>> GetCustomersAsync() => CustomerResponseDto.ToListDto(await _customerRepository.GetCustomersAsync());
+        public async Task<List<CustomerResponseDto>> GetCustomersAsync() => CustomerResponseDto.ToListDto(await _customerRepository.GetAllWithDetailsAsync());
 
         public async Task UpdateAsync(CustomerRequestDto dto)
         {
@@ -75,6 +75,16 @@ namespace Prensadao.Application.Services
             return customer;
         }
 
+        private async Task<Customer> GetCustomerDetailsByIdOrThrowAsync(int customerId)
+        {
+            var customer = await _customerRepository.GetByIdWithDetailsAsync(customerId);
+
+            if (customer is null)
+                throw new ArgumentException("Cliente não encontrado.");
+
+            return customer;
+        }
+
         private async Task EnsurePhoneIsAvailableAsync(string phone)
         {
             if (await PhoneExistsAsync(phone))
@@ -82,6 +92,6 @@ namespace Prensadao.Application.Services
         }
 
         // Eliding Async/Await: wrapper puro, sem lógica extra (sem state machine desnecessária)
-        private Task<bool> PhoneExistsAsync(string phone) => _customerRepository.PhoneIsExistsAsync(phone);
+        private Task<bool> PhoneExistsAsync(string phone) => _customerRepository.ExistsByPhoneAsync(phone);
     }
 }

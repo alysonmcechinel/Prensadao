@@ -26,7 +26,7 @@ namespace Prensadao.Application.Services
             _productRepository = productRepository;
         }
 
-        public async Task<List<OrderResponseDto>> GetOrdersAsync() => OrderResponseDto.ToListDto(await _orderRepository.GetOrders());
+        public async Task<List<OrderResponseDto>> GetOrdersAsync() => OrderResponseDto.ToListDto(await _orderRepository.GetAllWithDetailsAsync());
 
         public async Task<OrderResponseDto> GetByIdAsync(int id)
         {
@@ -57,7 +57,7 @@ namespace Prensadao.Application.Services
             // precisa funcionar, ou nada será salvo no banco ("Tudo ou Nada").
             using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                await _orderRepository.CreateOrder(order);
+                await _orderRepository.AddAsync(order);
 
                 // 2. Operações Dependentes
                 // Se ocorrer um erro neste loop (ex: erro de banco),
@@ -66,7 +66,7 @@ namespace Prensadao.Application.Services
                 {
                     var unitPrice = prices[item.ProductId];
                     var orderItem = new OrderItem(item.Quantity, unitPrice, order.OrderId, item.ProductId);
-                    await _orderItemRepository.AddOrderItemAsync(orderItem);
+                    await _orderItemRepository.AddAsync(orderItem);
                 }
 
                 // 3. O "Commit" Final
@@ -86,7 +86,7 @@ namespace Prensadao.Application.Services
                 throw new ArgumentException("Status do pedido já está definido como o informado.");
 
             order.UpdateStatus(dto.OrderStatus);
-            await _orderRepository.Update(order);
+            await _orderRepository.UpdateAsync(order);
             await PublishNotifyMessageAsync(order);
 
             return OrderResponseDto.ToDto(order);
@@ -99,7 +99,7 @@ namespace Prensadao.Application.Services
             ValidateOrderCanBeCanceled(order);
             order.UpdateStatus(OrderStatusEnum.Cancelado);
 
-            await _orderRepository.Update(order);
+            await _orderRepository.UpdateAsync(order);
             await PublishNotifyMessageAsync(order);
         }
 
@@ -125,7 +125,7 @@ namespace Prensadao.Application.Services
 
         private async Task<Order> GetOrderByIdOrThrowAsync(int orderId)
         {
-            var order = await _orderRepository.GetByIdAsync(orderId);
+            var order = await _orderRepository.GetByIdWithDetailsAsync(orderId);
 
             if (order is null)
                 throw new ArgumentException("Pedido não encontrado.");
@@ -142,7 +142,7 @@ namespace Prensadao.Application.Services
         private async Task<Dictionary<int, decimal>> GetPricesAsync(IEnumerable<OrderItemRequestDto> orderItems)
         {
             var productIds = orderItems.Select(i => i.ProductId).Distinct().ToList();
-            var products = await _productRepository.ValueOfProducts(productIds);
+            var products = await _productRepository.GetValuesByIdsAsync(productIds);
             var prices = products.ToDictionary(p => p.ProductId, p => p.Value);
 
             var idsNotFound = productIds.Except(prices.Keys).ToList();
@@ -165,8 +165,8 @@ namespace Prensadao.Application.Services
             if (items.Any(x => x.Quantity <= 0))
                 throw new ArgumentException("Pedido contém itens com quantidade inválida.");
 
-            List<int> productsIDs = items.Select(x => x.ProductId).ToList();
-            var verifyProductActive = await _productRepository.ExistsInactiveProduct(productsIDs);
+            var productIds = items.Select(x => x.ProductId).Distinct().ToList();
+            var verifyProductActive = await _productRepository.ExistsInactiveByIdsAsync(productIds);
             if (verifyProductActive)
                 throw new ArgumentException("Pedido não pode ser feito com produtos inativos.");
         }

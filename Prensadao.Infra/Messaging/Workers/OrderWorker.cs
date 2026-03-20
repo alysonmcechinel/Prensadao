@@ -37,7 +37,7 @@ public class OrderWorker : BackgroundService
 
             // 2. Execução Segura
             order.NextStatus(); // Muda para 'Em Preparação'
-            await orderRepository.Update(order);
+            await orderRepository.UpdateAsync(order);
 
             // 3. Notifica apenas se a atualização ocorreu
             var notify = new NotifyMessageDto

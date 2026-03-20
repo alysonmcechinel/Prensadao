@@ -42,12 +42,12 @@ public class OrderServiceTest
             new(20, 8.00m)
         };
 
-        A.CallTo(() => productRepository.ExistsInactiveProduct(A<List<int>>._)).Returns(false);
-        A.CallTo(() => productRepository.ValueOfProducts(A<List<int>>.That.Matches(ids =>
+        A.CallTo(() => productRepository.ExistsInactiveByIdsAsync(A<IReadOnlyCollection<int>>._)).Returns(false);
+        A.CallTo(() => productRepository.GetValuesByIdsAsync(A<IReadOnlyCollection<int>>.That.Matches(ids =>
             ids.Count == 2 &&
             ids.Contains(10) &&
             ids.Contains(20)))).Returns(products);
-        A.CallTo(() => orderRepository.CreateOrder(A<Order>._))
+        A.CallTo(() => orderRepository.AddAsync(A<Order>._))
             .Invokes((Order order) => typeof(Order).GetProperty("OrderId")!.SetValue(order, 123));
 
         // Act
@@ -56,7 +56,7 @@ public class OrderServiceTest
         // Assert
         Assert.Equal(123, result);
 
-        A.CallTo(() => orderRepository.CreateOrder(
+        A.CallTo(() => orderRepository.AddAsync(
             A<Order>.That.Matches(order =>
                 order.CustomerId == dto.CustomerId &&
                 order.Delivery == dto.Delivery &&
@@ -65,7 +65,7 @@ public class OrderServiceTest
                 order.OrderStatus == OrderStatusEnum.Criado)))
             .MustHaveHappenedOnceExactly();
 
-        A.CallTo(() => orderItemRepository.AddOrderItemAsync(
+        A.CallTo(() => orderItemRepository.AddAsync(
             A<OrderItem>.That.Matches(item =>
                 item.OrderId == 123 &&
                 item.ProductId == 10 &&
@@ -73,7 +73,7 @@ public class OrderServiceTest
                 item.UnitPrice == 15.50m)))
             .MustHaveHappenedOnceExactly();
 
-        A.CallTo(() => orderItemRepository.AddOrderItemAsync(
+        A.CallTo(() => orderItemRepository.AddAsync(
             A<OrderItem>.That.Matches(item =>
                 item.OrderId == 123 &&
                 item.ProductId == 20 &&
@@ -100,7 +100,7 @@ public class OrderServiceTest
         await Assert.ThrowsAsync<ArgumentNullException>(() => orderService.OrderCreateAsync(dto!));
 
         // Assert
-        A.CallTo(() => orderRepository.CreateOrder(A<Order>._)).MustNotHaveHappened();
+        A.CallTo(() => orderRepository.AddAsync(A<Order>._)).MustNotHaveHappened();
     }
 
     [Theory, AutoFakeItEasyData]
@@ -117,7 +117,7 @@ public class OrderServiceTest
 
         // Assert
         Assert.Equal("Pedido não pode ser feito sem cliente cadastrado.", ex.Message);
-        A.CallTo(() => orderRepository.CreateOrder(A<Order>._)).MustNotHaveHappened();
+        A.CallTo(() => orderRepository.AddAsync(A<Order>._)).MustNotHaveHappened();
     }
 
     [Theory, AutoFakeItEasyData]
@@ -135,8 +135,8 @@ public class OrderServiceTest
 
         // Assert
         Assert.Equal("Pedido não pode ser feito sem itens.", ex.Message);
-        A.CallTo(() => orderRepository.CreateOrder(A<Order>._)).MustNotHaveHappened();
-        A.CallTo(() => productRepository.ExistsInactiveProduct(A<List<int>>._)).MustNotHaveHappened();
+        A.CallTo(() => orderRepository.AddAsync(A<Order>._)).MustNotHaveHappened();
+        A.CallTo(() => productRepository.ExistsInactiveByIdsAsync(A<IReadOnlyCollection<int>>._)).MustNotHaveHappened();
     }
 
     [Theory, AutoFakeItEasyData]
@@ -157,8 +157,8 @@ public class OrderServiceTest
 
         // Assert
         Assert.Equal("Pedido contém itens com ProductId inválido.", ex.Message);
-        A.CallTo(() => orderRepository.CreateOrder(A<Order>._)).MustNotHaveHappened();
-        A.CallTo(() => productRepository.ExistsInactiveProduct(A<List<int>>._)).MustNotHaveHappened();
+        A.CallTo(() => orderRepository.AddAsync(A<Order>._)).MustNotHaveHappened();
+        A.CallTo(() => productRepository.ExistsInactiveByIdsAsync(A<IReadOnlyCollection<int>>._)).MustNotHaveHappened();
     }
 
     [Theory, AutoFakeItEasyData]
@@ -179,8 +179,8 @@ public class OrderServiceTest
 
         // Assert
         Assert.Equal("Pedido contém itens com quantidade inválida.", ex.Message);
-        A.CallTo(() => orderRepository.CreateOrder(A<Order>._)).MustNotHaveHappened();
-        A.CallTo(() => productRepository.ExistsInactiveProduct(A<List<int>>._)).MustNotHaveHappened();
+        A.CallTo(() => orderRepository.AddAsync(A<Order>._)).MustNotHaveHappened();
+        A.CallTo(() => productRepository.ExistsInactiveByIdsAsync(A<IReadOnlyCollection<int>>._)).MustNotHaveHappened();
     }
 
     [Theory, AutoFakeItEasyData]
@@ -196,14 +196,14 @@ public class OrderServiceTest
             new() { ProductId = 10, Quantity = 1 }
         };
 
-        A.CallTo(() => productRepository.ExistsInactiveProduct(A<List<int>>._)).Returns(true);
+        A.CallTo(() => productRepository.ExistsInactiveByIdsAsync(A<IReadOnlyCollection<int>>._)).Returns(true);
 
         // Act
         var ex = await Assert.ThrowsAsync<ArgumentException>(() => orderService.OrderCreateAsync(dto));
 
         // Assert
         Assert.Equal("Pedido não pode ser feito com produtos inativos.", ex.Message);
-        A.CallTo(() => orderRepository.CreateOrder(A<Order>._)).MustNotHaveHappened();
+        A.CallTo(() => orderRepository.AddAsync(A<Order>._)).MustNotHaveHappened();
     }
 
     [Theory, AutoFakeItEasyData]
@@ -215,7 +215,7 @@ public class OrderServiceTest
         // Arrange: pedido em status que NÃO pode ser cancelado (ex.: Pronto)
         var order = new Order(delivery: true, value: 10m, observation: "obs", customerId: 1, NodaTimeExtensions.NowUtc());
         order.UpdateStatus(OrderStatusEnum.Pronto);
-        A.CallTo(() => orderRepository.GetByIdAsync(pedidoId)).Returns(order);
+        A.CallTo(() => orderRepository.GetByIdWithDetailsAsync(pedidoId)).Returns(order);
 
         // Act
         var ex = await Assert.ThrowsAsync<ArgumentException>(() => orderService.EnabledAsync(pedidoId));
@@ -223,7 +223,7 @@ public class OrderServiceTest
         // Assert
         var esperado = $"Pedido não pode ser cancelado pois, já esta com status: {order.OrderStatus.GetDescription()}";
         Assert.Equal(esperado, ex.Message);
-        A.CallTo(() => orderRepository.Update(A<Order>._)).MustNotHaveHappened();
+        A.CallTo(() => orderRepository.UpdateAsync(A<Order>._)).MustNotHaveHappened();
     }
 
     [Theory, AutoFakeItEasyData]
@@ -242,13 +242,13 @@ public class OrderServiceTest
         typeof(Order).GetProperty("Customer")!.SetValue(order, custumer);
 
         order.UpdateStatus(OrderStatusEnum.EmPreparacao);
-        A.CallTo(() => orderRepository.GetByIdAsync(orderId)).Returns(order);
+        A.CallTo(() => orderRepository.GetByIdWithDetailsAsync(orderId)).Returns(order);
 
         // Act
         await orderService.EnabledAsync(orderId);
 
         // Assert
         Assert.Equal(OrderStatusEnum.Cancelado, order.OrderStatus);
-        A.CallTo(() => orderRepository.Update(A<Order>._)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => orderRepository.UpdateAsync(A<Order>._)).MustHaveHappenedOnceExactly();
     }
 }

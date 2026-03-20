@@ -21,7 +21,7 @@ namespace Prensadao.Application.Services
             ValidateProductRequest(dto);
             await EnsureProductNameIsAvailableAsync(dto.Name);
 
-            return await _productRepository.AddProduct(CreateProduct(dto));
+            return await _productRepository.AddAsync(CreateProduct(dto));
         }
 
         public async Task<ProductResponseDto> GetByIdAsync(int id)
@@ -37,10 +37,10 @@ namespace Prensadao.Application.Services
 
             var product = await GetProductByIdOrThrowAsync(dto.ProductId!.Value);
             UpdateProduct(product, dto);
-            await _productRepository.Update(product);
+            await _productRepository.UpdateAsync(product);
         }
 
-        public async Task<List<ProductResponseDto>> GetProductsAsync() => ProductResponseDto.ToListDto(await _productRepository.GetProducts());
+        public async Task<List<ProductResponseDto>> GetProductsAsync() => ProductResponseDto.ToListDto(await _productRepository.GetAllAsync());
 
         public async Task EnabledAsync(ProductEnabledDto dto)
         {
@@ -52,7 +52,7 @@ namespace Prensadao.Application.Services
                 return;
 
             product.EnabledProduct(dto.Enabled);
-            await _productRepository.Update(product);
+            await _productRepository.UpdateAsync(product);
         }
 
         private static Product CreateProduct(ProductRequestDto dto)
@@ -86,7 +86,7 @@ namespace Prensadao.Application.Services
 
         private async Task<Product> GetProductByIdOrThrowAsync(int productId)
         {
-            var product = await _productRepository.GetById(productId);
+            var product = await _productRepository.GetByIdAsync(productId);
 
             if (product is null)
                 throw new ArgumentException("Produto não encontrado.");
@@ -96,7 +96,7 @@ namespace Prensadao.Application.Services
 
         private async Task EnsureProductNameIsAvailableAsync(string productName)
         {
-            var nameAlreadyExists = await _productRepository.NameAlreadyExists(productName);
+            var nameAlreadyExists = await _productRepository.ExistsByNameAsync(productName);
             if (nameAlreadyExists)
                 throw new ArgumentException("Já existe um produto com esse nome");
         }
