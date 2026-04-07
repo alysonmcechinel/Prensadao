@@ -14,35 +14,37 @@ namespace Prensadao.Infra.Persistence.Repositories
             _dbContext = dbContext;
         }
 
-        public async Task<int> AddProduct(Product product)
+        public async Task<int> AddAsync(Product product)
         {
-            await _dbContext.AddAsync(product);
+            await _dbContext.Products.AddAsync(product);
             await _dbContext.SaveChangesAsync();
 
             return product.ProductId;
         }
 
-        public async Task Update(Product product)
+        public async Task UpdateAsync(Product product)
         {
             _dbContext.Products.Update(product);
             await _dbContext.SaveChangesAsync();
         }
 
-        public async Task<Product?> GetById(int id) => await _dbContext.Products
+        public Task<Product?> GetByIdAsync(int id) => _dbContext.Products
             .SingleOrDefaultAsync(x => x.ProductId == id);
 
-        public async Task<List<Product>> GetProducts() => await _dbContext.Products
-            .Include(x => x.OrderItems)
+        public Task<List<Product>> GetAllAsync() => _dbContext.Products
             .AsNoTracking()
-            .ToListAsync();        
+            .ToListAsync();
 
-        public async Task<bool> NameAlreadyExists(string name) => await _dbContext.Products.AnyAsync(x => x.Name == name);
+        public Task<bool> ExistsByNameAsync(string name) => _dbContext.Products
+            .AnyAsync(product => product.Name == name);
 
-        public async Task<bool> ExistsInactiveProduct(List<int> productsIDs) => await _dbContext.Products.AnyAsync(x => productsIDs.Contains(x.ProductId) && !x.Enabled);
+        public Task<bool> ExistsInactiveByIdsAsync(IReadOnlyCollection<int> productIds) => _dbContext.Products
+            .AnyAsync(product => productIds.Contains(product.ProductId) && !product.Enabled);
 
-        public async Task<List<ProductValueModels>> ValueOfProducts(List<int> ids) => await _dbContext.Products
-            .Where(x => ids.Contains(x.ProductId))
-            .Select(x => new ProductValueModels(x.ProductId, x.Value))
+        public Task<List<ProductValueModels>> GetValuesByIdsAsync(IReadOnlyCollection<int> ids) => _dbContext.Products
+            .Where(product => ids.Contains(product.ProductId))
+            .Select(product => new ProductValueModels(product.ProductId, product.Price))
+            .AsNoTracking()
             .ToListAsync();
     }
 }

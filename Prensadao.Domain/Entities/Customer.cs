@@ -6,7 +6,7 @@ public class Customer
 {
     public Customer() { }
 
-    public Customer(string name, string phone, string street, string district, string number, string city, string refencePoint, int cep)
+    public Customer(string name, string phone, string street, string district, string number, string city, string referencePoint, int cep)
     {
         Name = name;
         Phone = phone;
@@ -14,7 +14,7 @@ public class Customer
         District = district;
         Number = number;
         City = city;
-        ReferencePoint = refencePoint;
+        ReferencePoint = referencePoint;
         Cep = cep;
 
         Orders = new List<Order>();
@@ -34,7 +34,7 @@ public class Customer
     // Relationship
     public ICollection<Order> Orders { get; private set; } = [];
 
-    public void Update(string name, string phone, string street, string district, string number, string city, string refencePoint, int cep)
+    public void UpdateDetails(string name, string phone, string street, string district, string number, string city, string referencePoint, int cep)
     {
         Name = name;
         Phone = phone;
@@ -42,7 +42,7 @@ public class Customer
         District = district;
         Number = number;
         City = city;
-        ReferencePoint = refencePoint;
+        ReferencePoint = referencePoint;
         Cep = cep;
     }
 }

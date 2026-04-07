@@ -12,24 +12,22 @@ namespace Prensadao.Infra.Persistence.Repositories
         {
             _dbContext = dbContext;
         }
-        public async Task<int> AddCustomerAsync(Customer customer)
+
+        public async Task<int> AddAsync(Customer customer)
         {
-            await _dbContext.AddAsync(customer);
+            await _dbContext.Customers.AddAsync(customer);
             await _dbContext.SaveChangesAsync();
 
             return customer.CustomerId;
         }
 
-        public async Task<Customer?> GetByIdAsync(int id) => await _dbContext.Customers
-            .Include(x => x.Orders)
-                .ThenInclude(o => o.OrderItems)
-                .ThenInclude(p => p.Product)
-            .SingleOrDefaultAsync(c => c.CustomerId == id);
+        public Task<Customer?> GetByIdAsync(int id) => _dbContext.Customers
+            .SingleOrDefaultAsync(customer => customer.CustomerId == id);
 
-        public Task<List<Customer>> GetCustomersAsync() => _dbContext.Customers
-            .Include(x => x.Orders)
-                .ThenInclude(o => o.OrderItems)
-                .ThenInclude(p => p.Product)
+        public Task<Customer?> GetByIdWithDetailsAsync(int id) => BuildCustomerDetailsQuery()
+            .SingleOrDefaultAsync(customer => customer.CustomerId == id);
+
+        public Task<List<Customer>> GetAllWithDetailsAsync() => BuildCustomerDetailsQuery()
             .AsNoTracking()
             .ToListAsync();
 
@@ -39,7 +37,13 @@ namespace Prensadao.Infra.Persistence.Repositories
             await _dbContext.SaveChangesAsync();
         }
 
-        public Task<bool> PhoneIsExistsAsync(string phone) => _dbContext.Customers
-            .AnyAsync(c => c.Phone.Equals(phone));
+        public Task<bool> ExistsByPhoneAsync(string phone) => _dbContext.Customers
+            .AnyAsync(customer => customer.Phone == phone);
+
+        private IQueryable<Customer> BuildCustomerDetailsQuery() => _dbContext.Customers
+            .Include(x => x.Orders)
+                .ThenInclude(o => o.OrderItems)
+                .ThenInclude(p => p.Product)
+            .AsSplitQuery();
     }
 }

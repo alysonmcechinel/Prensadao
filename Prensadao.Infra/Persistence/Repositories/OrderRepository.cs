@@ -12,7 +12,7 @@ namespace Prensadao.Infra.Persistence.Repositories
             _dbContext = dbContext;
         }
 
-        public async Task<int> CreateOrder(Order order)
+        public async Task<int> AddAsync(Order order)
         {
             await _dbContext.Orders.AddAsync(order);
             await _dbContext.SaveChangesAsync();
@@ -20,25 +20,27 @@ namespace Prensadao.Infra.Persistence.Repositories
             return order.OrderId;
         }
 
-        public async Task Update(Order order)
+        public async Task UpdateAsync(Order order)
         {
             _dbContext.Orders.Update(order);
             await _dbContext.SaveChangesAsync();
         }
 
-        public async Task<Order?> GetByIdAsync(int id) => await _dbContext.Orders
+        public Task<Order?> GetByIdAsync(int id) => _dbContext.Orders
+            .Include(order => order.Customer)
+            .SingleOrDefaultAsync(order => order.OrderId == id);
+
+        public Task<Order?> GetByIdWithDetailsAsync(int id) => BuildOrderDetailsQuery()
+            .SingleOrDefaultAsync(order => order.OrderId == id);
+
+        public Task<List<Order>> GetAllWithDetailsAsync() => BuildOrderDetailsQuery()
+            .AsNoTracking()
+            .ToListAsync();
+
+        private IQueryable<Order> BuildOrderDetailsQuery() => _dbContext.Orders
             .Include(x => x.OrderItems)
                 .ThenInclude(o => o.Product)
             .Include(x => x.Customer)
-            .SingleOrDefaultAsync(o => o.OrderId == id);
-
-        public async Task<List<Order>> GetOrders() => 
-            await _dbContext.Orders
-                .Include(x => x.Customer)
-                .Include(x => x.OrderItems)
-                    .ThenInclude(oi => oi.Product)
-                .AsNoTracking()
-                .ToListAsync();
-         
+            .AsSplitQuery();
     }
 }

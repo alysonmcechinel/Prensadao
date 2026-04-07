@@ -33,7 +33,7 @@ namespace Prensadao.Application.DTOs.Responses
         public List<OrderItemResponseDto> OrderItems { get; set; } = [];
 
         #region Mapeamento
-        public static OrderResponseDto ToDto(Order order) => new OrderResponseDto(order.OrderId, order.OrderStatus, order.Delivery, order.Value, order.Observation, order.CustomerId, order.Customer.Name, order.DateOrder, ToListItens(order.OrderItems.ToList()));
+        public static OrderResponseDto ToDto(Order order) => new OrderResponseDto(order.OrderId, order.Status, order.IsDelivery, order.TotalAmount, order.Notes, order.CustomerId, order.Customer.Name, order.CreatedAt, ToListItens(order.OrderItems.ToList()));
 
         public static List<OrderResponseDto> ToListDto(List<Order> orders)
         {
@@ -43,7 +43,7 @@ namespace Prensadao.Application.DTOs.Responses
             {
                 var ordemItens = ToListItens(order.OrderItems.ToList());
 
-                orderResponse.Add(new OrderResponseDto(order.OrderId, order.OrderStatus, order.Delivery, order.Value, order.Observation, order.CustomerId, order.Customer.Name, order.DateOrder, ordemItens));
+                orderResponse.Add(new OrderResponseDto(order.OrderId, order.Status, order.IsDelivery, order.TotalAmount, order.Notes, order.CustomerId, order.Customer.Name, order.CreatedAt, ordemItens));
             }
 
             return orderResponse;
@@ -55,7 +55,7 @@ namespace Prensadao.Application.DTOs.Responses
             OrderId = x.OrderId,
             ProductId = x.ProductId,
             Quantity = x.Quantity,
-            ProductValue = x.Product.Value,
+            ProductValue = x.Product.Price,
             ProductName = x.Product.Name
         }).ToList();
         #endregion

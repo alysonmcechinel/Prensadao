@@ -25,18 +25,18 @@ public class ProductServiceTest
             Value = 12.30m
         };
         
-        A.CallTo(() => repository.NameAlreadyExists("X Salada")).Returns(Task.FromResult(false)); // quando checar se o nome existe retorna "false" (não existe)
-        A.CallTo(() => repository.AddProduct(
-            A<Product>.That.Matches(p => p.Name == dto.Name && p.Description == dto.Description && p.Value == dto.Value)
+        A.CallTo(() => repository.ExistsByNameAsync("X Salada")).Returns(Task.FromResult(false)); // quando checar se o nome existe retorna "false" (não existe)
+        A.CallTo(() => repository.AddAsync(
+            A<Product>.That.Matches(p => p.Name == dto.Name && p.Description == dto.Description && p.Price == dto.Value)
             )).Returns(1); // adiciona um Product cujo os nomes batem com o DTO e retona com o ID 1.
 
         // Act
-        var id = await productService.AddProduct(dto);
+        var id = await productService.AddProductAsync(dto);
 
         // Assert
         Assert.Equal(1, id);
-        A.CallTo(() => repository.NameAlreadyExists(dto.Name)).MustHaveHappenedOnceExactly(); // verifica que NameAlreadyExists foi chamado uma única vez com o mesmo nome do DTO
-        A.CallTo(() => repository.AddProduct(A<Product>._)).MustHaveHappenedOnceExactly(); // verifica que AddProduct foi chamado uma única vez (com qualquer Product)
+        A.CallTo(() => repository.ExistsByNameAsync(dto.Name)).MustHaveHappenedOnceExactly(); // verifica que ExistsByNameAsync foi chamado uma única vez com o mesmo nome do DTO
+        A.CallTo(() => repository.AddAsync(A<Product>._)).MustHaveHappenedOnceExactly(); // verifica que AddAsync foi chamado uma única vez (com qualquer Product)
     }
 
     [Fact]
@@ -53,12 +53,12 @@ public class ProductServiceTest
         };
 
         // Act
-        var act = () => productService.AddProduct(dto);
+        var act = () => productService.AddProductAsync(dto);
 
         // Assert
         await Assert.ThrowsAsync<ArgumentException>(async () => await act());
-        A.CallTo(() => repository.NameAlreadyExists(A<string>._)).MustNotHaveHappened();
-        A.CallTo(() => repository.AddProduct(A<Product>._)).MustNotHaveHappened();
+        A.CallTo(() => repository.ExistsByNameAsync(A<string>._)).MustNotHaveHappened();
+        A.CallTo(() => repository.AddAsync(A<Product>._)).MustNotHaveHappened();
     }
 
     [Fact]
@@ -74,15 +74,15 @@ public class ProductServiceTest
             Value = 12.30m
         };
 
-        A.CallTo(() => repository.NameAlreadyExists("X Salada")).Returns(Task.FromResult(true));
+        A.CallTo(() => repository.ExistsByNameAsync("X Salada")).Returns(Task.FromResult(true));
 
         // Act
-        var act = () => productService.AddProduct(dto);
+        var act = () => productService.AddProductAsync(dto);
 
         // Assert
         await Assert.ThrowsAsync<ArgumentException>(async () => await act());
-        A.CallTo(() => repository.NameAlreadyExists(A<string>._)).MustHaveHappenedOnceExactly();
-        A.CallTo(() => repository.AddProduct(A<Product>._)).MustNotHaveHappened();
+        A.CallTo(() => repository.ExistsByNameAsync(A<string>._)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => repository.AddAsync(A<Product>._)).MustNotHaveHappened();
     }
 
     [Theory]
@@ -100,15 +100,15 @@ public class ProductServiceTest
             Value = value
         };
 
-        A.CallTo(() => repository.NameAlreadyExists("X Salada")).Returns(Task.FromResult(false));
+        A.CallTo(() => repository.ExistsByNameAsync("X Salada")).Returns(Task.FromResult(false));
 
         // Act
-        var act = () => productService.AddProduct(dto);
+        var act = async () => await productService.AddProductAsync(dto);
 
         // Assert
         await Assert.ThrowsAsync<ArgumentException>(async () => await act());
-        A.CallTo(() => repository.NameAlreadyExists(A<string>._)).MustHaveHappenedOnceExactly();
-        A.CallTo(() => repository.AddProduct(A<Product>._)).MustNotHaveHappened();
+        A.CallTo(() => repository.ExistsByNameAsync(A<string>._)).MustNotHaveHappened();
+        A.CallTo(() => repository.AddAsync(A<Product>._)).MustNotHaveHappened();
     }
 
     [Fact]
@@ -119,17 +119,17 @@ public class ProductServiceTest
         var productService = new ProductService(repository);
 
         var product = new Product("X Salada", 12.30m, "O melhor x da região");
-        A.CallTo(() => repository.GetById(1)).Returns(Task.FromResult<Product?>(product));
+        A.CallTo(() => repository.GetByIdAsync(1)).Returns(Task.FromResult<Product?>(product));
 
         // act
-        var result = await productService.GetById(1);
+        var result = await productService.GetByIdAsync(1);
 
         // Assert
         Assert.NotNull(result);
         result.Name.Should().Be("X Salada");
         result.Value.Should().Be(12.30m);
         result.Description.Should().Be("O melhor x da região");
-        A.CallTo(() => repository.GetById(1)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => repository.GetByIdAsync(1)).MustHaveHappenedOnceExactly();
     }
 
     [Fact]
@@ -140,11 +140,11 @@ public class ProductServiceTest
         var productService = new ProductService(repository);
 
         // Act
-        var act = () => productService.GetById(0);
+        var act = () => productService.GetByIdAsync(0);
 
         // Assert
         await Assert.ThrowsAsync<ArgumentException>(async () => await act());
-        A.CallTo(() => repository.GetById(A<int>._)).MustNotHaveHappened();
+        A.CallTo(() => repository.GetByIdAsync(A<int>._)).MustNotHaveHappened();
     }
 
     [Fact]
@@ -154,14 +154,14 @@ public class ProductServiceTest
         var repository = A.Fake<IProductRepository>();
         var productService = new ProductService(repository);
         
-        A.CallTo(() => repository.GetById(1)).Returns(Task.FromResult<Product?>(null));
+        A.CallTo(() => repository.GetByIdAsync(1)).Returns(Task.FromResult<Product?>(null));
 
         // Act
-        var act = () => productService.GetById(1);
+        var act = () => productService.GetByIdAsync(1);
 
         // Assert
         await Assert.ThrowsAsync<ArgumentException>(async () => await act());
-        A.CallTo(() => repository.GetById(1)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => repository.GetByIdAsync(1)).MustHaveHappenedOnceExactly();
     }
 
     [Fact]
@@ -181,24 +181,24 @@ public class ProductServiceTest
             Value = 10.50m
         };
 
-        A.CallTo(() => repository.GetById(1)).Returns(Task.FromResult<Product?>(product));
-        A.CallTo(() => repository.Update(A<Product>._)).Returns(Task.CompletedTask);
+        A.CallTo(() => repository.GetByIdAsync(1)).Returns(Task.FromResult<Product?>(product));
+        A.CallTo(() => repository.UpdateAsync(A<Product>._)).Returns(Task.CompletedTask);
 
         // Act
-        await productService.Update(dto);
+        await productService.UpdateAsync(dto);
 
         // Assert
         product.Name.Should().Be(dto.Name);
         product.Description.Should().Be(dto.Description);
-        product.Value.Should().Be(dto.Value);
+        product.Price.Should().Be(dto.Value);
         product.Enabled.Should().Be(dto.Enabled);
 
-        A.CallTo(() => repository.GetById(1)).MustHaveHappenedOnceExactly();        
-        A.CallTo(() => repository.Update(
+        A.CallTo(() => repository.GetByIdAsync(1)).MustHaveHappenedOnceExactly();        
+        A.CallTo(() => repository.UpdateAsync(
             A<Product>.That.Matches(p =>
                 p.Name == dto.Name &&
                 p.Description == dto.Description &&
-                p.Value == dto.Value &&
+                p.Price == dto.Value &&
                 p.Enabled == dto.Enabled)))
          .MustHaveHappenedOnceExactly(); // Verifica que chamou Update com um Product que tem os valores esperados
     }
@@ -223,12 +223,12 @@ public class ProductServiceTest
         };
 
         // Act
-        var act = () => productService.Update(dto);
+        var act = () => productService.UpdateAsync(dto);
 
         // Assert
         await Assert.ThrowsAsync<ArgumentException>(async () => await act());
-        A.CallTo(() => repository.GetById(A<int>._)).MustNotHaveHappened();
-        A.CallTo(() => repository.Update(A<Product>._)).MustNotHaveHappened();
+        A.CallTo(() => repository.GetByIdAsync(A<int>._)).MustNotHaveHappened();
+        A.CallTo(() => repository.UpdateAsync(A<Product>._)).MustNotHaveHappened();
     }
 
     [Fact]
@@ -247,15 +247,15 @@ public class ProductServiceTest
             Value = 10.50m
         };
 
-        A.CallTo(() => repository.GetById(dto.ProductId!.Value)).Returns(Task.FromResult<Product?>(null)!);
+        A.CallTo(() => repository.GetByIdAsync(dto.ProductId!.Value)).Returns(Task.FromResult<Product?>(null)!);
 
         // Act
-        var act = () => productService.Update(dto);
+        var act = () => productService.UpdateAsync(dto);
 
         // Assert
         await Assert.ThrowsAsync<ArgumentException>(async () => await act());
-        A.CallTo(() => repository.GetById(A<int>._)).MustHaveHappenedOnceExactly();
-        A.CallTo(() => repository.Update(A<Product>._)).MustNotHaveHappened();
+        A.CallTo(() => repository.GetByIdAsync(A<int>._)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => repository.UpdateAsync(A<Product>._)).MustNotHaveHappened();
     }
 
     [Fact]
@@ -268,19 +268,20 @@ public class ProductServiceTest
         var dto = new ProductEnabledDto
         {
             ProductId = 1,
-            Enabled = true
+            Enabled = false
         };
 
-        A.CallTo(() => repository.GetById(dto.ProductId)).Returns(Task.FromResult<Product?>(product)!);
-        A.CallTo(() => repository.Update(product)).Returns(Task.CompletedTask);
+        A.CallTo(() => repository.GetByIdAsync(dto.ProductId)).Returns(Task.FromResult<Product?>(product)!);
+        A.CallTo(() => repository.UpdateAsync(product)).Returns(Task.CompletedTask);
 
         // Act
-        await productService.Enabled(dto);
+        await productService.EnabledAsync(dto);
 
         // Assert
-        product.Enabled.Should().BeTrue();
-        A.CallTo(() => repository.GetById(dto.ProductId)).MustHaveHappenedOnceExactly();
-        A.CallTo(() => repository.Update(A<Product>.That.Matches(p => p.Enabled == dto.Enabled)));
+        product.Enabled.Should().BeFalse();
+        A.CallTo(() => repository.GetByIdAsync(dto.ProductId)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => repository.UpdateAsync(A<Product>.That.Matches(p => p.Enabled == dto.Enabled)))
+            .MustHaveHappenedOnceExactly();
     }
 
     [Fact]
@@ -295,14 +296,14 @@ public class ProductServiceTest
             Enabled = true
         };
 
-        A.CallTo(() => repository.GetById(dto.ProductId)).Returns(Task.FromResult<Product?>(null)!);
+        A.CallTo(() => repository.GetByIdAsync(dto.ProductId)).Returns(Task.FromResult<Product?>(null)!);
 
         // Act
-        var act = () => productService.Enabled(dto);
+        var act = () => productService.EnabledAsync(dto);
 
         // Assert
         await Assert.ThrowsAsync<ArgumentException>(async () => await act());
-        A.CallTo(() => repository.GetById(A<int>._)).MustHaveHappenedOnceExactly();
-        A.CallTo(() => repository.Update(A<Product>._)).MustNotHaveHappened();
+        A.CallTo(() => repository.GetByIdAsync(A<int>._)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => repository.UpdateAsync(A<Product>._)).MustNotHaveHappened();
     }
 }

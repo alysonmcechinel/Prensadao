@@ -16,65 +16,89 @@ namespace Prensadao.Application.Services
             _productRepository = productRepository;
         }
 
-        public async Task<int> AddProduct(ProductRequestDto dto)
+        public async Task<int> AddProductAsync(ProductRequestDto dto)
         {
-            if(string.IsNullOrEmpty(dto.Name))
-                throw new ArgumentException("O produto deve ter um nome.");
+            ValidateProductRequest(dto);
+            await EnsureProductNameIsAvailableAsync(dto.Name);
 
-            bool nameAlreadyExists = await _productRepository.NameAlreadyExists(dto.Name);
-            if (nameAlreadyExists)
-                throw new ArgumentException("Já existe um produto com esse nome");
+            return await _productRepository.AddAsync(CreateProduct(dto));
+        }
+
+        public async Task<ProductResponseDto> GetByIdAsync(int id)
+        {
+            ValidateProductId(id);
+            return ProductResponseDto.ToDto(await GetProductByIdOrThrowAsync(id));
+        }
+
+        public async Task UpdateAsync(ProductRequestDto dto)
+        {
+            ValidateProductRequest(dto);
+            ValidateProductId(dto.ProductId);
+
+            var product = await GetProductByIdOrThrowAsync(dto.ProductId!.Value);
+            UpdateProduct(product, dto);
+            await _productRepository.UpdateAsync(product);
+        }
+
+        public async Task<List<ProductResponseDto>> GetProductsAsync() => ProductResponseDto.ToListDto(await _productRepository.GetAllAsync());
+
+        public async Task EnabledAsync(ProductEnabledDto dto)
+        {
+            ArgumentNullException.ThrowIfNull(dto);
+
+            var product = await GetProductByIdOrThrowAsync(dto.ProductId);
+
+            if (product.Enabled == dto.Enabled)
+                return;
+
+            product.SetEnabled(dto.Enabled);
+            await _productRepository.UpdateAsync(product);
+        }
+
+        private static Product CreateProduct(ProductRequestDto dto)
+            => new(dto.Name, dto.Value, dto.Description);
+
+        private static void UpdateProduct(Product product, ProductRequestDto dto)
+            => product.UpdateDetails(dto.Name, dto.Enabled, dto.Value, dto.Description);
+
+        private static void ValidateProductRequest(ProductRequestDto dto)
+        {
+            ArgumentNullException.ThrowIfNull(dto);
+
+            if (string.IsNullOrWhiteSpace(dto.Name))
+                throw new ArgumentException("O produto deve ter um nome.");
 
             if (dto.Value <= 0)
                 throw new ArgumentException("O valor do produto deve ser maior que 0");
-
-            var product = new Product(dto.Name, dto.Value, dto.Description);
-
-            return await _productRepository.AddProduct(product);
         }
 
-        public async Task<ProductResponseDto> GetById(int id)
+        private static void ValidateProductId(int? productId)
         {
-            if (id <= 0)
+            if (!productId.HasValue || productId <= 0)
                 throw new ArgumentException("O ID informado está incorreto.");
-            
-             var product = await _productRepository.GetById(id);
-
-            if (product == null)
-                throw new ArgumentException("Produto não encontrado.");
-
-            return ProductResponseDto.ToDto(product);
         }
 
-        public async Task Update(ProductRequestDto dto)
+        private static void ValidateProductId(int productId)
         {
-            if (!dto.ProductId.HasValue || dto.ProductId <= 0)
+            if (productId <= 0)
                 throw new ArgumentException("O ID informado está incorreto.");
-
-            var product = await _productRepository.GetById(dto.ProductId!.Value);
-
-            if (product == null)
-                throw new ArgumentException("Produto não encontrado.");
-
-            product.Update(dto.Name, dto.Enabled, dto.Value, dto.Description);
-            await _productRepository.Update(product);
         }
 
-        public async Task<List<ProductResponseDto>> GetProducts() => ProductResponseDto.ToListDto(await _productRepository.GetProducts());
-
-        public async Task Enabled(ProductEnabledDto dto)
+        private async Task<Product> GetProductByIdOrThrowAsync(int productId)
         {
-            var product = await _productRepository.GetById(dto.ProductId);
+            var product = await _productRepository.GetByIdAsync(productId);
 
-            if (product == null)
+            if (product is null)
                 throw new ArgumentException("Produto não encontrado.");
 
-            if (product.Enabled != dto.Enabled)
-                product.EnabledProduct(dto.Enabled);
-            else
-                return;
+            return product;
+        }
 
-            await _productRepository.Update(product);
+        private async Task EnsureProductNameIsAvailableAsync(string productName)
+        {
+            var nameAlreadyExists = await _productRepository.ExistsByNameAsync(productName);
+            if (nameAlreadyExists)
+                throw new ArgumentException("Já existe um produto com esse nome");
         }
     }
 }

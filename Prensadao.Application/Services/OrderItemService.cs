@@ -14,8 +14,12 @@ namespace Prensadao.Application.Services
             _orderItemRepository = orderItemRepository;
         }
 
-        public Task AddOrderItemAsync(OrderItem ordemItem) => _orderItemRepository.AddOrderItemAsync(ordemItem);
+        public Task AddOrderItemAsync(OrderItem orderItem)
+        {
+            ArgumentNullException.ThrowIfNull(orderItem);
+            return _orderItemRepository.AddAsync(orderItem);
+        }
 
-        public Task<List<OrderItem>> GetOrderItems() => _orderItemRepository.GetOrderItemsAsync();
+        public Task<List<OrderItem>> GetOrderItemsAsync() => _orderItemRepository.GetAllAsync();
     }
 }

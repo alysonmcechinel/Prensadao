@@ -13,13 +13,13 @@ namespace Prensadao.Infra.Persistence.Repositories
             _dbContext = dbContext;
         }
 
-        public async Task AddOrderItemAsync(OrderItem ordemItem)
+        public async Task AddAsync(OrderItem orderItem)
         {
-            await _dbContext.AddAsync(ordemItem);
+            await _dbContext.OrderItems.AddAsync(orderItem);
             await _dbContext.SaveChangesAsync();
         }
 
-        public async Task<List<OrderItem>> GetOrderItemsAsync() => await _dbContext.OrderItems
+        public Task<List<OrderItem>> GetAllAsync() => _dbContext.OrderItems
             .Include(x => x.Order)
             .Include(x => x.Product)
             .AsNoTracking()

@@ -1,9 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Prensadao.Application.DTOs.Requests;
 using Prensadao.Application.DTOs.Responses;
 using Prensadao.Application.Interfaces;
-using Prensadao.Application.Services;
-using System.Data;
 
 namespace Prensadao.API.Controllers
 {
@@ -20,16 +18,20 @@ namespace Prensadao.API.Controllers
             _orderService = orderService;
         }
 
-        [HttpPost]
+        [HttpPost("Post")]
         [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Post([FromBody] OrderRequestDto order)
+        public async Task<IActionResult> PostAsync([FromBody] OrderRequestDto dto)
         {
             try
             {
-                var result = await _orderService.OrderCreateAsync(order);
+                var result = await _orderService.OrderCreateAsync(dto);
 
-                return Ok( new { message = "Pedido criado com sucesso.", data = result });
+                return Ok(new
+                {
+                    message = "Pedido criado com sucesso.",
+                    data = result
+                });
             }
             catch (Exception ex)
             {
@@ -37,10 +39,10 @@ namespace Prensadao.API.Controllers
             }
         }
 
-        [HttpGet]
+        [HttpGet("GetAll")]
         [ProducesResponseType(typeof(IEnumerable<OrderResponseDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAllAsync()
         {
             try
             {
@@ -49,40 +51,41 @@ namespace Prensadao.API.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest($"{ex.Message}");
+                return BadRequest(ex.Message);
             }
         }
 
         [HttpGet("GetById")]
-        [ProducesResponseType(typeof(ProductResponseDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(OrderResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetById([FromQuery] int id)
+        public async Task<IActionResult> GetByIdAsync([FromQuery] int id)
         {
             try
             {
                 var result = await _orderService.GetByIdAsync(id);
-
-                if (result is null)
-                    return NotFound("Pedido não encontrado.");
-                else
-                    return Ok(result);
+                return Ok(result);
             }
             catch (Exception ex)
             {
-                return BadRequest($"Erro ao localizar o pedido, {ex.Message}");
+                return BadRequest(ex.Message);
             }
         }
 
         [HttpPut("UpdateStatus")]
         [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> UpdateStatus([FromBody] UpdateStatusDto dto)
+        public async Task<IActionResult> UpdateStatusAsync([FromBody] UpdateStatusDto dto)
         {
             try
             {
                 var result = await _orderService.UpdateStatusAsync(dto);
-                return Ok( new { message = "Status do pedido atualizado com sucesso.", data = result });
+
+                return Ok(new
+                {
+                    message = "Status do pedido atualizado com sucesso.",
+                    data = result
+                });
             }
             catch (Exception ex)
             {
@@ -93,7 +96,7 @@ namespace Prensadao.API.Controllers
         [HttpPut("Enabled")]
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Enabled([FromQuery] int id)
+        public async Task<IActionResult> EnabledAsync([FromQuery] int id)
         {
             try
             {
@@ -102,7 +105,7 @@ namespace Prensadao.API.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest($"{ex.Message}");
+                return BadRequest(ex.Message);
             }
         }
     }

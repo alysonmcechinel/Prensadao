@@ -26,35 +26,25 @@ namespace Prensadao.Application.Services
             _productRepository = productRepository;
         }
 
-        public async Task<List<OrderResponseDto>> GetOrdersAsync() => OrderResponseDto.ToListDto(await _orderRepository.GetOrders());
+        public async Task<List<OrderResponseDto>> GetOrdersAsync() => OrderResponseDto.ToListDto(await _orderRepository.GetAllWithDetailsAsync());
 
         public async Task<OrderResponseDto> GetByIdAsync(int id)
         {
-            var order = await _orderRepository.GetByIdAsync(id);
-
-            if (order == null)
-                throw new ArgumentException("Pedido não encontrado.");
-
-            return OrderResponseDto.ToDto(order);
+            return OrderResponseDto.ToDto(await GetOrderByIdOrThrowAsync(id));
         }
 
         public async Task<int> OrderCreateAsync(OrderRequestDto dto)
         {
-            if (dto is null)
-                throw new ArgumentException("O pedido não pode ser nulo.");
+            ValidateOrderRequest(dto);
 
-            if (dto.CustomerId <= 0)
-                throw new ArgumentException("Pedido não pode ser feito sem cliente cadastrado.");
+            await ValidateOrderItemsAsync(dto.OrderItems);
 
-            await ValidationsOrderItemAsync(dto);
-            Dictionary<int, decimal> prices = await GetPricesAsync(dto);
+            var prices = await GetPricesAsync(dto.OrderItems);
+            var totalAmountOrder = CalculateTotalAmount(dto.OrderItems, prices);
+            var order = CreateOrder(dto, totalAmountOrder);
 
-            decimal totalAmountOrder = Math.Round(dto.OrderItems.Sum(i => prices[i.ProductId] * i.Quantity), 2, MidpointRounding.AwayFromZero);
-
-            var order = new Order(dto.Delivery, totalAmountOrder, dto.Observation, dto.CustomerId, NodaTimeExtensions.NowUtc());
             await OrderCreateAsync(dto, prices, order);
-
-            await MessageOrderAsync(order);
+            await PublishOrderMessageAsync(order);
 
             return order.OrderId;
         }
@@ -67,7 +57,7 @@ namespace Prensadao.Application.Services
             // precisa funcionar, ou nada será salvo no banco ("Tudo ou Nada").
             using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                await _orderRepository.CreateOrder(order);
+                await _orderRepository.AddAsync(order);
 
                 // 2. Operações Dependentes
                 // Se ocorrer um erro neste loop (ex: erro de banco),
@@ -76,7 +66,7 @@ namespace Prensadao.Application.Services
                 {
                     var unitPrice = prices[item.ProductId];
                     var orderItem = new OrderItem(item.Quantity, unitPrice, order.OrderId, item.ProductId);
-                    await _orderItemRepository.AddOrderItemAsync(orderItem);
+                    await _orderItemRepository.AddAsync(orderItem);
                 }
 
                 // 3. O "Commit" Final
@@ -88,41 +78,71 @@ namespace Prensadao.Application.Services
 
         public async Task<OrderResponseDto> UpdateStatusAsync(UpdateStatusDto dto)
         {
-            var order = await _orderRepository.GetByIdAsync(dto.OrderId);
-            if (order is null)
-                throw new ArgumentException("Pedido não encontrado.");
+            ValidateUpdateStatusRequest(dto);
 
-            if (order.OrderStatus == dto.OrderStatus)
+            var order = await GetOrderByIdOrThrowAsync(dto.OrderId);
+
+            if (order.Status == dto.OrderStatus)
                 throw new ArgumentException("Status do pedido já está definido como o informado.");
 
-            order.UpdateStatus(dto.OrderStatus);
-            await _orderRepository.Update(order);
-            await MessageNotifyAsync(order);
+            order.SetStatus(dto.OrderStatus);
+            await _orderRepository.UpdateAsync(order);
+            await PublishNotifyMessageAsync(order);
 
             return OrderResponseDto.ToDto(order);
         }        
 
         public async Task EnabledAsync(int id)
         {
-            var order = await _orderRepository.GetByIdAsync(id);
+            var order = await GetOrderByIdOrThrowAsync(id);
+
+            ValidateOrderCanBeCanceled(order);
+            order.SetStatus(OrderStatusEnum.Cancelado);
+
+            await _orderRepository.UpdateAsync(order);
+            await PublishNotifyMessageAsync(order);
+        }
+
+        // Privates
+        private static void ValidateOrderRequest(OrderRequestDto dto)
+        {
+            ArgumentNullException.ThrowIfNull(dto);
+
+            if (dto.CustomerId <= 0)
+                throw new ArgumentException("Pedido não pode ser feito sem cliente cadastrado.");
+        }
+
+        private static void ValidateUpdateStatusRequest(UpdateStatusDto dto)
+        {
+            ArgumentNullException.ThrowIfNull(dto);
+        }
+
+        private static Order CreateOrder(OrderRequestDto dto, decimal totalAmountOrder)
+            => new(dto.Delivery, totalAmountOrder, dto.Observation ?? string.Empty, dto.CustomerId, NodaTimeExtensions.NowUtc());
+
+        private static decimal CalculateTotalAmount(IEnumerable<OrderItemRequestDto> items, IReadOnlyDictionary<int, decimal> prices)
+            => Math.Round(items.Sum(item => prices[item.ProductId] * item.Quantity), 2, MidpointRounding.AwayFromZero);
+
+        private async Task<Order> GetOrderByIdOrThrowAsync(int orderId)
+        {
+            var order = await _orderRepository.GetByIdWithDetailsAsync(orderId);
 
             if (order is null)
                 throw new ArgumentException("Pedido não encontrado.");
 
-            if (order.OrderStatus == OrderStatusEnum.EmPreparacao || order.OrderStatus == OrderStatusEnum.Criado)
-                order.UpdateStatus(OrderStatusEnum.Cancelado);
-            else
-                throw new ArgumentException($"Pedido não pode ser cancelado pois, já esta com status: {order.OrderStatus.GetDescription()}");
-
-            await _orderRepository.Update(order);
-            await MessageNotifyAsync(order);
+            return order;
         }
 
-        // Privates
-        private async Task<Dictionary<int, decimal>> GetPricesAsync(OrderRequestDto dto)
+        private static void ValidateOrderCanBeCanceled(Order order)
         {
-            var productIds = dto.OrderItems.Select(i => i.ProductId).Distinct().ToList();
-            var products = await _productRepository.ValueOfProducts(productIds);
+            if (order.Status != OrderStatusEnum.EmPreparacao && order.Status != OrderStatusEnum.Criado)
+                throw new ArgumentException($"Pedido não pode ser cancelado pois, já esta com status: {order.Status.GetDescription()}");
+        }
+
+        private async Task<Dictionary<int, decimal>> GetPricesAsync(IEnumerable<OrderItemRequestDto> orderItems)
+        {
+            var productIds = orderItems.Select(i => i.ProductId).Distinct().ToList();
+            var products = await _productRepository.GetValuesByIdsAsync(productIds);
             var prices = products.ToDictionary(p => p.ProductId, p => p.Value);
 
             var idsNotFound = productIds.Except(prices.Keys).ToList();
@@ -132,45 +152,45 @@ namespace Prensadao.Application.Services
             return prices;
         }
 
-        private async Task ValidationsOrderItemAsync(OrderRequestDto dto)
+        private async Task ValidateOrderItemsAsync(IEnumerable<OrderItemRequestDto> orderItems)
         {
-            if (!dto.OrderItems.Any())
+            var items = orderItems.ToList();
+
+            if (!items.Any())
                 throw new ArgumentException("Pedido não pode ser feito sem itens.");
 
-            if (dto.OrderItems.Any(x => x.ProductId <= 0))
+            if (items.Any(x => x.ProductId <= 0))
                 throw new ArgumentException("Pedido contém itens com ProductId inválido.");
 
-            if (dto.OrderItems.Any(x => x.Quantity <= 0))
+            if (items.Any(x => x.Quantity <= 0))
                 throw new ArgumentException("Pedido contém itens com quantidade inválida.");
 
-            List<int> productsIDs = dto.OrderItems.Select(x => x.ProductId).ToList();
-            var verifyProductActive = await _productRepository.ExistsInactiveProduct(productsIDs);
+            var productIds = items.Select(x => x.ProductId).Distinct().ToList();
+            var verifyProductActive = await _productRepository.ExistsInactiveByIdsAsync(productIds);
             if (verifyProductActive)
                 throw new ArgumentException("Pedido não pode ser feito com produtos inativos.");
         }
 
-        private async Task MessageOrderAsync(Order order)
-        {
-            var messageDto = new OrderMessageDto
+        private Task PublishOrderMessageAsync(Order order)
+            => _bus.Publish(CreateOrderMessage(order), RabbitMqConstants.Exchanges.OrderExchange);
+
+        private Task PublishNotifyMessageAsync(Order order)
+            => _bus.Publish(CreateNotifyMessage(order), RabbitMqConstants.Exchanges.NotifyExchange);
+
+        private static OrderMessageDto CreateOrderMessage(Order order)
+            => new()
             {
                 OrderId = order.OrderId
             };
 
-            await _bus.Publish(messageDto, RabbitMqConstants.Exchanges.OrderExchange);
-        }
-
-        private async Task MessageNotifyAsync(Order order)
-        {
-            var notify = new NotifyMessageDto
+        private static NotifyMessageDto CreateNotifyMessage(Order order)
+            => new()
             {
                 OrderId = order.OrderId,
                 ConsumerName = order.Customer.Name,
-                Delivery = order.Delivery,
-                OrderStatus = order.OrderStatus,
+                Delivery = order.IsDelivery,
+                OrderStatus = order.Status,
                 Phone = order.Customer.Phone
             };
-
-            await _bus.Publish(notify, RabbitMqConstants.Exchanges.NotifyExchange);
-        }        
     }
 }

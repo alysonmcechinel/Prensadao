@@ -5,12 +5,12 @@ namespace Prensadao.Domain.Repositories
 {
     public interface IProductRepository
     {
-        Task<int> AddProduct(Product product);
-        Task Update(Product product);
-        Task<Product> GetById(int id);
-        Task<List<Product>> GetProducts();
-        Task<bool> NameAlreadyExists(string name);
-        Task<bool> ExistsInactiveProduct(List<int> productsIDs);
-        Task<List<ProductValueModels>> ValueOfProducts(List<int> ids);
+        Task<int> AddAsync(Product product);
+        Task UpdateAsync(Product product);
+        Task<Product?> GetByIdAsync(int id);
+        Task<List<Product>> GetAllAsync();
+        Task<bool> ExistsByNameAsync(string name);
+        Task<bool> ExistsInactiveByIdsAsync(IReadOnlyCollection<int> productIds);
+        Task<List<ProductValueModels>> GetValuesByIdsAsync(IReadOnlyCollection<int> ids);
     }
 }

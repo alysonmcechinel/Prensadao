@@ -21,6 +21,7 @@ namespace Prensadao.Application
             services.AddScoped<IOrderItemService, OrderItemService>();
             services.AddScoped<ICustomerService, CustomerService>();
             services.AddScoped<IProductService, ProductService>();
+            services.AddScoped<IPromotionGenerator, PromotionGeneratorService>();
 
             return services;
         }

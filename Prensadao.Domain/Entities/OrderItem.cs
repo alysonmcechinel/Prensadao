@@ -25,5 +25,5 @@ public class OrderItem
     public Order Order { get; private set; }
     public Product Product { get; private set; }
 
-    public decimal GetTotal() => Quantity * UnitPrice;
+    public decimal GetTotalPrice() => Quantity * UnitPrice;
 }
