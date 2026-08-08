@@ -34,30 +34,7 @@ public class Order
 
     public void SetStatus(OrderStatusEnum status)
     {
-        switch (status)
-        {
-            case OrderStatusEnum.Criado:
-                Status = OrderStatusEnum.Criado;
-                break;
-            case OrderStatusEnum.EmPreparacao:
-                Status = OrderStatusEnum.EmPreparacao;
-                break;
-            case OrderStatusEnum.Pronto:
-                Status = OrderStatusEnum.Pronto;
-                break;
-            case OrderStatusEnum.SaiuParaEntrega:
-                Status = IsDelivery ? OrderStatusEnum.SaiuParaEntrega : OrderStatusEnum.Finalizado;
-                break;
-            case OrderStatusEnum.Finalizado:
-                Status = OrderStatusEnum.Finalizado;
-                break;
-            case OrderStatusEnum.Cancelado:
-                Status = OrderStatusEnum.Cancelado;
-                break;
-            default:
-                Status = OrderStatusEnum.Error;
-                throw new ArgumentException("Transição de status inválida.");
-        }
+        Status = status;
     }
 
     public void AdvanceStatus()
