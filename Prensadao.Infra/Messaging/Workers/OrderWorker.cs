@@ -12,13 +12,13 @@ public class OrderWorker : BackgroundService
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly IConsumer _consumer;
-    private readonly IBus _bus;
+    private readonly IMessagePublisher _messagePublisher;
 
-    public OrderWorker(IServiceProvider serviceProvider, IConsumer consumer, IBus bus)
+    public OrderWorker(IServiceProvider serviceProvider, IConsumer consumer, IMessagePublisher messagePublisher)
     {
         _serviceProvider = serviceProvider;
         _consumer = consumer;
-        _bus = bus;
+        _messagePublisher = messagePublisher;
     }
 
     // Exemplo de metodo com IDEMPOTÊNCIA
@@ -48,7 +48,7 @@ public class OrderWorker : BackgroundService
                 OrderStatus = order.Status,
                 Phone = order.Customer.Phone
             };
-            await _bus.Publish(notify, RabbitMqConstants.Exchanges.NotifyExchange, "");
+            await _messagePublisher.PublishAsync(notify, RabbitMqConstants.Exchanges.NotifyExchange, "");
 
             Console.WriteLine($"Pedido #{order.OrderId} atualizado com sucesso.");
         });

@@ -13,14 +13,14 @@ namespace Prensadao.Application.Services
     //TODO: implementar FluentValidation
     public class OrderService : IOrderService
     {
-        private readonly IBus _bus;
+        private readonly IMessagePublisher _messagePublisher;
         private readonly IOrderRepository _orderRepository;
         private readonly IOrderItemRepository _orderItemRepository;
         private readonly IProductRepository _productRepository;
 
-        public OrderService(IBus bus, IOrderRepository orderRepository, IOrderItemRepository orderItemRepository, IProductRepository productRepository)
+        public OrderService(IMessagePublisher messagePublisher, IOrderRepository orderRepository, IOrderItemRepository orderItemRepository, IProductRepository productRepository)
         {
-            _bus = bus;
+            _messagePublisher = messagePublisher;
             _orderRepository = orderRepository;
             _orderItemRepository = orderItemRepository;
             _productRepository = productRepository;
@@ -172,10 +172,10 @@ namespace Prensadao.Application.Services
         }
 
         private Task PublishOrderMessageAsync(Order order)
-            => _bus.Publish(CreateOrderMessage(order), RabbitMqConstants.Exchanges.OrderExchange);
+            => _messagePublisher.PublishAsync(CreateOrderMessage(order), RabbitMqConstants.Exchanges.OrderExchange);
 
         private Task PublishNotifyMessageAsync(Order order)
-            => _bus.Publish(CreateNotifyMessage(order), RabbitMqConstants.Exchanges.NotifyExchange);
+            => _messagePublisher.PublishAsync(CreateNotifyMessage(order), RabbitMqConstants.Exchanges.NotifyExchange);
 
         private static OrderMessageDto CreateOrderMessage(Order order)
             => new()

@@ -6,11 +6,11 @@ using System.Text.Json;
 
 namespace Prensadao.Infra.Messaging.RabbitMq;
 
-public class Bus : IBus
+public class Publish : IPublish
 {
     private readonly IRabbitMqConfig _rabbitMqConfigService;
 
-    public Bus(IRabbitMqConfig rabbitMqConfigService)
+    public Publish(IRabbitMqConfig rabbitMqConfigService)
     {
         _rabbitMqConfigService = rabbitMqConfigService;
     }

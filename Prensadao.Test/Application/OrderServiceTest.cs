@@ -17,7 +17,7 @@ public class OrderServiceTest
 {
     [Theory, AutoFakeItEasyData]
     public async Task OrderCreate_DeveCriarPedidoItensEPublicarMensagem_QuandoSucesso(
-        [Frozen] IBus bus,
+        [Frozen] IMessagePublisher messagePublisher,
         [Frozen] IOrderRepository orderRepository,
         [Frozen] IOrderItemRepository orderItemRepository,
         [Frozen] IProductRepository productRepository,
@@ -81,7 +81,7 @@ public class OrderServiceTest
                 item.UnitPrice == 8.00m)))
             .MustHaveHappenedOnceExactly();
 
-        A.CallTo(() => bus.Publish(
+        A.CallTo(() => messagePublisher.PublishAsync(
             A<OrderMessageDto>.That.Matches(message => message.OrderId == 123),
             RabbitMqConstants.Exchanges.OrderExchange,
             A<string?>._))
