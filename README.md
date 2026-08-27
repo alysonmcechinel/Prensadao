@@ -1,36 +1,37 @@
-# Prensadao
+﻿# Prensadão
 
-## Introdução
+Sistema de gestão de pedidos para uma hamburgueria, desenvolvido em ASP.NET Core com arquitetura em camadas. O projeto usa PostgreSQL, Entity Framework Core, RabbitMQ, Hangfire, NodaTime e Azure OpenAI para geração de sugestões de promoções.
 
-O Prensadão é um sistema de gestão de pedidos para uma hamburgueria, desenvolvido em ASP.NET Core, utilizando RabbitMQ para mensageria, PostgreSQL para persistência de dados e testes automatizados com xUnit, FakeItEasy e AutoFixture. O projeto segue boas práticas de arquitetura e organização de código, com foco em DDD e Clean Architecture.
+## Documentação
+A documentação técnica principal fica em `docs/`:
 
-## Tecnologias Utilizadas
+- `docs/README.md`: índice.
+- `docs/ARCHITECTURE.md`: arquitetura, camadas e dependências.
+- `docs/FEATURES.md`: funcionalidades existentes.
+- `docs/AI_PROMOTIONS.md`: fluxo de promoções com IA.
+- `docs/RUNBOOK.md`: comandos de execução, Docker, migrations e testes.
+- `docs/rules/`: guardrails para manutenção por humanos, Codex e Claude.
 
- - ASP.NET Core – API REST
- - Entity Framework Core – Acesso a dados e Migrations
- - PostgreSQL – Banco de dados
- - RabbitMQ – Mensageria
- - xUnit – Testes unitários
- - FakeItEasy e AutoFixture – Mocks e geração de dados para testes
- - Docker/Docker Compose – Orquestração de serviços
+## Tecnologias
+- ASP.NET Core / .NET 8
+- Entity Framework Core
+- PostgreSQL
+- RabbitMQ
+- Hangfire
+- NodaTime
+- Azure OpenAI
+- xUnit, FakeItEasy, AutoFixture e FluentAssertions
+- Docker / Docker Compose
 
-## Migrações do EF Core
+## Comandos Principais
+Execute a partir da raiz do repositório:
 
-Gerar: <code>dotnet ef migrations add Initial --project ../../Prensadao.Infra.csproj --startup-project ../../../Prensadao/Prensadao.API.csproj</code>
+```powershell
+dotnet restore Prensadao.sln
+dotnet build Prensadao.sln
+dotnet test Prensadao.Test/Prensadao.Test.csproj --collect:"XPlat Code Coverage"
+dotnet run --project Prensadao/Prensadao.API.csproj
+docker compose up -d --build
+```
 
-Aplicar: <code>dotnet ef database update --project ../../Prensadao.Infra.csproj --startup-project ../../../Prensadao/Prensadao.API.csproj</code>
-
-## Executando com Docker Compose
-
-Na pasta raiz do projeto, execute:
-
-<code>docker compose up -d --build</code>
-
-## Estrutura do Projeto
-
- - API – Endpoints REST
- - Application – Serviços e regras de negócio
- - Domain – Entidades e agregados
- - Infrastructure – Persistência e integrações externas
- - Workers – Processamento assíncrono via RabbitMQ
- - Tests – Testes unitários e de integração
+Para detalhes de configuração, migrations, variáveis e troubleshooting, consulte `docs/RUNBOOK.md`.
