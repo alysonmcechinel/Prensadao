@@ -16,10 +16,12 @@ public class Consumer : IConsumer
         _rabbitMqConfigService = rabbitMqConfigService;
     }
 
-    public async Task Listen<T>(string queue, Func<T, Task> onMessage)
+    public Task Listen<T>(string queue, Func<T, Task> onMessage, CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(queue))
             throw new ArgumentNullException(nameof(queue));
+
+        ArgumentNullException.ThrowIfNull(onMessage);
 
         var channel = _rabbitMqConfigService.CreateChannel();
 
@@ -55,8 +57,25 @@ public class Consumer : IConsumer
             }
         };
 
-        channel.BasicConsume(queue, autoAck: false, consumer);
+        var consumerTag = channel.BasicConsume(queue, autoAck: false, consumer);
 
-        await Task.CompletedTask;
+        cancellationToken.Register(() =>
+        {
+            try
+            {
+                if (!channel.IsOpen)
+                    return;
+
+                channel.BasicCancel(consumerTag);
+                channel.Close();
+                channel.Dispose();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro ao encerrar o consumidor da fila {queue}: {ex.Message}");
+            }
+        });
+
+        return Task.CompletedTask;
     }
 }
