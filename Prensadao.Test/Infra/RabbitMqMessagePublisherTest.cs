@@ -1,4 +1,4 @@
-using FakeItEasy;
+﻿using FakeItEasy;
 using Prensadao.Application.DTOs;
 using Prensadao.Infra.Messaging.Interfaces;
 using Prensadao.Infra.Messaging.RabbitMq;
@@ -13,7 +13,7 @@ public class RabbitMqMessagePublisherTest
     [Fact]
     public async Task PublishAsync_DevePublicarMensagemPersistenteEmJson_QuandoMensagemValida()
     {
-        // Arrange
+        // arrange
         var rabbitMqConfig = A.Fake<IRabbitMqConfig>();
         var channel = A.Fake<IModel>();
         var properties = A.Fake<IBasicProperties>();
@@ -31,10 +31,10 @@ public class RabbitMqMessagePublisherTest
         A.CallTo(() => rabbitMqConfig.CreateChannel()).Returns(channel);
         A.CallTo(() => channel.CreateBasicProperties()).Returns(properties);
 
-        // Act
+        // act
         await publisher.PublishAsync(message, exchange, routingKey);
 
-        // Assert
+        // assert
         A.CallTo(() => rabbitMqConfig.CreateChannel())
             .MustHaveHappenedOnceExactly();
 
@@ -57,27 +57,27 @@ public class RabbitMqMessagePublisherTest
     [Fact]
     public async Task PublishAsync_DeveLancarArgumentNullException_QuandoExchangeVazio()
     {
-        // Arrange
+        // arrange
         var publisher = new RabbitMqMessagePublisher(A.Fake<IRabbitMqConfig>());
         var message = new OrderMessageDto { OrderId = 123 };
 
-        // Act
+        // act
         var exception = await Assert.ThrowsAsync<ArgumentNullException>(() => publisher.PublishAsync(message, ""));
 
-        // Assert
+        // assert
         Assert.Equal("exchange", exception.ParamName);
     }
 
     [Fact]
     public async Task PublishAsync_DeveLancarArgumentNullException_QuandoMensagemNula()
     {
-        // Arrange
+        // arrange
         var publisher = new RabbitMqMessagePublisher(A.Fake<IRabbitMqConfig>());
 
-        // Act
+        // act
         var exception = await Assert.ThrowsAsync<ArgumentNullException>(() => publisher.PublishAsync<OrderMessageDto>(null!, "order.exchange"));
 
-        // Assert
+        // assert
         Assert.Equal("message", exception.ParamName);
     }
 }

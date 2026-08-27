@@ -1,4 +1,4 @@
-using AutoFixture.Xunit2;
+﻿using AutoFixture.Xunit2;
 using FakeItEasy;
 using Prensadao.Application;
 using Prensadao.Application.DTOs;
@@ -23,7 +23,7 @@ public class OrderServiceTest
         [Frozen] IProductRepository productRepository,
         OrderService orderService)
     {
-        // Arrange
+        // arrange
         var dto = new OrderRequestDto
         {
             CustomerId = 1,
@@ -50,10 +50,10 @@ public class OrderServiceTest
         A.CallTo(() => orderRepository.AddAsync(A<Order>._))
             .Invokes((Order order) => typeof(Order).GetProperty("OrderId")!.SetValue(order, 123));
 
-        // Act
+        // act
         var result = await orderService.OrderCreateAsync(dto);
 
-        // Assert
+        // assert
         Assert.Equal(123, result);
 
         A.CallTo(() => orderRepository.AddAsync(
@@ -93,13 +93,13 @@ public class OrderServiceTest
         [Frozen] IOrderRepository orderRepository,
         OrderService orderService)
     {
-        // Arrange
+        // arrange
         OrderRequestDto? dto = null;
 
-        // Act
+        // act
         await Assert.ThrowsAsync<ArgumentNullException>(() => orderService.OrderCreateAsync(dto!));
 
-        // Assert
+        // assert
         A.CallTo(() => orderRepository.AddAsync(A<Order>._)).MustNotHaveHappened();
     }
 
@@ -109,13 +109,13 @@ public class OrderServiceTest
         OrderService orderService,
         OrderRequestDto dto)
     {
-        // Arrange
+        // arrange
         dto.CustomerId = 0;
 
-        // Act
+        // act
         var ex = await Assert.ThrowsAsync<ArgumentException>(() => orderService.OrderCreateAsync(dto));
 
-        // Assert
+        // assert
         Assert.Equal("Pedido não pode ser feito sem cliente cadastrado.", ex.Message);
         A.CallTo(() => orderRepository.AddAsync(A<Order>._)).MustNotHaveHappened();
     }
@@ -127,13 +127,13 @@ public class OrderServiceTest
         OrderService orderService,
         OrderRequestDto dto)
     {
-        // Arrange
+        // arrange
         dto.OrderItems = new List<OrderItemRequestDto>();
 
-        // Act
+        // act
         var ex = await Assert.ThrowsAsync<ArgumentException>(() => orderService.OrderCreateAsync(dto));
 
-        // Assert
+        // assert
         Assert.Equal("Pedido não pode ser feito sem itens.", ex.Message);
         A.CallTo(() => orderRepository.AddAsync(A<Order>._)).MustNotHaveHappened();
         A.CallTo(() => productRepository.ExistsInactiveByIdsAsync(A<IReadOnlyCollection<int>>._)).MustNotHaveHappened();
@@ -146,16 +146,16 @@ public class OrderServiceTest
         OrderService orderService,
         OrderRequestDto dto)
     {
-        // Arrange
+        // arrange
         dto.OrderItems = new List<OrderItemRequestDto>
         {
             new() { ProductId = 0, Quantity = 1 }
         };
 
-        // Act
+        // act
         var ex = await Assert.ThrowsAsync<ArgumentException>(() => orderService.OrderCreateAsync(dto));
 
-        // Assert
+        // assert
         Assert.Equal("Pedido contém itens com ProductId inválido.", ex.Message);
         A.CallTo(() => orderRepository.AddAsync(A<Order>._)).MustNotHaveHappened();
         A.CallTo(() => productRepository.ExistsInactiveByIdsAsync(A<IReadOnlyCollection<int>>._)).MustNotHaveHappened();
@@ -168,16 +168,16 @@ public class OrderServiceTest
         OrderService orderService,
         OrderRequestDto dto)
     {
-        // Arrange
+        // arrange
         dto.OrderItems = new List<OrderItemRequestDto>
         {
             new() { ProductId = 10, Quantity = 0 }
         };
 
-        // Act
+        // act
         var ex = await Assert.ThrowsAsync<ArgumentException>(() => orderService.OrderCreateAsync(dto));
 
-        // Assert
+        // assert
         Assert.Equal("Pedido contém itens com quantidade inválida.", ex.Message);
         A.CallTo(() => orderRepository.AddAsync(A<Order>._)).MustNotHaveHappened();
         A.CallTo(() => productRepository.ExistsInactiveByIdsAsync(A<IReadOnlyCollection<int>>._)).MustNotHaveHappened();
@@ -190,7 +190,7 @@ public class OrderServiceTest
         OrderService orderService,
         OrderRequestDto dto)
     {
-        // Arrange
+        // arrange
         dto.OrderItems = new List<OrderItemRequestDto>
         {
             new() { ProductId = 10, Quantity = 1 }
@@ -198,10 +198,10 @@ public class OrderServiceTest
 
         A.CallTo(() => productRepository.ExistsInactiveByIdsAsync(A<IReadOnlyCollection<int>>._)).Returns(true);
 
-        // Act
+        // act
         var ex = await Assert.ThrowsAsync<ArgumentException>(() => orderService.OrderCreateAsync(dto));
 
-        // Assert
+        // assert
         Assert.Equal("Pedido não pode ser feito com produtos inativos.", ex.Message);
         A.CallTo(() => orderRepository.AddAsync(A<Order>._)).MustNotHaveHappened();
     }
@@ -214,7 +214,7 @@ public class OrderServiceTest
         int orderId,
         int customerId)
     {
-        // Arrange
+        // arrange
         var customer = new Customer("Nome", "48999999999", "Rua", "Bairro", "123", "Cidade", "Ponto de referencia", 88000000);
         typeof(Customer).GetProperty("CustomerId")!.SetValue(customer, customerId);
 
@@ -230,10 +230,10 @@ public class OrderServiceTest
 
         A.CallTo(() => orderRepository.GetByIdWithDetailsAsync(orderId)).Returns(order);
 
-        // Act
+        // act
         var result = await orderService.UpdateStatusAsync(dto);
 
-        // Assert
+        // assert
         Assert.Equal(orderId, result.OrderId);
         Assert.Equal(OrderStatusEnum.EmPreparacao.GetDescription(), result.OrderStatus);
         Assert.Equal(customerId, result.CustomerId);
@@ -269,7 +269,7 @@ public class OrderServiceTest
         int orderId,
         int customerId)
     {
-        // Arrange
+        // arrange
         var customer = new Customer("Nome", "48999999999", "Rua", "Bairro", "123", "Cidade", "Ponto de referencia", 88000000);
         typeof(Customer).GetProperty("CustomerId")!.SetValue(customer, customerId);
 
@@ -286,10 +286,10 @@ public class OrderServiceTest
 
         A.CallTo(() => orderRepository.GetByIdWithDetailsAsync(orderId)).Returns(order);
 
-        // Act
+        // act
         var exception = await Assert.ThrowsAsync<ArgumentException>(() => orderService.UpdateStatusAsync(dto));
 
-        // Assert
+        // assert
         Assert.Equal("Status do pedido já está definido como o informado.", exception.Message);
 
         A.CallTo(() => orderRepository.GetByIdWithDetailsAsync(orderId))
@@ -311,15 +311,15 @@ public class OrderServiceTest
         OrderService orderService,
         int pedidoId)
     {
-        // Arrange: pedido em status que NÃO pode ser cancelado (ex.: Pronto)
+        // arrange: pedido em status que NÃO pode ser cancelado (ex.: Pronto)
         var order = new Order(isDelivery: true, totalAmount: 10m, notes: "obs", customerId: 1, createdAt: NodaTimeExtensions.NowUtc());
         order.SetStatus(OrderStatusEnum.Pronto);
         A.CallTo(() => orderRepository.GetByIdWithDetailsAsync(pedidoId)).Returns(order);
 
-        // Act
+        // act
         var ex = await Assert.ThrowsAsync<ArgumentException>(() => orderService.EnabledAsync(pedidoId));
 
-        // Assert
+        // assert
         var esperado = $"Pedido não pode ser cancelado pois, já esta com status: {order.Status.GetDescription()}";
         Assert.Equal(esperado, ex.Message);
         A.CallTo(() => orderRepository.UpdateAsync(A<Order>._)).MustNotHaveHappened();
@@ -332,7 +332,7 @@ public class OrderServiceTest
         int orderId,
         int customerId)
     {
-        // Arrange: pedido em status que pode ser cancelado (ex.: EmPreparacao)
+        // arrange: pedido em status que pode ser cancelado (ex.: EmPreparacao)
         var customer = new Customer("Nome", "48999999999", "Rua", "Bairro", "123", "Cidade", "Ponto de referência", 88000000);
         typeof(Customer).GetProperty("CustomerId")!.SetValue(customer, customerId);
 
@@ -343,10 +343,10 @@ public class OrderServiceTest
         order.SetStatus(OrderStatusEnum.EmPreparacao);
         A.CallTo(() => orderRepository.GetByIdWithDetailsAsync(orderId)).Returns(order);
 
-        // Act
+        // act
         await orderService.EnabledAsync(orderId);
 
-        // Assert
+        // assert
         Assert.Equal(OrderStatusEnum.Cancelado, order.Status);
         A.CallTo(() => orderRepository.UpdateAsync(A<Order>._)).MustHaveHappenedOnceExactly();
     }

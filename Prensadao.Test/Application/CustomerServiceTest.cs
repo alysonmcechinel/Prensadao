@@ -20,14 +20,14 @@ public class CustomerServiceTest
         CustomerService customerService,
         CustomerRequestDto dto)
     {
-        // Arrange: telefone válido, mas já existente
+        // arrange: telefone válido, mas já existente
         dto.Phone = "48999999999";
         A.CallTo(() => customerRepository.ExistsByPhoneAsync(dto.Phone)).Returns(true);
 
-        // Act
+        // act
         var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => customerService.AddCustomerAsync(dto));
 
-        // Assert
+        // assert
         Assert.Equal("Telefone já cadastrado.", ex.Message);
         A.CallTo(() => customerRepository.ExistsByPhoneAsync(dto.Phone)).MustHaveHappenedOnceExactly(); // Verifica que consultou existência uma única vez
         A.CallTo(() => customerRepository.AddAsync(A<Customer>._)).MustNotHaveHappened(); // Não deve tentar inserir
@@ -39,14 +39,14 @@ public class CustomerServiceTest
         CustomerService customerService,
         CustomerRequestDto dto)
     {
-        // Arrange: telefone inválido, e garantimos que "não existe"
+        // arrange: telefone inválido, e garantimos que "não existe"
         dto.Phone = "123"; // inválido pelos critérios da service
         A.CallTo(() => customerRepository.ExistsByPhoneAsync(dto.Phone)).Returns(false);
 
-        // Act
+        // act
         var ex = await Assert.ThrowsAsync<ArgumentException>(() => customerService.AddCustomerAsync(dto));
 
-        // Assert
+        // assert
         Assert.Equal("Número de telefone inválido.", ex.Message);
         A.CallTo(() => customerRepository.AddAsync(A<Customer>._)).MustNotHaveHappened(); // Não deve tentar inserir
         A.CallTo(() => customerRepository.ExistsByPhoneAsync(dto.Phone)).MustNotHaveHappened(); // A validação deve falhar antes de consultar o repositório
@@ -59,15 +59,15 @@ public class CustomerServiceTest
         CustomerRequestDto dto,
         int novoId)
     {
-        // Arrange: telefone válido e não existente
+        // arrange: telefone válido e não existente
         dto.Phone = "48988887777";
         A.CallTo(() => customerRepository.ExistsByPhoneAsync(dto.Phone)).Returns(false);
         A.CallTo(() => customerRepository.AddAsync(A<Customer>._)).Returns(novoId); // Simula ID gerado pelo repositório
 
-        // Act
+        // act
         var id = await customerService.AddCustomerAsync(dto);
 
-        // Assert
+        // assert
         Assert.Equal(novoId, id);
         A.CallTo(() => customerRepository.AddAsync(
             A<Customer>.That.Matches(c =>
@@ -84,13 +84,13 @@ public class CustomerServiceTest
         CustomerService customerService,
         int idInexistente)
     {
-        // Arrange
+        // arrange
         A.CallTo(() => customerRepository.GetByIdWithDetailsAsync(idInexistente)).Returns(Task.FromResult<Customer?>(null));
 
-        // Act
+        // act
         var ex = await Assert.ThrowsAsync<ArgumentException>(() => customerService.GetByIdAsync(idInexistente));
 
-        // Assert
+        // assert
         Assert.Equal("Cliente não encontrado.", ex.Message);
         A.CallTo(() => customerRepository.GetByIdWithDetailsAsync(idInexistente)).MustHaveHappenedOnceExactly();
     }
@@ -100,15 +100,15 @@ public class CustomerServiceTest
     [Frozen] ICustomerRepository customerRepository,
     CustomerService customerService)
     {
-        // Arrange
+        // arrange
         var customer = new Customer("John Doe", "48988887777", "Street 1", "District A", "100", "CityX", "Near Park", 123456);
         typeof(Customer).GetProperty("CustomerId")!.SetValue(customer, 1);
         A.CallTo(() => customerRepository.GetByIdWithDetailsAsync(customer.CustomerId)).Returns(Task.FromResult<Customer?>(customer));
 
-        // Act
+        // act
         var response = await customerService.GetByIdAsync(customer.CustomerId);
 
-        // Assert
+        // assert
         Assert.Equal(customer.CustomerId, response.CustomerId);
         A.CallTo(() => customerRepository.GetByIdWithDetailsAsync(customer.CustomerId)).MustHaveHappenedOnceExactly();
     }
@@ -119,15 +119,15 @@ public class CustomerServiceTest
         CustomerService customerService,
         CustomerRequestDto dto)
     {
-        // Arrange: garantir que o cenário falhe por cliente não encontrado
+        // arrange: garantir que o cenário falhe por cliente não encontrado
         dto.CustomerId = 1;
         dto.Phone = "48999999999";
         A.CallTo(() => customerRepository.GetByIdAsync(dto.CustomerId)).Returns(Task.FromResult<Customer>(null));
 
-        // Act
+        // act
         var ex = await Assert.ThrowsAsync<ArgumentException>(() => customerService.UpdateAsync(dto));
 
-        // Assert
+        // assert
         Assert.Equal("Cliente não encontrado.", ex.Message);
         A.CallTo(() => customerRepository.GetByIdAsync(dto.CustomerId)).MustHaveHappenedOnceExactly();
         A.CallTo(() => customerRepository.UpdateAsync(A<Customer>._)).MustNotHaveHappened(); // Verificar que o método Update do repository não foi chamado

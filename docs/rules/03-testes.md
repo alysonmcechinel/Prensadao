@@ -6,6 +6,7 @@
 - Nomeie arquivos conforme o item testado, como `ProductServiceTest.cs`.
 - Para novos testes, prefira `Method_ShouldExpectedBehavior_WhenCondition`.
 - Mantenha o padrão local quando editar arquivos existentes.
+- Separe os testes unitários com comentários AAA em minúsculo: `// arrange`, `// act` e `// assert`.
 - Cubra sucesso, validações de entrada, exceções de regra e chamadas esperadas a repositórios/mensageria.
 - Não dependa de PostgreSQL, RabbitMQ ou Azure OpenAI reais em testes unitários.
 - Para mudanças em serviços, contratos, DTOs, workers, repositórios ou IA, adicione ou atualize testes relevantes.
@@ -19,6 +20,7 @@ Nome claro e foco em uma regra.
 [Fact]
 public async Task AddProduct_ShouldThrow_WhenValueIsNotPositive()
 {
+    // arrange
     var repository = A.Fake<IProductRepository>();
     var service = new ProductService(repository);
 
@@ -29,8 +31,10 @@ public async Task AddProduct_ShouldThrow_WhenValueIsNotPositive()
         Description = "Produto de teste"
     };
 
+    // act
     var act = () => service.AddProductAsync(dto);
 
+    // assert
     await act.Should().ThrowAsync<ArgumentException>()
         .WithMessage("O valor do produto deve ser maior que 0");
 }

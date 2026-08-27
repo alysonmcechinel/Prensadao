@@ -17,10 +17,12 @@ public class OrdemItemServiceTest
         OrderItemService orderItemService,
         OrderItem orderItem)
     {
-        // Act
+        // arrange
+
+        // act
         await orderItemService.AddOrderItemAsync(orderItem);
 
-        // Assert
+        // assert
         A.CallTo(() => orderItemRepository.AddAsync(orderItem)).MustHaveHappenedOnceExactly();
     }
 
@@ -30,13 +32,13 @@ public class OrdemItemServiceTest
         OrderItemService orderItemService,
         List<OrderItem> orderItems)
     {
-        // Arrange
+        // arrange
         A.CallTo(() => orderItemRepository.GetAllAsync()).Returns(orderItems);
         
-        // Act
+        // act
         var result = await orderItemService.GetOrderItemsAsync();
         
-        // Assert
+        // assert
         Assert.Equal(orderItems, result);
         A.CallTo(() => orderItemRepository.GetAllAsync()).MustHaveHappenedOnceExactly();
     }
