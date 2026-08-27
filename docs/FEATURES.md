@@ -27,7 +27,7 @@
 ## Mensageria e Workers
 - RabbitMQ usa exchanges e filas centralizadas em `RabbitMqConstants`.
 - `OrderWorker` consome pedidos da fila da cozinha e publica notificação.
-- `NotifyWorker` consome mensagens de notificação.
+- `NotifyWorker` consome mensagens de notificação e usa estratégias por status do pedido.
 - A inicialização de exchanges, filas e binds ocorre via `RabbitMqStartup`.
 
 ## Hangfire

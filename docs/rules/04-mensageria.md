@@ -5,6 +5,7 @@
 - Publicação de mensagens deve passar por `IBus`.
 - Consumo deve passar por `IConsumer`.
 - Workers ficam em `Prensadao.Infra/Messaging/Workers`.
+- Workers devem passar o `CancellationToken` do host para o `IConsumer`.
 - Contratos de mensagem devem ser serializados em JSON e manter compatibilidade.
 - Ao alterar `OrderMessageDto` ou `NotifyMessageDto`, atualize produtores, consumidores, documentação e testes.
 - Workers devem tratar cancelamento e falhas de forma previsível.
@@ -36,7 +37,7 @@ private Task PublishOrderMessageAsync(Order order)
 Consumo dentro de worker.
 
 ```csharp
-_consumer.Listen<OrderMessageDto>(
+await _consumer.Listen<OrderMessageDto>(
     RabbitMqConstants.Queues.OrderCozinhaQueue,
     async message =>
     {
@@ -49,7 +50,10 @@ _consumer.Listen<OrderMessageDto>(
 
         order.AdvanceStatus();
         await orderRepository.UpdateAsync(order);
-    });
+    },
+    stoppingToken);
+
+await Task.Delay(Timeout.InfiniteTimeSpan, stoppingToken);
 ```
 
 ## Evite
