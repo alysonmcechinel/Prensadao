@@ -1,4 +1,4 @@
-﻿# Diretrizes do Repositório
+# Diretrizes do Repositório
 
 Este arquivo é o ponto de entrada para agentes como Codex ao trabalhar no Prensadão. Antes de alterar código, leia este arquivo, o índice em `docs/README.md`, `docs/rules/00-principios.md` e as rules aplicáveis em `docs/rules/`.
 

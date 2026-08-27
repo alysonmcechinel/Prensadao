@@ -17,7 +17,7 @@ public class OrderServiceTest
 {
     [Theory, AutoFakeItEasyData]
     public async Task OrderCreate_DeveCriarPedidoItensEPublicarMensagem_QuandoSucesso(
-        [Frozen] IBus bus,
+        [Frozen] IMessagePublisher messagePublisher,
         [Frozen] IOrderRepository orderRepository,
         [Frozen] IOrderItemRepository orderItemRepository,
         [Frozen] IProductRepository productRepository,
@@ -81,7 +81,7 @@ public class OrderServiceTest
                 item.UnitPrice == 8.00m)))
             .MustHaveHappenedOnceExactly();
 
-        A.CallTo(() => bus.Publish(
+        A.CallTo(() => messagePublisher.PublishAsync(
             A<OrderMessageDto>.That.Matches(message => message.OrderId == 123),
             RabbitMqConstants.Exchanges.OrderExchange,
             A<string?>._))
@@ -204,6 +204,105 @@ public class OrderServiceTest
         // Assert
         Assert.Equal("Pedido não pode ser feito com produtos inativos.", ex.Message);
         A.CallTo(() => orderRepository.AddAsync(A<Order>._)).MustNotHaveHappened();
+    }
+
+    [Theory, AutoFakeItEasyData]
+    public async Task UpdateStatusAsync_DeveAtualizarPedidoPublicarNotificacaoERetornarPedido_QuandoStatusValido(
+        [Frozen] IMessagePublisher messagePublisher,
+        [Frozen] IOrderRepository orderRepository,
+        OrderService orderService,
+        int orderId,
+        int customerId)
+    {
+        // Arrange
+        var customer = new Customer("Nome", "48999999999", "Rua", "Bairro", "123", "Cidade", "Ponto de referencia", 88000000);
+        typeof(Customer).GetProperty("CustomerId")!.SetValue(customer, customerId);
+
+        var order = new Order(isDelivery: true, totalAmount: 42.50m, notes: "Sem cebola", customerId: customerId, createdAt: NodaTimeExtensions.NowUtc());
+        typeof(Order).GetProperty("OrderId")!.SetValue(order, orderId);
+        typeof(Order).GetProperty("Customer")!.SetValue(order, customer);
+
+        var dto = new UpdateStatusDto
+        {
+            OrderId = orderId,
+            OrderStatus = OrderStatusEnum.EmPreparacao
+        };
+
+        A.CallTo(() => orderRepository.GetByIdWithDetailsAsync(orderId)).Returns(order);
+
+        // Act
+        var result = await orderService.UpdateStatusAsync(dto);
+
+        // Assert
+        Assert.Equal(orderId, result.OrderId);
+        Assert.Equal(OrderStatusEnum.EmPreparacao.GetDescription(), result.OrderStatus);
+        Assert.Equal(customerId, result.CustomerId);
+        Assert.Equal(customer.Name, result.CustomerName);
+        Assert.Equal(OrderStatusEnum.EmPreparacao, order.Status);
+
+        A.CallTo(() => orderRepository.GetByIdWithDetailsAsync(orderId))
+            .MustHaveHappenedOnceExactly();
+
+        A.CallTo(() => orderRepository.UpdateAsync(
+                A<Order>.That.Matches(updatedOrder =>
+                    updatedOrder.OrderId == orderId &&
+                    updatedOrder.Status == OrderStatusEnum.EmPreparacao)))
+            .MustHaveHappenedOnceExactly();
+
+        A.CallTo(() => messagePublisher.PublishAsync(
+                A<NotifyMessageDto>.That.Matches(message =>
+                    message.OrderId == orderId &&
+                    message.ConsumerName == customer.Name &&
+                    message.Delivery == order.IsDelivery &&
+                    message.OrderStatus == OrderStatusEnum.EmPreparacao &&
+                    message.Phone == customer.Phone),
+                RabbitMqConstants.Exchanges.NotifyExchange,
+                A<string?>._))
+            .MustHaveHappenedOnceExactly();
+    }
+
+    [Theory, AutoFakeItEasyData]
+    public async Task UpdateStatusAsync_DeveLancarExceptionENaoAtualizarOuPublicar_QuandoStatusJaEstaDefinido(
+        [Frozen] IMessagePublisher messagePublisher,
+        [Frozen] IOrderRepository orderRepository,
+        OrderService orderService,
+        int orderId,
+        int customerId)
+    {
+        // Arrange
+        var customer = new Customer("Nome", "48999999999", "Rua", "Bairro", "123", "Cidade", "Ponto de referencia", 88000000);
+        typeof(Customer).GetProperty("CustomerId")!.SetValue(customer, customerId);
+
+        var order = new Order(isDelivery: true, totalAmount: 42.50m, notes: "Sem cebola", customerId: customerId, createdAt: NodaTimeExtensions.NowUtc());
+        typeof(Order).GetProperty("OrderId")!.SetValue(order, orderId);
+        typeof(Order).GetProperty("Customer")!.SetValue(order, customer);
+        order.SetStatus(OrderStatusEnum.Pronto);
+
+        var dto = new UpdateStatusDto
+        {
+            OrderId = orderId,
+            OrderStatus = OrderStatusEnum.Pronto
+        };
+
+        A.CallTo(() => orderRepository.GetByIdWithDetailsAsync(orderId)).Returns(order);
+
+        // Act
+        var exception = await Assert.ThrowsAsync<ArgumentException>(() => orderService.UpdateStatusAsync(dto));
+
+        // Assert
+        Assert.Equal("Status do pedido já está definido como o informado.", exception.Message);
+
+        A.CallTo(() => orderRepository.GetByIdWithDetailsAsync(orderId))
+            .MustHaveHappenedOnceExactly();
+
+        A.CallTo(() => orderRepository.UpdateAsync(A<Order>._))
+            .MustNotHaveHappened();
+
+        A.CallTo(() => messagePublisher.PublishAsync(
+                A<NotifyMessageDto>._,
+                A<string>._,
+                A<string?>._))
+            .MustNotHaveHappened();
     }
 
     [Theory, AutoFakeItEasyData]

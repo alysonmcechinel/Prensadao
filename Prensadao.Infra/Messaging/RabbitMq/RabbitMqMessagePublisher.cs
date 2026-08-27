@@ -6,16 +6,16 @@ using System.Text.Json;
 
 namespace Prensadao.Infra.Messaging.RabbitMq;
 
-public class Bus : IBus
+public class RabbitMqMessagePublisher : IMessagePublisher
 {
     private readonly IRabbitMqConfig _rabbitMqConfigService;
 
-    public Bus(IRabbitMqConfig rabbitMqConfigService)
+    public RabbitMqMessagePublisher(IRabbitMqConfig rabbitMqConfigService)
     {
         _rabbitMqConfigService = rabbitMqConfigService;
     }
 
-    public Task Publish<T>(T message, string exchange, string? routingKey = "")
+    public Task PublishAsync<T>(T message, string exchange, string? routingKey = "")
     {
         if (string.IsNullOrWhiteSpace(exchange))
             throw new ArgumentNullException(nameof(exchange));

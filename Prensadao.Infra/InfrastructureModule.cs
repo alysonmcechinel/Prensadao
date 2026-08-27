@@ -47,7 +47,7 @@ namespace Prensadao.Infra
         // Configuração do rabbitMQ, injeção de dependecia services e inicialiação do RabbitMQ
         public static IServiceCollection AddRabbitMQ(this IServiceCollection services)
         {
-            services.AddSingleton<IBus, Bus>();
+            services.AddSingleton<IMessagePublisher, RabbitMqMessagePublisher>();
             services.AddSingleton<IConsumer, Consumer>();
 
             services.AddSingleton<IRabbitMqConfig, RabbitMqConfig>();
