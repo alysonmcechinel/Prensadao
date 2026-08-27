@@ -2,5 +2,5 @@
 
 public interface IConsumer
 {
-    Task Listen<T>(string queue, Func<T, Task> onMessage);
+    Task Listen<T>(string queue, Func<T, Task> onMessage, CancellationToken cancellationToken);
 }

@@ -21,25 +21,21 @@ public class OrderWorker : BackgroundService
         _messagePublisher = messagePublisher;
     }
 
-    // Exemplo de metodo com IDEMPOTÊNCIA
-    protected override Task ExecuteAsync(CancellationToken stoppingToken) => 
-        _consumer.Listen<OrderMessageDto>(RabbitMqConstants.Queues.OrderCozinhaQueue, async message =>
+    // Mantém idempotência caso o RabbitMQ entregue a mesma mensagem mais de uma vez.
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        await _consumer.Listen<OrderMessageDto>(RabbitMqConstants.Queues.OrderCozinhaQueue, async message =>
         {
             using var scope = _serviceProvider.CreateScope();
-            var orderRepository = scope.ServiceProvider.GetService<IOrderRepository>();
+            var orderRepository = scope.ServiceProvider.GetRequiredService<IOrderRepository>();
             var order = await orderRepository.GetByIdAsync(message.OrderId);
 
-            // 1. AQUI ESTÁ A IDEMPOTÊNCIA
-            // Se o pedido já saiu do status 'Criado', ignoramos a mensagem.
-            // Isso evita processar duas vezes se o RabbitMQ reenviar.
             if (order is null || order.Status != OrderStatusEnum.Criado)
                 return;
 
-            // 2. Execução Segura
-            order.AdvanceStatus(); // Muda para 'Em Preparação'
+            order.AdvanceStatus();
             await orderRepository.UpdateAsync(order);
 
-            // 3. Notifica apenas se a atualização ocorreu
             var notify = new NotifyMessageDto
             {
                 OrderId = order.OrderId,
@@ -51,5 +47,8 @@ public class OrderWorker : BackgroundService
             await _messagePublisher.PublishAsync(notify, RabbitMqConstants.Exchanges.NotifyExchange, "");
 
             Console.WriteLine($"Pedido #{order.OrderId} atualizado com sucesso.");
-        });
+        }, stoppingToken);
+
+        await Task.Delay(Timeout.InfiniteTimeSpan, stoppingToken);
+    }
 }
