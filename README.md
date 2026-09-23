@@ -1,18 +1,23 @@
-﻿# Prensadão
+# Prensadão
 
 Sistema de gestão de pedidos para uma hamburgueria, desenvolvido em ASP.NET Core com arquitetura em camadas. O projeto usa PostgreSQL, Entity Framework Core, RabbitMQ, Hangfire, NodaTime e Azure OpenAI para geração de sugestões de promoções.
 
 ## Documentação
+
 A documentação técnica principal fica em `docs/`:
 
-- `docs/README.md`: índice.
+- `AGENTS.md`: instruções obrigatórias para agentes de desenvolvimento.
+- `docs/README.md`: índice e rotas de leitura.
 - `docs/ARCHITECTURE.md`: arquitetura, camadas e dependências.
 - `docs/FEATURES.md`: funcionalidades existentes.
+- `docs/GLOSSARY.md`: dicionário dos termos de negócio usados pelo sistema.
 - `docs/AI_PROMOTIONS.md`: fluxo de promoções com IA.
 - `docs/RUNBOOK.md`: comandos de execução, Docker, migrations e testes.
-- `docs/rules/`: guardrails para manutenção por humanos, Codex e Claude.
+- `docs/ROADMAP.md`: pendências e decisões futuras.
+- `docs/rules/`: regras de manutenção por área.
 
 ## Tecnologias
+
 - ASP.NET Core / .NET 8
 - Entity Framework Core
 - PostgreSQL
@@ -24,6 +29,7 @@ A documentação técnica principal fica em `docs/`:
 - Docker / Docker Compose
 
 ## Comandos Principais
+
 Execute a partir da raiz do repositório:
 
 ```powershell

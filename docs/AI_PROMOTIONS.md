@@ -1,8 +1,9 @@
-﻿# Promoções com IA
+# Promoções com IA
 
 A feature de promoções com IA sugere uma promoção semanal com base em produtos mais vendidos e histórico de melhor dia para promoção.
 
 ## Endpoint
+
 `POST api/Promotions/Generate`
 
 Request:
@@ -30,6 +31,7 @@ Response:
 ```
 
 ## Fluxo
+
 1. `PromotionsController` recebe a request.
 2. `PromotionGeneratorService` valida `TopN`, `MinDiscountPercent` e `MaxDiscountPercent`.
 3. O serviço busca os produtos mais vendidos em `ISalesAnalyticsRepository`.
@@ -39,6 +41,7 @@ Response:
 7. O preço promocional é calculado com arredondamento `MidpointRounding.AwayFromZero`.
 
 ## Configuração
+
 A seção esperada em `appsettings.json` é:
 
 ```json
@@ -56,6 +59,7 @@ A seção esperada em `appsettings.json` é:
 Não versione chaves reais. Use variáveis de ambiente, user secrets ou configuração local fora do versionamento.
 
 ## Validações
+
 - `TopN` deve ser maior que zero.
 - `MinDiscountPercent` não pode ser negativo.
 - `MaxDiscountPercent` deve ser maior que zero.
@@ -67,6 +71,7 @@ Não versione chaves reais. Use variáveis de ambiente, user secrets ou configur
 - A resposta deve ser JSON válido no schema esperado.
 
 ## Segurança de Prompt
+
 O prompt orienta a IA a:
 
 - Responder apenas JSON.
@@ -75,7 +80,6 @@ O prompt orienta a IA a:
 - Não inventar produtos fora da lista.
 - Não gerar preço negativo.
 
-## Pendências Conhecidas
-- `RequestContextMiddleware` trata `AiResponseValidationException`, mas está comentado em `Program.cs`.
-- `PromotionsController` ainda captura `Exception` genérica e retorna `BadRequest`, o que reduz a utilidade do middleware.
-- Ainda faltam testes unitários para o gerador de promoções, validações de resposta da IA e cenários de falha.
+## Trabalho Futuro
+
+As pendências de tratamento de erro e cobertura automatizada estão centralizadas em `ROADMAP.md`.

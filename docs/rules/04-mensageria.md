@@ -1,19 +1,21 @@
-﻿# Rules: Mensageria
+# Rules: Mensageria
 
 ## Regra
+
 - Constantes de exchanges, filas e routing keys devem ficar centralizadas em `RabbitMqConstants` ou no local já estabelecido.
-- Publicação de mensagens deve passar por `IBus`.
+- Publicação de mensagens deve passar por `IMessagePublisher`.
 - Consumo deve passar por `IConsumer`.
 - Workers ficam em `Prensadao.Infra/Messaging/Workers`.
 - Workers devem passar o `CancellationToken` do host para o `IConsumer`.
 - Contratos de mensagem devem ser serializados em JSON e manter compatibilidade.
 - Ao alterar `OrderMessageDto` ou `NotifyMessageDto`, atualize produtores, consumidores, documentação e testes.
 - Workers devem tratar cancelamento e falhas de forma previsível.
-- Não bloqueie o host indefinidamente dentro de worker.
+- Não use espera bloqueante; mantenha o worker ativo apenas com operação assíncrona cancelável pelo token do host.
 - Repositórios não devem publicar mensagens.
 - Controllers não devem publicar mensagens diretamente.
 
 ## Exemplo Bom
+
 Constantes centralizadas.
 
 ```csharp
@@ -27,11 +29,13 @@ public static class RabbitMqConstants
 }
 ```
 
-Publicação passando por abstração.
+Publicação passando pela abstração usada pelo projeto.
 
 ```csharp
 private Task PublishOrderMessageAsync(Order order)
-    => _bus.Publish(CreateOrderMessage(order), RabbitMqConstants.Exchanges.OrderExchange);
+    => _messagePublisher.PublishAsync(
+        CreateOrderMessage(order),
+        RabbitMqConstants.Exchanges.OrderExchange);
 ```
 
 Consumo dentro de worker.
@@ -57,6 +61,7 @@ await Task.Delay(Timeout.InfiniteTimeSpan, stoppingToken);
 ```
 
 ## Evite
+
 Controller publicando diretamente no RabbitMQ.
 
 ```csharp
@@ -71,4 +76,5 @@ public async Task<IActionResult> PostAsync([FromBody] OrderRequestDto dto)
 ```
 
 ## Por quê?
-Mensageria é detalhe de integração. Mantendo `IBus`, `IConsumer`, workers e constantes centralizadas, fica mais fácil trocar implementação, testar serviços e entender o fluxo assíncrono.
+
+Mensageria é detalhe de integração. Mantendo `IMessagePublisher`, `IConsumer`, workers e constantes centralizadas, fica mais fácil trocar implementação, testar serviços e entender o fluxo assíncrono.
