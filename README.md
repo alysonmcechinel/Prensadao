@@ -10,7 +10,7 @@ A documentação técnica principal fica em `docs/`:
 - `docs/README.md`: índice e rotas de leitura.
 - `docs/ARCHITECTURE.md`: arquitetura, camadas e dependências.
 - `docs/FEATURES.md`: funcionalidades existentes.
-- `docs/GLOSSARY.md`: dicionário dos termos de negócio usados pelo sistema.
+- `docs/GLOSSARY.md`: vocabulário canônico dos termos de negócio e técnicos próprios do Prensadão.
 - `docs/AI_PROMOTIONS.md`: fluxo de promoções com IA.
 - `docs/RUNBOOK.md`: comandos de execução, Docker, migrations e testes.
 - `docs/ROADMAP.md`: pendências e decisões futuras.

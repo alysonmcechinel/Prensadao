@@ -8,8 +8,9 @@ Este diretório concentra a documentação técnica e operacional do projeto. `A
 | --- | --- | --- |
 | `ARCHITECTURE.md` | Estado atual das camadas, dependências e limites | Passos operacionais ou planos futuros |
 | `FEATURES.md` | Funcionalidades já implementadas | Funcionalidades apenas planejadas |
-| `GLOSSARY.md` | Significado canônico dos termos de negócio | Regras técnicas ou detalhes de implementação sem impacto semântico |
+| `GLOSSARY.md` | Significado canônico dos termos de negócio e técnicos próprios do Prensadão | Regras ou detalhes de implementação sem impacto semântico |
 | `AI_PROMOTIONS.md` | Contrato e fluxo detalhado da promoção com IA | Regras gerais de arquitetura |
+| `ERROR_HANDLING.md` | Proposta e roteiro para padronizar erros HTTP | Comportamento apresentado como já implementado |
 | `RUNBOOK.md` | Execução, configuração, migrations e diagnóstico | Decisões de negócio |
 | `ROADMAP.md` | Pendências, débitos conhecidos e decisões futuras | Comportamento apresentado como concluído |
 | `rules/` | Regras prescritivas para mudanças | Inventário de funcionalidades |
@@ -17,13 +18,15 @@ Este diretório concentra a documentação técnica e operacional do projeto. `A
 ## Rotas de Leitura
 
 - Visão geral do sistema: `ARCHITECTURE.md` e `FEATURES.md`.
-- Regra de negócio, contrato, DTO ou nomenclatura: `GLOSSARY.md`.
+- Termo de negócio, termo técnico próprio do projeto ou nomenclatura: `GLOSSARY.md`.
+- Comportamento implementado: `FEATURES.md` e, para promoções, `AI_PROMOTIONS.md`.
 - Execução ou diagnóstico local: `RUNBOOK.md`.
 - Mudança em arquitetura: `ARCHITECTURE.md`, `rules/00-principios.md` e `rules/01-arquitetura.md`.
 - Mudança em persistência: `rules/00-principios.md` e `rules/02-persistencia.md`.
 - Mudança em testes: `rules/00-principios.md` e `rules/03-testes.md`.
 - Mudança em mensageria ou workers: `rules/00-principios.md` e `rules/04-mensageria.md`.
 - Mudança em promoções com IA: `AI_PROMOTIONS.md`, `rules/00-principios.md` e `rules/05-ia-promocoes.md`.
+- Padronização de erros HTTP: `ERROR_HANDLING.md`, `rules/00-principios.md`, `rules/01-arquitetura.md` e `rules/03-testes.md`.
 - Operação Git solicitada pelo usuário: `rules/06-git.md`.
 - Planejamento e débitos conhecidos: `ROADMAP.md`.
 
