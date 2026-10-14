@@ -56,10 +56,10 @@ namespace Prensadao.Application.Services
         }
 
         private static Product CreateProduct(ProductRequestDto dto)
-            => new(dto.Name, dto.Value, dto.Description);
+            => new(dto.Name, dto.Price, dto.Description);
 
         private static void UpdateProduct(Product product, ProductRequestDto dto)
-            => product.UpdateDetails(dto.Name, dto.Enabled, dto.Value, dto.Description);
+            => product.UpdateDetails(dto.Name, dto.Enabled, dto.Price, dto.Description);
 
         private static void ValidateProductRequest(ProductRequestDto dto)
         {
@@ -68,8 +68,8 @@ namespace Prensadao.Application.Services
             if (string.IsNullOrWhiteSpace(dto.Name))
                 throw new ArgumentException("O produto deve ter um nome.");
 
-            if (dto.Value <= 0)
-                throw new ArgumentException("O valor do produto deve ser maior que 0");
+            if (dto.Price <= 0)
+                throw new ArgumentException("O preço do produto deve ser maior que 0");
         }
 
         private static void ValidateProductId(int? productId)

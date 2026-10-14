@@ -18,6 +18,7 @@ Este documento registra apenas comportamentos já implementados. Trabalho futuro
 - Atualização de dados.
 - Ativação/desativação por flag `Enabled`.
 - Validações de nome obrigatório, preço positivo, id válido, existência e nome duplicado.
+- Requests e responses de produto expõem o preço pelo campo canônico `Price`.
 
 ## Pedidos
 

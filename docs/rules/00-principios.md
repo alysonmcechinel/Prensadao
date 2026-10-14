@@ -61,7 +61,7 @@ public async Task<IActionResult> PostAsync(ProductRequestDto dto)
     if (string.IsNullOrWhiteSpace(dto.Name))
         return BadRequest("Nome inválido.");
 
-    var product = new Product(dto.Name, dto.Value, dto.Description);
+    var product = new Product(dto.Name, dto.Price, dto.Description);
     await _dbContext.Products.AddAsync(product);
     await _dbContext.SaveChangesAsync();
     await _bus.Publish(product, "product.created");

@@ -5,12 +5,12 @@ namespace Prensadao.Application.DTOs.Responses;
 
 public class ProductResponseDto
 {
-    public ProductResponseDto(int id, string name, bool enabled, decimal value, string description)
+    public ProductResponseDto(int id, string name, bool enabled, decimal price, string description)
     {
         ProductId = id;
         Name = name;
         Enabled = enabled;
-        Value = value;
+        Price = price;
         Description = description;
     }
 
@@ -18,7 +18,7 @@ public class ProductResponseDto
     public int ProductId { get; set; }
     public string Name { get; set; }
     public bool Enabled { get; set; }
-    public decimal Value { get; set; }
+    public decimal Price { get; set; }
     public string Description { get; set; }
 
     #region Mapeamentos

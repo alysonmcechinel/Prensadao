@@ -27,7 +27,7 @@ public async Task AddProduct_ShouldThrow_WhenValueIsNotPositive()
     var dto = new ProductRequestDto
     {
         Name = "X Salada",
-        Value = 0,
+        Price = 0,
         Description = "Produto de teste"
     };
 
@@ -36,7 +36,7 @@ public async Task AddProduct_ShouldThrow_WhenValueIsNotPositive()
 
     // assert
     await act.Should().ThrowAsync<ArgumentException>()
-        .WithMessage("O valor do produto deve ser maior que 0");
+        .WithMessage("O preço do produto deve ser maior que 0");
 }
 ```
 
