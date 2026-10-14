@@ -8,13 +8,13 @@ namespace Prensadao.Application.DTOs.Responses
 {
     public class OrderResponseDto
     {
-        public OrderResponseDto(int orderId, OrderStatusEnum orderStatus, bool delivery, decimal totalAmount, string observation, int customerId, string customerName, DateTime dateOrder, List<OrderItemResponseDto> ordemItems)
+        public OrderResponseDto(int orderId, OrderStatusEnum orderStatus, bool delivery, decimal totalAmount, string notes, int customerId, string customerName, DateTime dateOrder, List<OrderItemResponseDto> ordemItems)
         {
             OrderId = orderId;
             OrderStatus = orderStatus.GetDescription();
             Delivery = delivery;
             TotalAmount = totalAmount;
-            Observation = observation;
+            Notes = notes;
             CustomerId = customerId;
             CustomerName = customerName;
             DateOrder = dateOrder.LocalTime();
@@ -26,7 +26,7 @@ namespace Prensadao.Application.DTOs.Responses
         public string OrderStatus { get; set; }
         public bool Delivery { get; set; }
         public decimal TotalAmount { get; set; }
-        public string? Observation { get; set; }
+        public string? Notes { get; set; }
         public int CustomerId { get; set; }
         public string CustomerName { get; set; } = string.Empty;
         public DateTime DateOrder { get; set; }

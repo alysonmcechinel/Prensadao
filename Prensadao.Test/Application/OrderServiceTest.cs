@@ -28,7 +28,7 @@ public class OrderServiceTest
         {
             CustomerId = 1,
             Delivery = true,
-            Observation = "Sem cebola",
+            Notes = "Sem cebola",
             OrderItems =
             [
                 new OrderItemRequestDto { ProductId = 10, Quantity = 2 },
@@ -60,7 +60,7 @@ public class OrderServiceTest
             A<Order>.That.Matches(order =>
                 order.CustomerId == dto.CustomerId &&
                 order.IsDelivery == dto.Delivery &&
-                order.Notes == dto.Observation &&
+                order.Notes == dto.Notes &&
                 order.TotalAmount == 39.00m &&
                 order.Status == OrderStatusEnum.Criado)))
             .MustHaveHappenedOnceExactly();

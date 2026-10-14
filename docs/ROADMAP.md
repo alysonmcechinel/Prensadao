@@ -20,7 +20,6 @@ Os itens abaixo registram divergências existentes entre nomes, contratos e comp
 
 | Pendência | Classificação | Resultado esperado |
 | --- | --- | --- |
-| O domínio usa `Notes`, enquanto os contratos usam `Observation`. | Nomenclatura entre camadas. | Escolher o termo canônico por limite e manter o mapeamento explícito enquanto houver nomes diferentes. |
 | O domínio usa `CreatedAt`, enquanto a resposta usa `DateOrder` e converte o valor para horário local. | Nomenclatura e semântica temporal do contrato. | Tornar nome, fuso e tipo temporal inequívocos sem reinterpretar dados existentes. |
 | O domínio usa `Status`, enquanto os contratos usam `OrderStatus` em formatos diferentes. | Nomenclatura e contrato HTTP. | Padronizar o significado e documentar claramente os formatos de entrada e saída. |
 | O domínio usa `IsDelivery`, enquanto os contratos usam `Delivery`. | Nomenclatura entre camadas. | Escolher nomes coerentes para o booleano e preservar compatibilidade quando necessário. |

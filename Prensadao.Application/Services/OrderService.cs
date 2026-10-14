@@ -118,7 +118,7 @@ namespace Prensadao.Application.Services
         }
 
         private static Order CreateOrder(OrderRequestDto dto, decimal totalAmountOrder)
-            => new(dto.Delivery, totalAmountOrder, dto.Observation ?? string.Empty, dto.CustomerId, NodaTimeExtensions.NowUtc());
+            => new(dto.Delivery, totalAmountOrder, dto.Notes ?? string.Empty, dto.CustomerId, NodaTimeExtensions.NowUtc());
 
         private static decimal CalculateTotalAmount(IEnumerable<OrderItemRequestDto> items, IReadOnlyDictionary<int, decimal> prices)
             => Math.Round(items.Sum(item => prices[item.ProductId] * item.Quantity), 2, MidpointRounding.AwayFromZero);

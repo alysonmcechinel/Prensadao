@@ -31,6 +31,7 @@ Este documento registra apenas comportamentos já implementados. Trabalho futuro
 - Publicação de mensagens para cozinha e notificação.
 - Responses de pedido expõem o valor total pelo campo canônico `TotalAmount`.
 - Itens de pedido expõem o preço histórico cobrado pelo campo `UnitPrice`.
+- Requests e responses de pedido usam `Notes` para as observações do pedido.
 
 ## Mensageria e Workers
 

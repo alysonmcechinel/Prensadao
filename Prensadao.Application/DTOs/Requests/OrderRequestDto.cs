@@ -9,7 +9,7 @@ public class OrderRequestDto
     [Required]
     public bool Delivery { get; set; }
     
-    public string? Observation { get; set; }
+    public string? Notes { get; set; }
 
     [Required]
     public int CustomerId { get; set; }

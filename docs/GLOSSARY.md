@@ -53,7 +53,7 @@ O sistema não modela toda a operação comercial da lanchonete. Pagamento, esto
 | **Total do pedido** / `TotalAmount` | Valor monetário agregado dos itens do pedido. | Não comprova pagamento e não representa taxa de entrega, imposto, gorjeta ou desconto. | `Order.TotalAmount`; DTOs de pedido |
 | **Entrega** / `IsDelivery` | Modalidade na qual o pedido segue para entrega depois do preparo. | Não é status, entidade logística, endereço de entrega nem cálculo de frete. | `Order.IsDelivery`; DTOs de pedido |
 | **Retirada** | Modalidade na qual o pedido será retirado depois do preparo. | Não é entidade própria nem modalidade representada por um campo específico; corresponde à ausência de entrega no modelo atual. | `Order.IsDelivery`; notificações de pedido |
-| **Observação** / `Observation` | Texto livre associado ao pedido. | Não é descrição do produto, log técnico nem mensagem de notificação. | `Order`; DTOs de pedido |
+| **Observações do pedido** / `Notes` | Texto livre associado ao pedido. | Não é descrição do produto, log técnico nem mensagem de notificação. | `Order.Notes`; DTOs de pedido |
 | **Data do pedido** / `CreatedAt` | Instante em que o pedido foi criado. | Não é data de pagamento, preparo, entrega ou finalização. | `Order.CreatedAt`; DTOs de pedido |
 | **Criar pedido** | Registrar um novo pedido para um cliente cadastrado, com os produtos e quantidades solicitados. | Não identifica quem enviou a requisição, recebe pagamento nem reserva estoque. | `OrderService`; `FEATURES.md` |
 | **Cancelar pedido** | Interromper o fluxo operacional mantendo o pedido no histórico como cancelado. | Não exclui o pedido, estorna pagamento nem reverte estoque. | `OrderService`; `FEATURES.md` |

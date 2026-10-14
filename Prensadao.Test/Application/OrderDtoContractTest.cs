@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Prensadao.Application.DTOs.Requests;
 using Prensadao.Application.DTOs.Responses;
 using Prensadao.Domain.Entities;
 using Prensadao.Domain.Enums;
@@ -29,7 +30,26 @@ public class OrderDtoContractTest
 
         // assert
         Assert.Contains("\"totalAmount\":42.50", json);
+        Assert.Contains("\"notes\":\"Sem cebola\"", json);
         Assert.DoesNotContain("\"value\"", json);
+        Assert.DoesNotContain("\"observation\"", json);
+    }
+
+    [Fact]
+    public void OrderRequestDto_ShouldDeserializeNotesWithoutLegacyObservation()
+    {
+        // arrange
+        const string json = """
+            { "customerId": 10, "delivery": true, "notes": "Sem cebola", "orderItems": [] }
+            """;
+
+        // act
+        var result = JsonSerializer.Deserialize<OrderRequestDto>(json, WebJsonOptions);
+
+        // assert
+        Assert.NotNull(result);
+        Assert.Equal("Sem cebola", result.Notes);
+        Assert.Null(typeof(OrderRequestDto).GetProperty("Observation"));
     }
 
     [Fact]
