@@ -20,7 +20,6 @@ Os itens abaixo registram divergências existentes entre nomes, contratos e comp
 
 | Pendência | Classificação | Resultado esperado |
 | --- | --- | --- |
-| `OrderResponseDto.Value` representa `Order.TotalAmount`. | Nomenclatura e contrato HTTP. | Expor o total com nome inequívoco, preservando ou versionando o contrato existente. |
 | `OrderItemResponseDto.ProductValue` recebe o preço atual do produto, não o `UnitPrice` histórico do item. | Possível defeito funcional e contrato HTTP. | Decidir quais preços a resposta deve expor e nomear separadamente preço histórico e preço atual. |
 | O domínio usa `Notes`, enquanto os contratos usam `Observation`. | Nomenclatura entre camadas. | Escolher o termo canônico por limite e manter o mapeamento explícito enquanto houver nomes diferentes. |
 | O domínio usa `CreatedAt`, enquanto a resposta usa `DateOrder` e converte o valor para horário local. | Nomenclatura e semântica temporal do contrato. | Tornar nome, fuso e tipo temporal inequívocos sem reinterpretar dados existentes. |

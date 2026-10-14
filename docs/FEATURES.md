@@ -29,6 +29,7 @@ Este documento registra apenas comportamentos já implementados. Trabalho futuro
 - Atualização de status.
 - Cancelamento via status `Cancelado`, respeitando regras de status permitido.
 - Publicação de mensagens para cozinha e notificação.
+- Responses de pedido expõem o valor total pelo campo canônico `TotalAmount`.
 
 ## Mensageria e Workers
 
