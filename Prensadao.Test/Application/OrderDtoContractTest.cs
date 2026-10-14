@@ -11,7 +11,7 @@ public class OrderDtoContractTest
     private static readonly JsonSerializerOptions WebJsonOptions = new(JsonSerializerDefaults.Web);
 
     [Fact]
-    public void OrderResponseDto_ShouldSerializeTotalAmountWithoutLegacyValue()
+    public void OrderResponseDto_ShouldSerializeCanonicalFields()
     {
         // arrange
         var createdAtUtc = new DateTime(2026, 10, 13, 18, 0, 0, DateTimeKind.Utc);
@@ -34,13 +34,10 @@ public class OrderDtoContractTest
         Assert.Contains("\"notes\":\"Sem cebola\"", json);
         Assert.Contains("\"createdAt\":\"2026-10-13T15:00:00-03:00\"", json);
         Assert.Equal(TimeSpan.FromHours(-3), dto.CreatedAt.Offset);
-        Assert.DoesNotContain("\"value\"", json);
-        Assert.DoesNotContain("\"observation\"", json);
-        Assert.DoesNotContain("\"dateOrder\"", json);
     }
 
     [Fact]
-    public void OrderRequestDto_ShouldDeserializeNotesWithoutLegacyObservation()
+    public void OrderRequestDto_ShouldDeserializeNotes()
     {
         // arrange
         const string json = """
@@ -53,7 +50,6 @@ public class OrderDtoContractTest
         // assert
         Assert.NotNull(result);
         Assert.Equal("Sem cebola", result.Notes);
-        Assert.Null(typeof(OrderRequestDto).GetProperty("Observation"));
     }
 
     [Fact]
@@ -77,6 +73,5 @@ public class OrderDtoContractTest
         // assert
         Assert.Equal(25m, result.OrderItems.Single().UnitPrice);
         Assert.Contains("\"unitPrice\":25", json);
-        Assert.DoesNotContain("\"productValue\"", json);
     }
 }

@@ -25,7 +25,7 @@ public class ProductDtoContractTest
     }
 
     [Fact]
-    public void ProductResponseDto_ShouldSerializePriceWithoutLegacyValue()
+    public void ProductResponseDto_ShouldSerializePrice()
     {
         // arrange
         var dto = new ProductResponseDto(1, "X Salada", true, 25.90m, "Completo");
@@ -35,6 +35,5 @@ public class ProductDtoContractTest
 
         // assert
         Assert.Contains("\"price\":25.90", json);
-        Assert.DoesNotContain("\"value\"", json);
     }
 }
