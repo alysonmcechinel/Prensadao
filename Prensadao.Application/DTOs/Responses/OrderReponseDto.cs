@@ -55,7 +55,7 @@ namespace Prensadao.Application.DTOs.Responses
             OrderId = x.OrderId,
             ProductId = x.ProductId,
             Quantity = x.Quantity,
-            ProductValue = x.Product.Price,
+            UnitPrice = x.UnitPrice,
             ProductName = x.Product.Name
         }).ToList();
         #endregion

@@ -30,6 +30,7 @@ Este documento registra apenas comportamentos já implementados. Trabalho futuro
 - Cancelamento via status `Cancelado`, respeitando regras de status permitido.
 - Publicação de mensagens para cozinha e notificação.
 - Responses de pedido expõem o valor total pelo campo canônico `TotalAmount`.
+- Itens de pedido expõem o preço histórico cobrado pelo campo `UnitPrice`.
 
 ## Mensageria e Workers
 
