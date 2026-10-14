@@ -32,6 +32,7 @@ Este documento registra apenas comportamentos já implementados. Trabalho futuro
 - Responses de pedido expõem o valor total pelo campo canônico `TotalAmount`.
 - Itens de pedido expõem o preço histórico cobrado pelo campo `UnitPrice`.
 - Requests e responses de pedido usam `Notes` para as observações do pedido.
+- Responses de pedido expõem `CreatedAt` em `America/Sao_Paulo` com offset explícito, enquanto a persistência permanece em UTC.
 
 ## Mensageria e Workers
 

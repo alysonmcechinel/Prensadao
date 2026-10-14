@@ -36,5 +36,6 @@ Não crie dependência de Domain para Application, Infra ou API.
 
 ## Datas, Dinheiro e Serialização
 - Use `decimal` para valores monetários.
-- Preserve o padrão com NodaTime para datas/horários.
+- Persista instantes em UTC e preserve o padrão com NodaTime para conversões de fuso horário.
+- O contrato de pedido expõe `CreatedAt` como `DateTimeOffset` em `America/Sao_Paulo`, mantendo o offset explícito.
 - A API configura serialização JSON com `ConfigureForNodaTime`.

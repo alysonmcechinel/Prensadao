@@ -12,11 +12,10 @@ public static class NodaTimeExtensions
         return instant.ToDateTimeUtc();
     }
 
-    public static DateTime LocalTime(this DateTime dataUtc)
+    public static DateTimeOffset ToSaoPauloDateTimeOffset(this DateTime dateTimeUtc)
     {
-        var instant = Instant.FromDateTimeUtc(DateTime.SpecifyKind(dataUtc, DateTimeKind.Utc));
+        var instant = Instant.FromDateTimeUtc(DateTime.SpecifyKind(dateTimeUtc, DateTimeKind.Utc));
         var zone = DateTimeZoneProviders.Tzdb[DefaultTimeZone];
-        var zoned = instant.InZone(zone);
-        return zoned.ToDateTimeUnspecified(); // evita alterar para UTC
+        return instant.InZone(zone).ToDateTimeOffset();
     }
 }

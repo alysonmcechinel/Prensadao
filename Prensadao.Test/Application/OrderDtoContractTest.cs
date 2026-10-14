@@ -14,6 +14,7 @@ public class OrderDtoContractTest
     public void OrderResponseDto_ShouldSerializeTotalAmountWithoutLegacyValue()
     {
         // arrange
+        var createdAtUtc = new DateTime(2026, 10, 13, 18, 0, 0, DateTimeKind.Utc);
         var dto = new OrderResponseDto(
             1,
             OrderStatusEnum.Criado,
@@ -22,7 +23,7 @@ public class OrderDtoContractTest
             "Sem cebola",
             10,
             "Cliente",
-            DateTime.UtcNow,
+            createdAtUtc,
             []);
 
         // act
@@ -31,8 +32,11 @@ public class OrderDtoContractTest
         // assert
         Assert.Contains("\"totalAmount\":42.50", json);
         Assert.Contains("\"notes\":\"Sem cebola\"", json);
+        Assert.Contains("\"createdAt\":\"2026-10-13T15:00:00-03:00\"", json);
+        Assert.Equal(TimeSpan.FromHours(-3), dto.CreatedAt.Offset);
         Assert.DoesNotContain("\"value\"", json);
         Assert.DoesNotContain("\"observation\"", json);
+        Assert.DoesNotContain("\"dateOrder\"", json);
     }
 
     [Fact]
