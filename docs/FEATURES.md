@@ -34,6 +34,7 @@ Este documento registra apenas comportamentos já implementados. Trabalho futuro
 - Requests e responses de pedido usam `Notes` para as observações do pedido.
 - Responses de pedido expõem `CreatedAt` em `America/Sao_Paulo` com offset explícito, enquanto a persistência permanece em UTC.
 - O contrato HTTP usa `Status`: a atualização recebe o número definido em `OrderStatusEnum` e as responses retornam sua descrição legível.
+- Domínio, contratos HTTP e mensagens usam `IsDelivery`; no JSON HTTP, `isDelivery` informa obrigatoriamente se o pedido é entrega (`true`) ou retirada (`false`).
 
 ## Mensageria e Workers
 

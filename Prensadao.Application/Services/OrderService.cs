@@ -110,6 +110,9 @@ namespace Prensadao.Application.Services
 
             if (dto.CustomerId <= 0)
                 throw new ArgumentException("Pedido não pode ser feito sem cliente cadastrado.");
+
+            if (!dto.IsDelivery.HasValue)
+                throw new ArgumentException("A modalidade de entrega do pedido deve ser informada.");
         }
 
         private static void ValidateUpdateStatusRequest(UpdateStatusDto dto)
@@ -121,7 +124,7 @@ namespace Prensadao.Application.Services
         }
 
         private static Order CreateOrder(OrderRequestDto dto, decimal totalAmountOrder)
-            => new(dto.Delivery, totalAmountOrder, dto.Notes ?? string.Empty, dto.CustomerId, NodaTimeExtensions.NowUtc());
+            => new(dto.IsDelivery!.Value, totalAmountOrder, dto.Notes ?? string.Empty, dto.CustomerId, NodaTimeExtensions.NowUtc());
 
         private static decimal CalculateTotalAmount(IEnumerable<OrderItemRequestDto> items, IReadOnlyDictionary<int, decimal> prices)
             => Math.Round(items.Sum(item => prices[item.ProductId] * item.Quantity), 2, MidpointRounding.AwayFromZero);
@@ -191,7 +194,7 @@ namespace Prensadao.Application.Services
             {
                 OrderId = order.OrderId,
                 ConsumerName = order.Customer.Name,
-                Delivery = order.IsDelivery,
+                IsDelivery = order.IsDelivery,
                 OrderStatus = order.Status,
                 Phone = order.Customer.Phone
             };

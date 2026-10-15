@@ -25,7 +25,7 @@ public class OrderStatusNotificationStrategyTest
     {
         // arrange
         var strategy = new OrderReadyNotificationStrategy();
-        var message = CreateMessage(OrderStatusEnum.Pronto, delivery: true);
+        var message = CreateMessage(OrderStatusEnum.Pronto, isDelivery: true);
 
         // act
         var result = strategy.BuildMessage(message);
@@ -39,7 +39,7 @@ public class OrderStatusNotificationStrategyTest
     {
         // arrange
         var strategy = new OrderReadyNotificationStrategy();
-        var message = CreateMessage(OrderStatusEnum.Pronto, delivery: false);
+        var message = CreateMessage(OrderStatusEnum.Pronto, isDelivery: false);
 
         // act
         var result = strategy.BuildMessage(message);
@@ -104,11 +104,11 @@ public class OrderStatusNotificationStrategyTest
         Assert.Equal("O seu pedido N°10 está com status não identificado.", result);
     }
 
-    private static NotifyMessageDto CreateMessage(OrderStatusEnum status, bool delivery = true)
+    private static NotifyMessageDto CreateMessage(OrderStatusEnum status, bool isDelivery = true)
         => new()
         {
             OrderId = 10,
             OrderStatus = status,
-            Delivery = delivery
+            IsDelivery = isDelivery
         };
 }

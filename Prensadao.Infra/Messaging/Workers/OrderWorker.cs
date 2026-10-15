@@ -40,7 +40,7 @@ public class OrderWorker : BackgroundService
             {
                 OrderId = order.OrderId,
                 ConsumerName = order.Customer.Name,
-                Delivery = order.IsDelivery,
+                IsDelivery = order.IsDelivery,
                 OrderStatus = order.Status,
                 Phone = order.Customer.Phone
             };

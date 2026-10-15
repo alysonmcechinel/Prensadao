@@ -6,7 +6,7 @@ public class NotifyMessageDto
 {
     public int OrderId { get; set; }
     public OrderStatusEnum OrderStatus { get; set; }
-    public bool Delivery { get; set; }
+    public bool IsDelivery { get; set; }
     public string ConsumerName { get; set; } = string.Empty;
     public string Phone { get; set; } = string.Empty;
 }

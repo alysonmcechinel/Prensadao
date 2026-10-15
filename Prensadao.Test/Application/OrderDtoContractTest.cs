@@ -31,6 +31,7 @@ public class OrderDtoContractTest
 
         // assert
         Assert.Contains("\"status\":\"Criado\"", json);
+        Assert.Contains("\"isDelivery\":true", json);
         Assert.Contains("\"totalAmount\":42.50", json);
         Assert.Contains("\"notes\":\"Sem cebola\"", json);
         Assert.Contains("\"createdAt\":\"2026-10-13T15:00:00-03:00\"", json);
@@ -55,11 +56,11 @@ public class OrderDtoContractTest
     }
 
     [Fact]
-    public void OrderRequestDto_ShouldDeserializeNotes()
+    public void OrderRequestDto_ShouldDeserializeCanonicalFields()
     {
         // arrange
         const string json = """
-            { "customerId": 10, "delivery": true, "notes": "Sem cebola", "orderItems": [] }
+            { "customerId": 10, "isDelivery": true, "notes": "Sem cebola", "orderItems": [] }
             """;
 
         // act
@@ -67,7 +68,26 @@ public class OrderDtoContractTest
 
         // assert
         Assert.NotNull(result);
+        Assert.True(result.IsDelivery);
         Assert.Equal("Sem cebola", result.Notes);
+    }
+
+    [Fact]
+    public void NotifyMessageDto_ShouldSerializeIsDelivery()
+    {
+        // arrange
+        var dto = new Prensadao.Application.DTOs.NotifyMessageDto
+        {
+            OrderId = 10,
+            OrderStatus = OrderStatusEnum.Pronto,
+            IsDelivery = true
+        };
+
+        // act
+        var json = JsonSerializer.Serialize(dto);
+
+        // assert
+        Assert.Contains("\"IsDelivery\":true", json);
     }
 
     [Fact]

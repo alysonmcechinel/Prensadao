@@ -10,7 +10,7 @@ public class OrderReadyNotificationStrategy : IOrderStatusNotificationStrategy
 
     public string BuildMessage(NotifyMessageDto message)
     {
-        if (message.Delivery)
+        if (message.IsDelivery)
             return $"O seu pedido N°{message.OrderId} está pronto e aguardando saída para entrega.";
 
         return $"O seu pedido N°{message.OrderId} está pronto para retirada.";

@@ -27,7 +27,7 @@ public class OrderServiceTest
         var dto = new OrderRequestDto
         {
             CustomerId = 1,
-            Delivery = true,
+            IsDelivery = true,
             Notes = "Sem cebola",
             OrderItems =
             [
@@ -59,7 +59,7 @@ public class OrderServiceTest
         A.CallTo(() => orderRepository.AddAsync(
             A<Order>.That.Matches(order =>
                 order.CustomerId == dto.CustomerId &&
-                order.IsDelivery == dto.Delivery &&
+                order.IsDelivery == dto.IsDelivery &&
                 order.Notes == dto.Notes &&
                 order.TotalAmount == 39.00m &&
                 order.Status == OrderStatusEnum.Criado)))
@@ -118,6 +118,26 @@ public class OrderServiceTest
         // assert
         Assert.Equal("Pedido não pode ser feito sem cliente cadastrado.", ex.Message);
         A.CallTo(() => orderRepository.AddAsync(A<Order>._)).MustNotHaveHappened();
+    }
+
+    [Theory, AutoFakeItEasyData]
+    public async Task OrderCreate_ShouldThrowAndNotPersist_WhenDeliveryModeIsMissing(
+        [Frozen] IOrderRepository orderRepository,
+        [Frozen] IProductRepository productRepository,
+        OrderService orderService,
+        OrderRequestDto dto)
+    {
+        // arrange
+        dto.CustomerId = 1;
+        dto.IsDelivery = null;
+
+        // act
+        var exception = await Assert.ThrowsAsync<ArgumentException>(() => orderService.OrderCreateAsync(dto));
+
+        // assert
+        Assert.Equal("A modalidade de entrega do pedido deve ser informada.", exception.Message);
+        A.CallTo(() => orderRepository.AddAsync(A<Order>._)).MustNotHaveHappened();
+        A.CallTo(() => productRepository.ExistsInactiveByIdsAsync(A<IReadOnlyCollection<int>>._)).MustNotHaveHappened();
     }
 
     [Theory, AutoFakeItEasyData]
@@ -253,7 +273,7 @@ public class OrderServiceTest
                 A<NotifyMessageDto>.That.Matches(message =>
                     message.OrderId == orderId &&
                     message.ConsumerName == customer.Name &&
-                    message.Delivery == order.IsDelivery &&
+                    message.IsDelivery == order.IsDelivery &&
                     message.OrderStatus == OrderStatusEnum.EmPreparacao &&
                     message.Phone == customer.Phone),
                 RabbitMqConstants.Exchanges.NotifyExchange,
