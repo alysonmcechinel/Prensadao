@@ -30,10 +30,28 @@ public class OrderDtoContractTest
         var json = JsonSerializer.Serialize(dto, WebJsonOptions);
 
         // assert
+        Assert.Contains("\"status\":\"Criado\"", json);
         Assert.Contains("\"totalAmount\":42.50", json);
         Assert.Contains("\"notes\":\"Sem cebola\"", json);
         Assert.Contains("\"createdAt\":\"2026-10-13T15:00:00-03:00\"", json);
         Assert.Equal(TimeSpan.FromHours(-3), dto.CreatedAt.Offset);
+    }
+
+    [Fact]
+    public void UpdateStatusDto_ShouldDeserializeNumericStatus()
+    {
+        // arrange
+        const string json = """
+            { "orderId": 10, "status": 1 }
+            """;
+
+        // act
+        var result = JsonSerializer.Deserialize<UpdateStatusDto>(json, WebJsonOptions);
+
+        // assert
+        Assert.NotNull(result);
+        Assert.Equal(10, result.OrderId);
+        Assert.Equal(OrderStatusEnum.EmPreparacao, result.Status);
     }
 
     [Fact]

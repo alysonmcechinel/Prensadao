@@ -225,7 +225,7 @@ public class OrderServiceTest
         var dto = new UpdateStatusDto
         {
             OrderId = orderId,
-            OrderStatus = OrderStatusEnum.EmPreparacao
+            Status = OrderStatusEnum.EmPreparacao
         };
 
         A.CallTo(() => orderRepository.GetByIdWithDetailsAsync(orderId)).Returns(order);
@@ -235,7 +235,7 @@ public class OrderServiceTest
 
         // assert
         Assert.Equal(orderId, result.OrderId);
-        Assert.Equal(OrderStatusEnum.EmPreparacao.GetDescription(), result.OrderStatus);
+        Assert.Equal(OrderStatusEnum.EmPreparacao.GetDescription(), result.Status);
         Assert.Equal(customerId, result.CustomerId);
         Assert.Equal(customer.Name, result.CustomerName);
         Assert.Equal(OrderStatusEnum.EmPreparacao, order.Status);
@@ -281,7 +281,7 @@ public class OrderServiceTest
         var dto = new UpdateStatusDto
         {
             OrderId = orderId,
-            OrderStatus = OrderStatusEnum.Pronto
+            Status = OrderStatusEnum.Pronto
         };
 
         A.CallTo(() => orderRepository.GetByIdWithDetailsAsync(orderId)).Returns(order);
@@ -298,6 +298,34 @@ public class OrderServiceTest
         A.CallTo(() => orderRepository.UpdateAsync(A<Order>._))
             .MustNotHaveHappened();
 
+        A.CallTo(() => messagePublisher.PublishAsync(
+                A<NotifyMessageDto>._,
+                A<string>._,
+                A<string?>._))
+            .MustNotHaveHappened();
+    }
+
+    [Theory, AutoFakeItEasyData]
+    public async Task UpdateStatusAsync_ShouldThrowAndNotReadOrWrite_WhenStatusIsUndefined(
+        [Frozen] IMessagePublisher messagePublisher,
+        [Frozen] IOrderRepository orderRepository,
+        OrderService orderService,
+        int orderId)
+    {
+        // arrange
+        var dto = new UpdateStatusDto
+        {
+            OrderId = orderId,
+            Status = (OrderStatusEnum)999
+        };
+
+        // act
+        var exception = await Assert.ThrowsAsync<ArgumentException>(() => orderService.UpdateStatusAsync(dto));
+
+        // assert
+        Assert.Equal("Status do pedido inválido.", exception.Message);
+        A.CallTo(() => orderRepository.GetByIdWithDetailsAsync(A<int>._)).MustNotHaveHappened();
+        A.CallTo(() => orderRepository.UpdateAsync(A<Order>._)).MustNotHaveHappened();
         A.CallTo(() => messagePublisher.PublishAsync(
                 A<NotifyMessageDto>._,
                 A<string>._,

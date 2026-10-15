@@ -82,10 +82,10 @@ namespace Prensadao.Application.Services
 
             var order = await GetOrderByIdOrThrowAsync(dto.OrderId);
 
-            if (order.Status == dto.OrderStatus)
+            if (order.Status == dto.Status)
                 throw new ArgumentException("Status do pedido já está definido como o informado.");
 
-            order.SetStatus(dto.OrderStatus);
+            order.SetStatus(dto.Status);
             await _orderRepository.UpdateAsync(order);
             await PublishNotifyMessageAsync(order);
 
@@ -115,6 +115,9 @@ namespace Prensadao.Application.Services
         private static void ValidateUpdateStatusRequest(UpdateStatusDto dto)
         {
             ArgumentNullException.ThrowIfNull(dto);
+
+            if (!Enum.IsDefined(dto.Status))
+                throw new ArgumentException("Status do pedido inválido.");
         }
 
         private static Order CreateOrder(OrderRequestDto dto, decimal totalAmountOrder)

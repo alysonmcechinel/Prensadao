@@ -33,6 +33,7 @@ Este documento registra apenas comportamentos já implementados. Trabalho futuro
 - Itens de pedido expõem o preço histórico cobrado pelo campo `UnitPrice`.
 - Requests e responses de pedido usam `Notes` para as observações do pedido.
 - Responses de pedido expõem `CreatedAt` em `America/Sao_Paulo` com offset explícito, enquanto a persistência permanece em UTC.
+- O contrato HTTP usa `Status`: a atualização recebe o número definido em `OrderStatusEnum` e as responses retornam sua descrição legível.
 
 ## Mensageria e Workers
 
