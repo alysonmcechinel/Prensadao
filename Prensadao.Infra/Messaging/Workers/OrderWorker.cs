@@ -39,7 +39,7 @@ public class OrderWorker : BackgroundService
             var notify = new NotifyMessageDto
             {
                 OrderId = order.OrderId,
-                ConsumerName = order.Customer.Name,
+                CustomerName = order.Customer.Name,
                 IsDelivery = order.IsDelivery,
                 OrderStatus = order.Status,
                 Phone = order.Customer.Phone

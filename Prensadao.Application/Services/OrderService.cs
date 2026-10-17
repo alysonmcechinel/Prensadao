@@ -193,7 +193,7 @@ namespace Prensadao.Application.Services
             => new()
             {
                 OrderId = order.OrderId,
-                ConsumerName = order.Customer.Name,
+                CustomerName = order.Customer.Name,
                 IsDelivery = order.IsDelivery,
                 OrderStatus = order.Status,
                 Phone = order.Customer.Phone

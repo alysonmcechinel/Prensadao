@@ -27,7 +27,7 @@ O sistema não modela toda a operação comercial da lanchonete. Pagamento, esto
 | --- | --- | --- | --- |
 | **Prensadão** | Nome do sistema de gestão de pedidos descrito neste repositório e contexto ao qual este glossário se aplica. | Não é produto do cardápio nem entidade persistida. Para o estabelecimento comercial, use **lanchonete**. | `Prensadao.sln`; `README.md` |
 | **Lanchonete** | Estabelecimento comercial cuja operação de pedidos é apoiada pelo Prensadão. | Não é usuário, cliente, filial nem entidade persistida. O modelo atual não possui cadastro da lanchonete. | Contexto do projeto; não existe tipo correspondente |
-| **Cliente** / `Customer` | Pessoa cadastrada à qual um pedido é associado e cujos dados identificam a referência e o contato do pedido. | Não é usuário autenticado, operador, consumidor RabbitMQ nem necessariamente quem manipulou a interface. O modelo não distingue comprador, pagador e destinatário. | `Customer`; DTOs de cliente |
+| **Cliente** / `Customer` | Pessoa cadastrada à qual um pedido é associado e cujos dados identificam a referência e o contato do pedido. | Não é usuário autenticado, operador, consumidor RabbitMQ nem necessariamente quem manipulou a interface. O modelo não distingue comprador, pagador e destinatário. | `Customer`; DTOs de cliente; `NotifyMessageDto.CustomerName` |
 | **Cozinha** | Etapa operacional de preparo do pedido. | Não é entidade, usuário autenticado, worker, espaço físico modelado nem fila RabbitMQ. Para o canal técnico, use **fila da cozinha**. | Status do pedido; notificações operacionais |
 
 ## Núcleo do Domínio

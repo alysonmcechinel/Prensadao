@@ -91,6 +91,26 @@ public class OrderDtoContractTest
     }
 
     [Fact]
+    public void NotifyMessageDto_ShouldSerializeCustomerNameAsCanonicalField()
+    {
+        // arrange
+        var dto = new Prensadao.Application.DTOs.NotifyMessageDto
+        {
+            OrderId = 10,
+            OrderStatus = OrderStatusEnum.Pronto,
+            CustomerName = "Cliente",
+            Phone = "48999999999"
+        };
+
+        // act
+        var json = JsonSerializer.Serialize(dto);
+
+        // assert
+        Assert.Contains("\"CustomerName\":\"Cliente\"", json);
+        Assert.DoesNotContain("ConsumerName", json);
+    }
+
+    [Fact]
     public void ToDto_ShouldUseHistoricalUnitPrice_WhenCurrentProductPriceHasChanged()
     {
         // arrange

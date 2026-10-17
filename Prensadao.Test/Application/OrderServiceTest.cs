@@ -272,7 +272,7 @@ public class OrderServiceTest
         A.CallTo(() => messagePublisher.PublishAsync(
                 A<NotifyMessageDto>.That.Matches(message =>
                     message.OrderId == orderId &&
-                    message.ConsumerName == customer.Name &&
+                    message.CustomerName == customer.Name &&
                     message.IsDelivery == order.IsDelivery &&
                     message.OrderStatus == OrderStatusEnum.EmPreparacao &&
                     message.Phone == customer.Phone),
