@@ -19,7 +19,6 @@ Os itens abaixo registram divergências existentes entre nomes, contratos e comp
 
 | Pendência | Classificação | Resultado esperado |
 | --- | --- | --- |
-| As análises agrupam `Order.CreatedAt.DayOfWeek` em UTC, embora o dia comercial siga `America/Sao_Paulo`. | Possível defeito funcional na análise temporal. | Converter limites e agrupamentos para o fuso comercial antes de determinar data e dia da semana, cobrindo a virada do dia em testes. |
 | Um produto inativo pode ser elegível para promoção. | Decisão de regra de negócio. | Decidir se `Enabled` participa da elegibilidade e aplicar a decisão na consulta e nos testes. |
 | Pedidos cancelados participam das métricas de vendas. | Decisão de regra de negócio. | Definir quais status compõem vendas e receita e aplicar o mesmo critério às análises. |
 | “Notificação” atualmente significa gerar texto e escrevê-lo no console. | Nomenclatura e capacidade futura. | Manter o nome limitado à geração atual ou criar uma operação distinta quando houver envio externo. |

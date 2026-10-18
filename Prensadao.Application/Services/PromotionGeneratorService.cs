@@ -36,17 +36,24 @@ public class PromotionGeneratorService : IPromotionGenerator
         if (request.MinDiscountPercent < 0 || request.MaxDiscountPercent <= 0 || request.MinDiscountPercent > request.MaxDiscountPercent)
             throw new ArgumentException("Limites de desconto inválidos.");
 
-        var nowUtc = _clock.NowUtc();
-        var topProductsStartUtc = nowUtc.AddDays(-TopProductsLookbackDays);
-        var bestDayStartUtc = nowUtc.AddDays(-BestDayLookbackDays);
+        var currentInstant = _clock.GetCurrentInstant();
+        var topProductsWindow = currentInstant.GetCompletedBusinessDaysWindowUtc(TopProductsLookbackDays);
+        var bestDayWindow = currentInstant.GetCompletedBusinessDaysWindowUtc(BestDayLookbackDays);
 
-        var topProducts = await _salesAnalyticsRepository.GetTopProductsSoldAsync(topProductsStartUtc, nowUtc, request.TopN, cancellationToken);
+        var topProducts = await _salesAnalyticsRepository.GetTopProductsSoldAsync(
+            topProductsWindow.FromInclusiveUtc,
+            topProductsWindow.ToExclusiveUtc,
+            request.TopN,
+            cancellationToken);
         if (topProducts.Count == 0)
             throw new InvalidOperationException("Não há vendas suficientes para gerar promoção.");
 
         var topProductsDTO = TopProductSalesDto.FromModels(topProducts);
 
-        var bestDayOfWeek = await _salesAnalyticsRepository.GetBestPromotionDayOfWeekAsync(bestDayStartUtc, nowUtc, cancellationToken);
+        var bestDayOfWeek = await _salesAnalyticsRepository.GetBestPromotionDayOfWeekAsync(
+            bestDayWindow.FromInclusiveUtc,
+            bestDayWindow.ToExclusiveUtc,
+            cancellationToken);
 
         var aiSuggestion = await _promotionSuggestionService.SuggestPromotionAsync(
             topProductsDTO,

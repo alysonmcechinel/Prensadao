@@ -48,7 +48,8 @@ As regras abaixo descrevem o comportamento implementado. As decisões ainda pend
 
 ### Produtos mais vendidos
 
-- O intervalo começa `TopProductsLookbackDays` (atualmente 360 dias) antes do instante atual em UTC e termina no instante atual, incluindo os limites.
+- O intervalo contém os últimos `TopProductsLookbackDays` dias comerciais completos (atualmente 360), considerando `America/Sao_Paulo` e excluindo o dia comercial atual.
+- O início corresponde à meia-noite local do primeiro dia incluído e o fim exclusivo corresponde à meia-noite local do dia atual; ambos são convertidos para UTC antes da consulta.
 - Os itens de pedido são agrupados por produto, nome e preço atual.
 - `UnitsSold` é a soma de `OrderItem.Quantity` para o produto.
 - `Revenue` é a soma de `Quantity * UnitPrice`, usando o preço histórico de cada item.
@@ -59,9 +60,10 @@ As regras abaixo descrevem o comportamento implementado. As decisões ainda pend
 
 ### Melhor dia da semana
 
-- O intervalo começa `BestDayLookbackDays` (atualmente 84 dias) antes do instante atual em UTC e termina no instante atual, incluindo os limites.
-- Os itens são agrupados pelo `DayOfWeek` de `Order.CreatedAt`.
-- Para cada dia da semana, o sistema calcula a receita total, as unidades totais e a quantidade de datas distintas presentes no grupo.
+- O intervalo contém os últimos `BestDayLookbackDays` dias comerciais completos (atualmente 84), considerando `America/Sao_Paulo` e excluindo o dia comercial atual.
+- O início corresponde à meia-noite local do primeiro dia incluído e o fim exclusivo corresponde à meia-noite local do dia atual; ambos são convertidos para UTC antes da consulta.
+- Os itens são agrupados pelo `DayOfWeek` local de `Order.CreatedAt` em `America/Sao_Paulo`.
+- Para cada dia da semana, o sistema calcula a receita total, as unidades totais e a quantidade de datas comerciais distintas presentes no grupo.
 - A receita média do dia é `receita total / quantidade de datas distintas`.
 - A classificação usa a receita média em ordem decrescente e, em empate, as unidades totais em ordem decrescente.
 - Quando não existem dados no intervalo, o resultado padrão é `Friday`.

@@ -21,7 +21,9 @@ public class PromotionGeneratorServiceTest
         var suggestionService = A.Fake<IPromotionSuggestionService>();
         var clock = A.Fake<IClock>();
         var cancellationToken = new CancellationTokenSource().Token;
-        var nowUtc = CurrentInstant.ToDateTimeUtc();
+        var topProductsStartUtc = new DateTime(2025, 10, 23, 3, 0, 0, DateTimeKind.Utc);
+        var bestDayStartUtc = new DateTime(2026, 7, 26, 3, 0, 0, DateTimeKind.Utc);
+        var currentBusinessDayStartUtc = new DateTime(2026, 10, 18, 3, 0, 0, DateTimeKind.Utc);
         var request = new GeneratePromotionRequest
         {
             TopN = 5,
@@ -42,14 +44,14 @@ public class PromotionGeneratorServiceTest
 
         A.CallTo(() => clock.GetCurrentInstant()).Returns(CurrentInstant);
         A.CallTo(() => repository.GetTopProductsSoldAsync(
-                nowUtc.AddDays(-360),
-                nowUtc,
+                topProductsStartUtc,
+                currentBusinessDayStartUtc,
                 request.TopN,
                 cancellationToken))
             .Returns(products);
         A.CallTo(() => repository.GetBestPromotionDayOfWeekAsync(
-                nowUtc.AddDays(-84),
-                nowUtc,
+                bestDayStartUtc,
+                currentBusinessDayStartUtc,
                 cancellationToken))
             .Returns(DayOfWeek.Wednesday.ToString());
         A.CallTo(() => suggestionService.SuggestPromotionAsync(
@@ -82,14 +84,14 @@ public class PromotionGeneratorServiceTest
         Assert.Equal(DayOfWeek.Wednesday.ToString(), result.BestDayOfWeek);
 
         A.CallTo(() => repository.GetTopProductsSoldAsync(
-                nowUtc.AddDays(-360),
-                nowUtc,
+                topProductsStartUtc,
+                currentBusinessDayStartUtc,
                 request.TopN,
                 cancellationToken))
             .MustHaveHappenedOnceExactly();
         A.CallTo(() => repository.GetBestPromotionDayOfWeekAsync(
-                nowUtc.AddDays(-84),
-                nowUtc,
+                bestDayStartUtc,
+                currentBusinessDayStartUtc,
                 cancellationToken))
             .MustHaveHappenedOnceExactly();
     }

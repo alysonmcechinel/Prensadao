@@ -55,6 +55,7 @@ O sistema não modela toda a operação comercial da lanchonete. Pagamento, esto
 | **Retirada** | Modalidade na qual o pedido será retirado depois do preparo. | Não é entidade própria nem modalidade representada por um campo específico; corresponde a `IsDelivery = false`. | `Order.IsDelivery`; DTOs de pedido; notificações de pedido |
 | **Observações do pedido** / `Notes` | Texto livre associado ao pedido. | Não é descrição do produto, log técnico nem mensagem de notificação. | `Order.Notes`; DTOs de pedido |
 | **Data do pedido** / `CreatedAt` | Instante em que o pedido foi criado, persistido em UTC e exposto pela API em `America/Sao_Paulo` com offset explícito. | Não é data de pagamento, preparo, entrega ou finalização. | `Order.CreatedAt`; DTOs de pedido |
+| **Dia comercial** | Data de calendário em `America/Sao_Paulo` usada para delimitar e agrupar as análises de vendas. | Não corresponde necessariamente à data UTC do instante nem inclui o dia atual ainda incompleto nas janelas de promoção. | `SalesAnalyticsRepository`; `AI_PROMOTIONS.md` |
 | **Criar pedido** | Registrar um novo pedido para um cliente cadastrado, com os produtos e quantidades solicitados. | Não identifica quem enviou a requisição, recebe pagamento nem reserva estoque. | `OrderService`; `FEATURES.md` |
 | **Cancelar pedido** | Interromper o fluxo operacional mantendo o pedido no histórico como cancelado. | Não exclui o pedido, estorna pagamento nem reverte estoque. | `OrderService`; `FEATURES.md` |
 
