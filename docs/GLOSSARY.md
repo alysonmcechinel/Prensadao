@@ -88,10 +88,10 @@ O sistema não modela toda a operação comercial da lanchonete. Pagamento, esto
 
 | Termo | Definição no Prensadão | O que NÃO significa / Cuidados | Onde é usado |
 | --- | --- | --- | --- |
-| **Análise de vendas** / `SalesAnalytics` | Leitura agregada dos itens de pedido dentro de um período. | Não é entidade persistida nem serviço analítico externo. | `ISalesAnalyticsRepository`; `AI_PROMOTIONS.md` |
+| **Análise de vendas** / `SalesAnalytics` | Leitura agregada dos itens de pedidos finalizados dentro de um período. | Não é entidade persistida, serviço analítico externo nem confirmação de pagamento. | `ISalesAnalyticsRepository`; `AI_PROMOTIONS.md` |
 | **Produto mais vendido** | Produto melhor classificado pela análise de vendas do Prensadão. | Não significa automaticamente produto de maior lucro nem maior número de pedidos distintos. | Modelos de análise; `AI_PROMOTIONS.md` |
-| **Unidades vendidas** / `UnitsSold` | Soma das quantidades registradas para um produto no período analisado. | Não é número de pedidos distintos nem redução de estoque. | Modelos de análise |
-| **Receita** / `Revenue` | Valor agregado dos itens usando seus preços unitários históricos. | Não representa lucro, dinheiro recebido nem soma dos preços atuais. | Modelos de análise |
+| **Unidades vendidas** / `UnitsSold` | Soma das quantidades registradas para um produto em pedidos finalizados no período analisado. | Não é número de pedidos distintos nem redução de estoque. | Modelos de análise |
+| **Receita** / `Revenue` | Valor agregado dos itens de pedidos finalizados usando seus preços unitários históricos. | Não representa lucro, confirmação de dinheiro recebido nem soma dos preços atuais. | Modelos de análise |
 | **Preço atual da análise** / `CurrentPrice` | Preço vigente do produto apresentado junto ao resultado da análise. | Não é o preço histórico usado no cálculo da receita. | Modelos de análise; `PromotionProductDto` |
 | **Produto elegível para promoção** | Produto ativo incluído entre os candidatos mais vendidos que podem ser selecionados para uma sugestão. | Produto inativo não é elegível, mesmo que possua vendas históricas; elegibilidade também não significa promoção já aprovada. | `PromotionGeneratorService`; `AI_PROMOTIONS.md` |
 | **Promoção** | Sugestão para um produto, com nome comercial, desconto, preço promocional e melhor dia. | Não é entidade persistida, cupom, campanha ativada nem mudança permanente no preço do produto. | `PromotionProductDto`; `AI_PROMOTIONS.md` |

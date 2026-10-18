@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Prensadao.Application.Helpers;
+using Prensadao.Domain.Enums;
 using Prensadao.Domain.Interfaces;
 using Prensadao.Domain.ReadModels;
 
@@ -19,6 +20,7 @@ public class SalesAnalyticsRepository : ISalesAnalyticsRepository
         var sales = await _context.OrderItems
             .Where(orderItem =>
                 orderItem.Product.Enabled &&
+                orderItem.Order.Status == OrderStatusEnum.Finalizado &&
                 orderItem.Order.CreatedAt >= fromUtc &&
                 orderItem.Order.CreatedAt < toUtc)
             .GroupBy(orderItem => new { orderItem.ProductId, orderItem.Product.Name, orderItem.Product.Price })
@@ -41,7 +43,10 @@ public class SalesAnalyticsRepository : ISalesAnalyticsRepository
     public async Task<string> GetBestPromotionDayOfWeekAsync(DateTime fromUtc, DateTime toUtc, CancellationToken cancellationToken)
     {
         var grouped = await _context.OrderItems
-            .Where(orderItem => orderItem.Order.CreatedAt >= fromUtc && orderItem.Order.CreatedAt < toUtc)
+            .Where(orderItem =>
+                orderItem.Order.Status == OrderStatusEnum.Finalizado &&
+                orderItem.Order.CreatedAt >= fromUtc &&
+                orderItem.Order.CreatedAt < toUtc)
             .Select(orderItem => new
             {
                 OrderItem = orderItem,
