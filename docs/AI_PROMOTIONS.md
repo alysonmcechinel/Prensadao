@@ -44,7 +44,7 @@ Response:
 
 ## Análises e Cálculos Atuais
 
-As regras abaixo descrevem o comportamento implementado. As decisões ainda pendentes sobre nomenclatura, status considerados e elegibilidade de produtos estão registradas em `ROADMAP.md`.
+As regras abaixo descrevem o comportamento implementado. As decisões ainda pendentes sobre os status considerados estão registradas em `ROADMAP.md`.
 
 ### Produtos mais vendidos
 
@@ -54,8 +54,9 @@ As regras abaixo descrevem o comportamento implementado. As decisões ainda pend
 - `UnitsSold` é a soma de `OrderItem.Quantity` para o produto.
 - `Revenue` é a soma de `Quantity * UnitPrice`, usando o preço histórico de cada item.
 - A classificação usa `UnitsSold` em ordem decrescente e, em empate, `Revenue` em ordem decrescente.
+- Apenas produtos ativos (`Product.Enabled = true`) participam do ranking e podem ser enviados como candidatos à IA.
 - Apenas os primeiros `TopN` produtos são retornados e enviados como candidatos à IA.
-- A consulta atual não filtra `Order.Status` nem `Product.Enabled`.
+- A consulta atual não filtra `Order.Status`.
 - Se nenhum produto for encontrado, a geração termina com erro antes de chamar a IA.
 
 ### Melhor dia da semana
@@ -68,7 +69,7 @@ As regras abaixo descrevem o comportamento implementado. As decisões ainda pend
 - A classificação usa a receita média em ordem decrescente e, em empate, as unidades totais em ordem decrescente.
 - Quando não existem dados no intervalo, o resultado padrão é `Friday`.
 - O resultado usa o nome em inglês produzido por `DayOfWeek.ToString()`.
-- A consulta atual não filtra `Order.Status` nem `Product.Enabled`.
+- A consulta atual não filtra `Order.Status`; vendas históricas de produtos atualmente ativos ou inativos participam desta análise temporal.
 
 ### Preço promocional
 

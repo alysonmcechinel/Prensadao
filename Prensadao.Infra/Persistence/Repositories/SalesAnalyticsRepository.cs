@@ -17,7 +17,10 @@ public class SalesAnalyticsRepository : ISalesAnalyticsRepository
     public async Task<IReadOnlyList<TopProductSalesModels>> GetTopProductsSoldAsync(DateTime fromUtc, DateTime toUtc, int topN, CancellationToken cancellationToken)
     {
         var sales = await _context.OrderItems
-            .Where(orderItem => orderItem.Order.CreatedAt >= fromUtc && orderItem.Order.CreatedAt < toUtc)
+            .Where(orderItem =>
+                orderItem.Product.Enabled &&
+                orderItem.Order.CreatedAt >= fromUtc &&
+                orderItem.Order.CreatedAt < toUtc)
             .GroupBy(orderItem => new { orderItem.ProductId, orderItem.Product.Name, orderItem.Product.Price })
             .Select(group => new TopProductSalesModels
             {

@@ -19,7 +19,6 @@ Os itens abaixo registram divergências existentes entre nomes, contratos e comp
 
 | Pendência | Classificação | Resultado esperado |
 | --- | --- | --- |
-| Um produto inativo pode ser elegível para promoção. | Decisão de regra de negócio. | Decidir se `Enabled` participa da elegibilidade e aplicar a decisão na consulta e nos testes. |
 | Pedidos cancelados participam das métricas de vendas. | Decisão de regra de negócio. | Definir quais status compõem vendas e receita e aplicar o mesmo critério às análises. |
 | “Notificação” atualmente significa gerar texto e escrevê-lo no console. | Nomenclatura e capacidade futura. | Manter o nome limitado à geração atual ou criar uma operação distinta quando houver envio externo. |
 | `Error = 99` existe no enum, mas status desconhecido não é convertido automaticamente para esse valor. | Modelagem de status e fallback. | Definir se `Error` é estado real, fallback de notificação ou conceito a ser removido. |

@@ -54,6 +54,7 @@ Este documento registra apenas comportamentos já implementados. Trabalho futuro
 
 - Endpoint `POST api/Promotions/Generate`.
 - Seleciona produtos mais vendidos via `ISalesAnalyticsRepository`.
+- Considera apenas produtos ativos entre os candidatos enviados à IA.
 - Usa Azure OpenAI via `IPromotionSuggestionService`.
 - Valida resposta da IA antes de calcular o preço promocional.
 - Detalhes em `AI_PROMOTIONS.md`.
