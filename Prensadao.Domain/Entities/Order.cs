@@ -32,29 +32,41 @@ public class Order
     public Customer Customer { get; private set; }
     public ICollection<OrderItem> OrderItems { get; private set; } = [];
 
-    public void SetStatus(OrderStatusEnum status)
+    public void ChangeStatus(OrderStatusEnum status)
     {
+        if (!Enum.IsDefined(status))
+            throw new ArgumentException("Status do pedido inválido.");
+
+        if (status is OrderStatusEnum.Cancelado or OrderStatusEnum.Error)
+            throw new ArgumentException("Cancelamento e erro não fazem parte do avanço normal do pedido.");
+
+        if (Status == status)
+            return;
+
+        var nextStatus = GetNextStatus();
+        if (status != nextStatus)
+            throw new ArgumentException($"Transição de status inválida: {Status} para {status}.");
+
         Status = status;
     }
 
-    public void AdvanceStatus()
+    public void AdvanceStatus() => ChangeStatus(GetNextStatus());
+
+    public void Cancel()
     {
-        switch (Status)
-        {
-            case OrderStatusEnum.Criado:
-                Status = OrderStatusEnum.EmPreparacao;
-                break;
-            case OrderStatusEnum.EmPreparacao:
-                Status = OrderStatusEnum.Pronto;
-                break;
-            case OrderStatusEnum.Pronto:
-                Status = IsDelivery ? OrderStatusEnum.SaiuParaEntrega : OrderStatusEnum.Finalizado;
-                break;
-            case OrderStatusEnum.SaiuParaEntrega:
-                Status = OrderStatusEnum.Finalizado;
-                break;
-            default:
-                throw new ArgumentException("Status não pode ser atualizado.");
-        }
+        if (Status is not OrderStatusEnum.Criado and not OrderStatusEnum.EmPreparacao)
+            throw new ArgumentException($"Pedido não pode ser cancelado no status atual: {Status}.");
+
+        Status = OrderStatusEnum.Cancelado;
     }
+
+    private OrderStatusEnum GetNextStatus() => Status switch
+    {
+        OrderStatusEnum.Criado => OrderStatusEnum.EmPreparacao,
+        OrderStatusEnum.EmPreparacao => OrderStatusEnum.Pronto,
+        OrderStatusEnum.Pronto when IsDelivery => OrderStatusEnum.SaiuParaEntrega,
+        OrderStatusEnum.Pronto => OrderStatusEnum.Finalizado,
+        OrderStatusEnum.SaiuParaEntrega => OrderStatusEnum.Finalizado,
+        _ => throw new ArgumentException($"Pedido no status {Status} não pode avançar.")
+    };
 }

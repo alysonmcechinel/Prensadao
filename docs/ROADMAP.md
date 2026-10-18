@@ -20,8 +20,6 @@ Os itens abaixo registram divergências existentes entre nomes, contratos e comp
 
 | Pendência | Classificação | Resultado esperado |
 | --- | --- | --- |
-| O endpoint e os métodos `Enabled` de pedido executam cancelamento. | Nomenclatura e contrato HTTP. | Renomear a operação para cancelamento sem confundi-la com ativação de produto. |
-| `AdvanceStatus` segue o fluxo, enquanto `SetStatus` permite atribuição direta. | Decisão de regra de negócio. | Definir se saltos de status são permitidos e tornar cada operação explícita no contrato. |
 | `GenerateWeeklyPromotionAsync` usa janelas de 360 e 84 dias. | Nomenclatura e regra de análise. | Renomear o caso de uso ou redefinir as janelas depois de decidir o significado de “semanal”. |
 | As análises agrupam `Order.CreatedAt.DayOfWeek` em UTC, embora o dia comercial siga `America/Sao_Paulo`. | Possível defeito funcional na análise temporal. | Converter limites e agrupamentos para o fuso comercial antes de determinar data e dia da semana, cobrindo a virada do dia em testes. |
 | Um produto inativo pode ser elegível para promoção. | Decisão de regra de negócio. | Decidir se `Enabled` participa da elegibilidade e aplicar a decisão na consulta e nos testes. |

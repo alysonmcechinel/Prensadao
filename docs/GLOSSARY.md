@@ -70,8 +70,8 @@ O sistema não modela toda a operação comercial da lanchonete. Pagamento, esto
 | **Finalizado** / `Finalizado = 4` | Pedido cujo fluxo operacional foi encerrado. | Não comprova pagamento, entrega por terceiro nem baixa de estoque. | `OrderStatusEnum` |
 | **Cancelado** / `Cancelado = 5` | Pedido interrompido e mantido no histórico. | Não é exclusão física nem estorno. | `OrderStatusEnum` |
 | **Erro** / `Error = 99` | Valor excepcional usado no tratamento de status não reconhecido. | Não é etapa normal do pedido nem exceção .NET. | `OrderStatusEnum`; estratégias de notificação |
-| **Avançar status** / `AdvanceStatus` | Levar o pedido à próxima etapa prevista no fluxo operacional. | Não é atribuição livre de qualquer estado. | `Order`; `OrderWorker` |
-| **Atualizar status** / `SetStatus` | Atribuir ao pedido um estado informado pelo caso de uso de atualização. | Não é sinônimo de avançar para a próxima etapa. | `Order`; `OrderService` |
+| **Avançar status** / `AdvanceStatus` | Levar o pedido à próxima etapa prevista no fluxo operacional, considerando sua modalidade. | Não é atribuição livre, cancelamento nem transição para `Error`. | `Order`; `OrderWorker` |
+| **Atualizar status** / `ChangeStatus` | Solicitar explicitamente a próxima etapa do fluxo operacional. Repetir o estado atual não produz uma nova transição. | Não permite saltar etapas, cancelar o pedido nem atribuir `Error`. | `Order`; `OrderService` |
 
 ## Mensageria e Notificações
 

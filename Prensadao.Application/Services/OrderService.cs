@@ -83,21 +83,20 @@ namespace Prensadao.Application.Services
             var order = await GetOrderByIdOrThrowAsync(dto.OrderId);
 
             if (order.Status == dto.Status)
-                throw new ArgumentException("Status do pedido já está definido como o informado.");
+                return OrderResponseDto.ToDto(order);
 
-            order.SetStatus(dto.Status);
+            order.ChangeStatus(dto.Status!.Value);
             await _orderRepository.UpdateAsync(order);
             await PublishNotifyMessageAsync(order);
 
             return OrderResponseDto.ToDto(order);
         }        
 
-        public async Task EnabledAsync(int id)
+        public async Task CancelAsync(int id)
         {
             var order = await GetOrderByIdOrThrowAsync(id);
 
-            ValidateOrderCanBeCanceled(order);
-            order.SetStatus(OrderStatusEnum.Cancelado);
+            order.Cancel();
 
             await _orderRepository.UpdateAsync(order);
             await PublishNotifyMessageAsync(order);
@@ -119,7 +118,13 @@ namespace Prensadao.Application.Services
         {
             ArgumentNullException.ThrowIfNull(dto);
 
-            if (!Enum.IsDefined(dto.Status))
+            if (dto.OrderId <= 0)
+                throw new ArgumentException("Id do pedido deve ser maior que zero.");
+
+            if (!dto.Status.HasValue)
+                throw new ArgumentException("Status do pedido deve ser informado.");
+
+            if (!Enum.IsDefined(dto.Status.Value))
                 throw new ArgumentException("Status do pedido inválido.");
         }
 
@@ -137,12 +142,6 @@ namespace Prensadao.Application.Services
                 throw new ArgumentException("Pedido não encontrado.");
 
             return order;
-        }
-
-        private static void ValidateOrderCanBeCanceled(Order order)
-        {
-            if (order.Status != OrderStatusEnum.EmPreparacao && order.Status != OrderStatusEnum.Criado)
-                throw new ArgumentException($"Pedido não pode ser cancelado pois, já esta com status: {order.Status.GetDescription()}");
         }
 
         private async Task<Dictionary<int, decimal>> GetPricesAsync(IEnumerable<OrderItemRequestDto> orderItems)

@@ -26,14 +26,16 @@ Este documento registra apenas comportamentos já implementados. Trabalho futuro
 - Cálculo do total com base nos produtos.
 - Persistência do pedido e itens dentro de fluxo transacional.
 - Consulta por id e listagem.
-- Atualização de status.
-- Cancelamento via status `Cancelado`, respeitando regras de status permitido.
+- Atualização de status por `PUT api/Order/Status`, com `OrderId` e `Status` no corpo, aceitando somente a próxima etapa do fluxo operacional; repetir o status atual não persiste nem publica uma nova notificação.
+- Pedidos de entrega seguem `Criado` -> `EmPreparacao` -> `Pronto` -> `SaiuParaEntrega` -> `Finalizado`; pedidos de retirada seguem de `Pronto` diretamente para `Finalizado`.
+- Cancelamento por `POST api/Order/{id}/Cancel`, permitido somente nos estados `Criado` e `EmPreparacao`.
+- `Cancelado` e `Error` não podem ser atribuídos pelo endpoint comum de atualização de status.
 - Publicação de mensagens para cozinha e notificação.
 - Responses de pedido expõem o valor total pelo campo canônico `TotalAmount`.
 - Itens de pedido expõem o preço histórico cobrado pelo campo `UnitPrice`.
 - Requests e responses de pedido usam `Notes` para as observações do pedido.
 - Responses de pedido expõem `CreatedAt` em `America/Sao_Paulo` com offset explícito, enquanto a persistência permanece em UTC.
-- O contrato HTTP usa `Status`: a atualização recebe o número definido em `OrderStatusEnum` e as responses retornam sua descrição legível.
+- O contrato HTTP de atualização recebe no corpo `OrderId` e o número de `Status` definido em `OrderStatusEnum`; as responses retornam a descrição legível do estado.
 - Domínio, contratos HTTP e mensagens usam `IsDelivery`; no JSON HTTP, `isDelivery` informa obrigatoriamente se o pedido é entrega (`true`) ou retirada (`false`).
 
 ## Mensageria e Workers
