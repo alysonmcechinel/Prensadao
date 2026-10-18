@@ -2,6 +2,8 @@
 
 A feature de promoções com IA gera uma sugestão para um produto com base nos produtos mais vendidos e no histórico usado para selecionar o melhor dia da semana.
 
+O caso de uso `GeneratePromotionAsync` é executado sob demanda. O nome não representa frequência, validade ou agendamento semanal; o aspecto semanal da análise é somente a escolha de `BestDayOfWeek`.
+
 ## Endpoint
 
 `POST api/Promotions/Generate`
@@ -46,7 +48,7 @@ As regras abaixo descrevem o comportamento implementado. As decisões ainda pend
 
 ### Produtos mais vendidos
 
-- O intervalo começa 360 dias antes do instante atual em UTC e termina no instante atual, incluindo os limites.
+- O intervalo começa `TopProductsLookbackDays` (atualmente 360 dias) antes do instante atual em UTC e termina no instante atual, incluindo os limites.
 - Os itens de pedido são agrupados por produto, nome e preço atual.
 - `UnitsSold` é a soma de `OrderItem.Quantity` para o produto.
 - `Revenue` é a soma de `Quantity * UnitPrice`, usando o preço histórico de cada item.
@@ -57,7 +59,7 @@ As regras abaixo descrevem o comportamento implementado. As decisões ainda pend
 
 ### Melhor dia da semana
 
-- O intervalo começa 84 dias antes do instante atual em UTC e termina no instante atual, incluindo os limites.
+- O intervalo começa `BestDayLookbackDays` (atualmente 84 dias) antes do instante atual em UTC e termina no instante atual, incluindo os limites.
 - Os itens são agrupados pelo `DayOfWeek` de `Order.CreatedAt`.
 - Para cada dia da semana, o sistema calcula a receita total, as unidades totais e a quantidade de datas distintas presentes no grupo.
 - A receita média do dia é `receita total / quantidade de datas distintas`.

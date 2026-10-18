@@ -6,6 +6,7 @@ using Prensadao.Application.Interfaces;
 using Prensadao.Domain.Entities;
 using Prensadao.Domain.Enums;
 using Prensadao.Domain.Repositories;
+using NodaTime;
 using System.Transactions;
 
 namespace Prensadao.Application.Services
@@ -17,13 +18,20 @@ namespace Prensadao.Application.Services
         private readonly IOrderRepository _orderRepository;
         private readonly IOrderItemRepository _orderItemRepository;
         private readonly IProductRepository _productRepository;
+        private readonly IClock _clock;
 
-        public OrderService(IMessagePublisher messagePublisher, IOrderRepository orderRepository, IOrderItemRepository orderItemRepository, IProductRepository productRepository)
+        public OrderService(
+            IMessagePublisher messagePublisher,
+            IOrderRepository orderRepository,
+            IOrderItemRepository orderItemRepository,
+            IProductRepository productRepository,
+            IClock clock)
         {
             _messagePublisher = messagePublisher;
             _orderRepository = orderRepository;
             _orderItemRepository = orderItemRepository;
             _productRepository = productRepository;
+            _clock = clock;
         }
 
         public async Task<List<OrderResponseDto>> GetOrdersAsync() => OrderResponseDto.ToListDto(await _orderRepository.GetAllWithDetailsAsync());
@@ -128,8 +136,8 @@ namespace Prensadao.Application.Services
                 throw new ArgumentException("Status do pedido inválido.");
         }
 
-        private static Order CreateOrder(OrderRequestDto dto, decimal totalAmountOrder)
-            => new(dto.IsDelivery!.Value, totalAmountOrder, dto.Notes ?? string.Empty, dto.CustomerId, NodaTimeExtensions.NowUtc());
+        private Order CreateOrder(OrderRequestDto dto, decimal totalAmountOrder)
+            => new(dto.IsDelivery!.Value, totalAmountOrder, dto.Notes ?? string.Empty, dto.CustomerId, _clock.NowUtc());
 
         private static decimal CalculateTotalAmount(IEnumerable<OrderItemRequestDto> items, IReadOnlyDictionary<int, decimal> prices)
             => Math.Round(items.Sum(item => prices[item.ProductId] * item.Quantity), 2, MidpointRounding.AwayFromZero);

@@ -1,6 +1,8 @@
 ﻿using AutoFixture;
 using AutoFixture.AutoFakeItEasy;
 using AutoFixture.Xunit2;
+using FakeItEasy;
+using NodaTime;
 
 namespace Prensadao.Test;
 
@@ -16,6 +18,10 @@ public class AutoFakeItEasyDataAttribute : AutoDataAttribute
                 });
 
             fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+
+            var clock = A.Fake<IClock>();
+            A.CallTo(() => clock.GetCurrentInstant()).Returns(Instant.FromUtc(2026, 1, 1, 12, 0));
+            fixture.Inject(clock);
 
             return fixture;
         })

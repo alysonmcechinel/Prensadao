@@ -3,41 +3,50 @@ using Prensadao.Application.DTOs.Responses;
 using Prensadao.Application.Helpers;
 using Prensadao.Application.Interfaces;
 using Prensadao.Domain.Interfaces;
+using NodaTime;
 
 namespace Prensadao.Application.Services;
 
 public class PromotionGeneratorService : IPromotionGenerator
 {
+    private const int TopProductsLookbackDays = 360;
+    private const int BestDayLookbackDays = 84;
+
     private readonly ISalesAnalyticsRepository _salesAnalyticsRepository;
     private readonly IPromotionSuggestionService _promotionSuggestionService;
+    private readonly IClock _clock;
 
     public PromotionGeneratorService(
         ISalesAnalyticsRepository salesAnalyticsRepository,
-        IPromotionSuggestionService promotionSuggestionService)
+        IPromotionSuggestionService promotionSuggestionService,
+        IClock clock)
     {
         _salesAnalyticsRepository = salesAnalyticsRepository;
         _promotionSuggestionService = promotionSuggestionService;
+        _clock = clock;
     }
 
-    public async Task<PromotionProductDto> GenerateWeeklyPromotionAsync(GeneratePromotionRequest request, CancellationToken cancellationToken)
+    public async Task<PromotionProductDto> GeneratePromotionAsync(GeneratePromotionRequest request, CancellationToken cancellationToken)
     {
+        ArgumentNullException.ThrowIfNull(request);
+
         if (request.TopN <= 0)
             throw new ArgumentException("TopN deve ser maior que zero.");
 
         if (request.MinDiscountPercent < 0 || request.MaxDiscountPercent <= 0 || request.MinDiscountPercent > request.MaxDiscountPercent)
             throw new ArgumentException("Limites de desconto inválidos.");
 
-        var nowUtc = NodaTimeExtensions.NowUtc();
-        var weekStart = nowUtc.AddDays(-360);
-        var historyStart = nowUtc.AddDays(-84);
+        var nowUtc = _clock.NowUtc();
+        var topProductsStartUtc = nowUtc.AddDays(-TopProductsLookbackDays);
+        var bestDayStartUtc = nowUtc.AddDays(-BestDayLookbackDays);
 
-        var topProducts = await _salesAnalyticsRepository.GetTopProductsSoldAsync(weekStart, nowUtc, request.TopN, cancellationToken);
+        var topProducts = await _salesAnalyticsRepository.GetTopProductsSoldAsync(topProductsStartUtc, nowUtc, request.TopN, cancellationToken);
         if (topProducts.Count == 0)
             throw new InvalidOperationException("Não há vendas suficientes para gerar promoção.");
 
         var topProductsDTO = TopProductSalesDto.FromModels(topProducts);
 
-        var bestDayOfWeek = await _salesAnalyticsRepository.GetBestPromotionDayOfWeekAsync(historyStart, nowUtc, cancellationToken);
+        var bestDayOfWeek = await _salesAnalyticsRepository.GetBestPromotionDayOfWeekAsync(bestDayStartUtc, nowUtc, cancellationToken);
 
         var aiSuggestion = await _promotionSuggestionService.SuggestPromotionAsync(
             topProductsDTO,

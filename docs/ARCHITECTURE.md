@@ -37,5 +37,6 @@ Não crie dependência de Domain para Application, Infra ou API.
 ## Datas, Dinheiro e Serialização
 - Use `decimal` para valores monetários.
 - Persista instantes em UTC e preserve o padrão com NodaTime para conversões de fuso horário.
+- Casos de uso que dependem do instante atual recebem `IClock` e obtêm UTC pelo helper canônico `_clock.NowUtc()`, permitindo substituir o relógio em testes.
 - O contrato de pedido expõe `CreatedAt` como `DateTimeOffset` em `America/Sao_Paulo`, mantendo o offset explícito.
 - A API configura serialização JSON com `ConfigureForNodaTime`.

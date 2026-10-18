@@ -10,7 +10,6 @@ Este documento reúne trabalho ainda não concluído. Itens daqui não devem ser
 
 ## Promoções com IA
 
-- Adicionar testes unitários para `PromotionGeneratorService`.
 - Adicionar testes para validação e falhas de `AzureOpenAiPromotionService`, sem acessar o serviço real.
 - Cobrir o mapeamento de `AiResponseValidationException` no tratamento HTTP escolhido.
 
@@ -20,7 +19,6 @@ Os itens abaixo registram divergências existentes entre nomes, contratos e comp
 
 | Pendência | Classificação | Resultado esperado |
 | --- | --- | --- |
-| `GenerateWeeklyPromotionAsync` usa janelas de 360 e 84 dias. | Nomenclatura e regra de análise. | Renomear o caso de uso ou redefinir as janelas depois de decidir o significado de “semanal”. |
 | As análises agrupam `Order.CreatedAt.DayOfWeek` em UTC, embora o dia comercial siga `America/Sao_Paulo`. | Possível defeito funcional na análise temporal. | Converter limites e agrupamentos para o fuso comercial antes de determinar data e dia da semana, cobrindo a virada do dia em testes. |
 | Um produto inativo pode ser elegível para promoção. | Decisão de regra de negócio. | Decidir se `Enabled` participa da elegibilidade e aplicar a decisão na consulta e nos testes. |
 | Pedidos cancelados participam das métricas de vendas. | Decisão de regra de negócio. | Definir quais status compõem vendas e receita e aplicar o mesmo critério às análises. |

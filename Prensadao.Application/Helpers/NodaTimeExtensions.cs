@@ -6,9 +6,11 @@ public static class NodaTimeExtensions
 {
     private const string DefaultTimeZone = "America/Sao_Paulo";
 
-    public static DateTime NowUtc()
+    public static DateTime NowUtc(this IClock clock)
     {
-        Instant instant = SystemClock.Instance.GetCurrentInstant();
+        ArgumentNullException.ThrowIfNull(clock);
+
+        Instant instant = clock.GetCurrentInstant();
         return instant.ToDateTimeUtc();
     }
 

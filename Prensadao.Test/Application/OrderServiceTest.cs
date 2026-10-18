@@ -1,5 +1,6 @@
 ﻿using AutoFixture.Xunit2;
 using FakeItEasy;
+using NodaTime;
 using Prensadao.Application;
 using Prensadao.Application.DTOs;
 using Prensadao.Application.DTOs.Requests;
@@ -61,6 +62,7 @@ public class OrderServiceTest
                 order.CustomerId == dto.CustomerId &&
                 order.IsDelivery == dto.IsDelivery &&
                 order.Notes == dto.Notes &&
+                order.CreatedAt == new DateTime(2026, 1, 1, 12, 0, 0, DateTimeKind.Utc) &&
                 order.TotalAmount == 39.00m &&
                 order.Status == OrderStatusEnum.Criado)))
             .MustHaveHappenedOnceExactly();
@@ -238,7 +240,7 @@ public class OrderServiceTest
         var customer = new Customer("Nome", "48999999999", "Rua", "Bairro", "123", "Cidade", "Ponto de referencia", 88000000);
         typeof(Customer).GetProperty("CustomerId")!.SetValue(customer, customerId);
 
-        var order = new Order(isDelivery: true, totalAmount: 42.50m, notes: "Sem cebola", customerId: customerId, createdAt: NodaTimeExtensions.NowUtc());
+        var order = new Order(isDelivery: true, totalAmount: 42.50m, notes: "Sem cebola", customerId: customerId, createdAt: SystemClock.Instance.NowUtc());
         typeof(Order).GetProperty("OrderId")!.SetValue(order, orderId);
         typeof(Order).GetProperty("Customer")!.SetValue(order, customer);
 
@@ -293,7 +295,7 @@ public class OrderServiceTest
         var customer = new Customer("Nome", "48999999999", "Rua", "Bairro", "123", "Cidade", "Ponto de referencia", 88000000);
         typeof(Customer).GetProperty("CustomerId")!.SetValue(customer, customerId);
 
-        var order = new Order(isDelivery: true, totalAmount: 42.50m, notes: "Sem cebola", customerId: customerId, createdAt: NodaTimeExtensions.NowUtc());
+        var order = new Order(isDelivery: true, totalAmount: 42.50m, notes: "Sem cebola", customerId: customerId, createdAt: SystemClock.Instance.NowUtc());
         typeof(Order).GetProperty("OrderId")!.SetValue(order, orderId);
         typeof(Order).GetProperty("Customer")!.SetValue(order, customer);
         order.AdvanceStatus();
@@ -413,7 +415,7 @@ public class OrderServiceTest
         int orderId)
     {
         // arrange
-        var order = new Order(isDelivery: true, totalAmount: 10m, notes: string.Empty, customerId: 1, createdAt: NodaTimeExtensions.NowUtc());
+        var order = new Order(isDelivery: true, totalAmount: 10m, notes: string.Empty, customerId: 1, createdAt: SystemClock.Instance.NowUtc());
         var dto = new UpdateStatusDto { OrderId = orderId, Status = OrderStatusEnum.Pronto };
         A.CallTo(() => orderRepository.GetByIdWithDetailsAsync(orderId)).Returns(order);
 
@@ -438,7 +440,7 @@ public class OrderServiceTest
         int orderId)
     {
         // arrange
-        var order = new Order(isDelivery: true, totalAmount: 10m, notes: string.Empty, customerId: 1, createdAt: NodaTimeExtensions.NowUtc());
+        var order = new Order(isDelivery: true, totalAmount: 10m, notes: string.Empty, customerId: 1, createdAt: SystemClock.Instance.NowUtc());
         var dto = new UpdateStatusDto { OrderId = orderId, Status = OrderStatusEnum.Cancelado };
         A.CallTo(() => orderRepository.GetByIdWithDetailsAsync(orderId)).Returns(order);
 
@@ -463,7 +465,7 @@ public class OrderServiceTest
         int pedidoId)
     {
         // arrange: pedido em status que NÃO pode ser cancelado (ex.: Pronto)
-        var order = new Order(isDelivery: true, totalAmount: 10m, notes: "obs", customerId: 1, createdAt: NodaTimeExtensions.NowUtc());
+        var order = new Order(isDelivery: true, totalAmount: 10m, notes: "obs", customerId: 1, createdAt: SystemClock.Instance.NowUtc());
         order.AdvanceStatus();
         order.AdvanceStatus();
         A.CallTo(() => orderRepository.GetByIdWithDetailsAsync(pedidoId)).Returns(order);
@@ -517,7 +519,7 @@ public class OrderServiceTest
         var customer = new Customer("Nome", "48999999999", "Rua", "Bairro", "123", "Cidade", "Ponto de referência", 88000000);
         typeof(Customer).GetProperty("CustomerId")!.SetValue(customer, customerId);
 
-        var order = new Order(isDelivery: true, totalAmount: 10m, notes: "obs", customerId: customerId, createdAt: NodaTimeExtensions.NowUtc());
+        var order = new Order(isDelivery: true, totalAmount: 10m, notes: "obs", customerId: customerId, createdAt: SystemClock.Instance.NowUtc());
         typeof(Order).GetProperty("OrderId")!.SetValue(order, orderId);
         typeof(Order).GetProperty("Customer")!.SetValue(order, customer);
 
