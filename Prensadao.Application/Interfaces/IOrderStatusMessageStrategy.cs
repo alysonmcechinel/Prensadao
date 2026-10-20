@@ -3,9 +3,9 @@ using Prensadao.Domain.Enums;
 
 namespace Prensadao.Application.Interfaces;
 
-public interface IOrderStatusNotificationStrategy
+public interface IOrderStatusMessageStrategy
 {
     OrderStatusEnum Status { get; }
 
-    string BuildMessage(NotifyMessageDto message);
+    string BuildMessage(OrderStatusChangedMessageDto message);
 }

@@ -37,8 +37,8 @@ public class Order
         if (!Enum.IsDefined(status))
             throw new ArgumentException("Status do pedido inválido.");
 
-        if (status is OrderStatusEnum.Cancelado or OrderStatusEnum.Error)
-            throw new ArgumentException("Cancelamento e erro não fazem parte do avanço normal do pedido.");
+        if (status == OrderStatusEnum.Cancelado)
+            throw new ArgumentException("Cancelamento não faz parte do avanço normal do pedido.");
 
         if (Status == status)
             return;

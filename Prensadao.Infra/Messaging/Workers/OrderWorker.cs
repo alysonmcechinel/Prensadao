@@ -36,15 +36,16 @@ public class OrderWorker : BackgroundService
             order.AdvanceStatus();
             await orderRepository.UpdateAsync(order);
 
-            var notify = new NotifyMessageDto
+            var statusChangedMessage = new OrderStatusChangedMessageDto
             {
                 OrderId = order.OrderId,
-                CustomerName = order.Customer.Name,
                 IsDelivery = order.IsDelivery,
-                OrderStatus = order.Status,
-                Phone = order.Customer.Phone
+                Status = order.Status
             };
-            await _messagePublisher.PublishAsync(notify, RabbitMqConstants.Exchanges.NotifyExchange, "");
+            await _messagePublisher.PublishAsync(
+                statusChangedMessage,
+                RabbitMqConstants.Exchanges.OrderStatusChangedExchange,
+                "");
 
             Console.WriteLine($"Pedido #{order.OrderId} atualizado com sucesso.");
         }, stoppingToken);

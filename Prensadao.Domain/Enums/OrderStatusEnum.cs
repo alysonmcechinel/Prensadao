@@ -15,8 +15,6 @@ namespace Prensadao.Domain.Enums
         [Description("Finalizado")]
         Finalizado = 4,
         [Description("Cancelado")]
-        Cancelado = 5,
-        [Description("Erro")]
-        Error = 99
+        Cancelado = 5
     }
 }

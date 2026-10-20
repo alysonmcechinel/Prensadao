@@ -50,19 +50,17 @@ public class OrderTest
         Assert.Equal(OrderStatusEnum.Criado, order.Status);
     }
 
-    [Theory]
-    [InlineData(OrderStatusEnum.Cancelado)]
-    [InlineData(OrderStatusEnum.Error)]
-    public void ChangeStatus_ShouldThrow_WhenStatusIsOutsideNormalFlow(OrderStatusEnum status)
+    [Fact]
+    public void ChangeStatus_ShouldThrow_WhenStatusIsCanceled()
     {
         // arrange
         var order = CreateOrder(isDelivery: true);
 
         // act
-        var exception = Assert.Throws<ArgumentException>(() => order.ChangeStatus(status));
+        var exception = Assert.Throws<ArgumentException>(() => order.ChangeStatus(OrderStatusEnum.Cancelado));
 
         // assert
-        Assert.Equal("Cancelamento e erro não fazem parte do avanço normal do pedido.", exception.Message);
+        Assert.Equal("Cancelamento não faz parte do avanço normal do pedido.", exception.Message);
         Assert.Equal(OrderStatusEnum.Criado, order.Status);
     }
 

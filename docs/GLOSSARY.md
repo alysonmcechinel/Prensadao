@@ -27,8 +27,8 @@ O sistema não modela toda a operação comercial da lanchonete. Pagamento, esto
 | --- | --- | --- | --- |
 | **Prensadão** | Nome do sistema de gestão de pedidos descrito neste repositório e contexto ao qual este glossário se aplica. | Não é produto do cardápio nem entidade persistida. Para o estabelecimento comercial, use **lanchonete**. | `Prensadao.sln`; `README.md` |
 | **Lanchonete** | Estabelecimento comercial cuja operação de pedidos é apoiada pelo Prensadão. | Não é usuário, cliente, filial nem entidade persistida. O modelo atual não possui cadastro da lanchonete. | Contexto do projeto; não existe tipo correspondente |
-| **Cliente** / `Customer` | Pessoa cadastrada à qual um pedido é associado e cujos dados identificam a referência e o contato do pedido. | Não é usuário autenticado, operador, consumidor RabbitMQ nem necessariamente quem manipulou a interface. O modelo não distingue comprador, pagador e destinatário. | `Customer`; DTOs de cliente; `NotifyMessageDto.CustomerName` |
-| **Cozinha** | Etapa operacional de preparo do pedido. | Não é entidade, usuário autenticado, worker, espaço físico modelado nem fila RabbitMQ. Para o canal técnico, use **fila da cozinha**. | Status do pedido; notificações operacionais |
+| **Cliente** / `Customer` | Pessoa cadastrada à qual um pedido é associado e cujos dados identificam a referência e o contato do pedido. | Não é usuário autenticado, operador, consumidor RabbitMQ nem necessariamente quem manipulou a interface. O modelo não distingue comprador, pagador e destinatário. | `Customer`; DTOs de cliente |
+| **Cozinha** | Etapa operacional de preparo do pedido. | Não é entidade, usuário autenticado, worker, espaço físico modelado nem fila RabbitMQ. Para o canal técnico, use **fila da cozinha**. | Status do pedido; mensagens operacionais |
 
 ## Núcleo do Domínio
 
@@ -51,9 +51,9 @@ O sistema não modela toda a operação comercial da lanchonete. Pagamento, esto
 | **Preço unitário** / `UnitPrice` | Preço preservado para uma unidade do produto dentro de um item de pedido. | Não é o preço atual do cadastro do produto. | `OrderItem.UnitPrice`; análises de vendas |
 | **Total do item** | Valor monetário correspondente à quantidade e ao preço unitário de um item. | Não é o total completo do pedido. | `OrderItem`; análises de vendas |
 | **Total do pedido** / `TotalAmount` | Valor monetário agregado dos itens do pedido. | Não comprova pagamento e não representa taxa de entrega, imposto, gorjeta ou desconto. | `Order.TotalAmount`; DTOs de pedido |
-| **Entrega** / `IsDelivery` | Modalidade na qual o pedido segue para entrega depois do preparo. | Não é status, entidade logística, endereço de entrega nem cálculo de frete. | `Order.IsDelivery`; DTOs de pedido; `NotifyMessageDto.IsDelivery` |
-| **Retirada** | Modalidade na qual o pedido será retirado depois do preparo. | Não é entidade própria nem modalidade representada por um campo específico; corresponde a `IsDelivery = false`. | `Order.IsDelivery`; DTOs de pedido; notificações de pedido |
-| **Observações do pedido** / `Notes` | Texto livre associado ao pedido. | Não é descrição do produto, log técnico nem mensagem de notificação. | `Order.Notes`; DTOs de pedido |
+| **Entrega** / `IsDelivery` | Modalidade na qual o pedido segue para entrega depois do preparo. | Não é status, entidade logística, endereço de entrega nem cálculo de frete. | `Order.IsDelivery`; DTOs de pedido; `OrderStatusChangedMessageDto.IsDelivery` |
+| **Retirada** | Modalidade na qual o pedido será retirado depois do preparo. | Não é entidade própria nem modalidade representada por um campo específico; corresponde a `IsDelivery = false`. | `Order.IsDelivery`; DTOs de pedido; mensagens de status |
+| **Observações do pedido** / `Notes` | Texto livre associado ao pedido. | Não é descrição do produto, log técnico nem mensagem de status. | `Order.Notes`; DTOs de pedido |
 | **Data do pedido** / `CreatedAt` | Instante em que o pedido foi criado, persistido em UTC e exposto pela API em `America/Sao_Paulo` com offset explícito. | Não é data de pagamento, preparo, entrega ou finalização. | `Order.CreatedAt`; DTOs de pedido |
 | **Dia comercial** | Data de calendário em `America/Sao_Paulo` usada para delimitar e agrupar as análises de vendas. | Não corresponde necessariamente à data UTC do instante nem inclui o dia atual ainda incompleto nas janelas de promoção. | `SalesAnalyticsRepository`; `AI_PROMOTIONS.md` |
 | **Criar pedido** | Registrar um novo pedido para um cliente cadastrado, com os produtos e quantidades solicitados. | Não identifica quem enviou a requisição, recebe pagamento nem reserva estoque. | `OrderService`; `FEATURES.md` |
@@ -70,18 +70,17 @@ O sistema não modela toda a operação comercial da lanchonete. Pagamento, esto
 | **Saiu para entrega** / `SaiuParaEntrega = 3` | Pedido da modalidade entrega que foi despachado. | Não confirma o recebimento pelo cliente. | `OrderStatusEnum` |
 | **Finalizado** / `Finalizado = 4` | Pedido cujo fluxo operacional foi encerrado. | Não comprova pagamento, entrega por terceiro nem baixa de estoque. | `OrderStatusEnum` |
 | **Cancelado** / `Cancelado = 5` | Pedido interrompido e mantido no histórico. | Não é exclusão física nem estorno. | `OrderStatusEnum` |
-| **Erro** / `Error = 99` | Valor excepcional usado no tratamento de status não reconhecido. | Não é etapa normal do pedido nem exceção .NET. | `OrderStatusEnum`; estratégias de notificação |
 | **Avançar status** / `AdvanceStatus` | Levar o pedido à próxima etapa prevista no fluxo operacional, considerando sua modalidade. | Não é atribuição livre, cancelamento nem transição para `Error`. | `Order`; `OrderWorker` |
 | **Atualizar status** / `ChangeStatus` | Solicitar explicitamente a próxima etapa do fluxo operacional. Repetir o estado atual não produz uma nova transição. | Não permite saltar etapas, cancelar o pedido nem atribuir `Error`. | `Order`; `OrderService` |
 
-## Mensageria e Notificações
+## Mensageria e Mensagens de Status
 
 | Termo | Definição no Prensadão | O que NÃO significa / Cuidados | Onde é usado |
 | --- | --- | --- | --- |
 | **Mensagem de pedido** / `OrderMessageDto` | Contrato assíncrono que identifica o pedido a ser encaminhado ao fluxo da cozinha. | Não é o agregado completo do pedido. | `OrderMessageDto`; `OrderWorker` |
 | **Fila da cozinha** | Canal RabbitMQ pelo qual o Prensadão entrega mensagens de pedido ao processamento assíncrono da cozinha. | Não é a cozinha física nem o próprio pedido. | `RabbitMqConstants.Queues`; `OrderWorker` |
-| **Mensagem de notificação** / `NotifyMessageDto` | Contrato com os dados necessários para produzir uma notificação sobre o pedido. | Não prova que uma comunicação externa foi enviada ou recebida. | `NotifyMessageDto`; `NotifyWorker` |
-| **Notificação** | Conteúdo textual produzido de acordo com o status do pedido. | Não é SMS, WhatsApp, e-mail ou push efetivamente enviado. | Estratégias de notificação; `NotifyWorker` |
+| **Evento de alteração de status** / `OrderStatusChangedMessageDto` | Contrato assíncrono que informa o pedido, o novo status e sua modalidade para produzir uma mensagem textual. | Não é uma notificação enviada ao cliente nem contém dados de contato. | `OrderStatusChangedMessageDto`; `OrderStatusMessageWorker` |
+| **Mensagem de status do pedido** | Conteúdo textual gerado de acordo com o status e registrado no log da aplicação. | Não é SMS, WhatsApp, e-mail, push nem prova de comunicação externa. | Estratégias de mensagem; `OrderStatusMessageWorker` |
 | **Consumidor** / `IConsumer` | Componente técnico que recebe mensagens de uma fila. | Não significa cliente da lanchonete. | `IConsumer`; workers |
 
 ## Vendas, IA e Promoções

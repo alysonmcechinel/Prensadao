@@ -272,13 +272,11 @@ public class OrderServiceTest
             .MustHaveHappenedOnceExactly();
 
         A.CallTo(() => messagePublisher.PublishAsync(
-                A<NotifyMessageDto>.That.Matches(message =>
+                A<OrderStatusChangedMessageDto>.That.Matches(message =>
                     message.OrderId == orderId &&
-                    message.CustomerName == customer.Name &&
                     message.IsDelivery == order.IsDelivery &&
-                    message.OrderStatus == OrderStatusEnum.EmPreparacao &&
-                    message.Phone == customer.Phone),
-                RabbitMqConstants.Exchanges.NotifyExchange,
+                    message.Status == OrderStatusEnum.EmPreparacao),
+                RabbitMqConstants.Exchanges.OrderStatusChangedExchange,
                 A<string?>._))
             .MustHaveHappenedOnceExactly();
     }
@@ -322,7 +320,7 @@ public class OrderServiceTest
             .MustNotHaveHappened();
 
         A.CallTo(() => messagePublisher.PublishAsync(
-                A<NotifyMessageDto>._,
+                A<OrderStatusChangedMessageDto>._,
                 A<string>._,
                 A<string?>._))
             .MustNotHaveHappened();
@@ -350,7 +348,7 @@ public class OrderServiceTest
         A.CallTo(() => orderRepository.GetByIdWithDetailsAsync(A<int>._)).MustNotHaveHappened();
         A.CallTo(() => orderRepository.UpdateAsync(A<Order>._)).MustNotHaveHappened();
         A.CallTo(() => messagePublisher.PublishAsync(
-                A<NotifyMessageDto>._,
+                A<OrderStatusChangedMessageDto>._,
                 A<string>._,
                 A<string?>._))
             .MustNotHaveHappened();
@@ -377,7 +375,7 @@ public class OrderServiceTest
         A.CallTo(() => orderRepository.GetByIdWithDetailsAsync(A<int>._)).MustNotHaveHappened();
         A.CallTo(() => orderRepository.UpdateAsync(A<Order>._)).MustNotHaveHappened();
         A.CallTo(() => messagePublisher.PublishAsync(
-                A<NotifyMessageDto>._,
+                A<OrderStatusChangedMessageDto>._,
                 A<string>._,
                 A<string?>._))
             .MustNotHaveHappened();
@@ -401,7 +399,7 @@ public class OrderServiceTest
         A.CallTo(() => orderRepository.GetByIdWithDetailsAsync(A<int>._)).MustNotHaveHappened();
         A.CallTo(() => orderRepository.UpdateAsync(A<Order>._)).MustNotHaveHappened();
         A.CallTo(() => messagePublisher.PublishAsync(
-                A<NotifyMessageDto>._,
+                A<OrderStatusChangedMessageDto>._,
                 A<string>._,
                 A<string?>._))
             .MustNotHaveHappened();
@@ -426,7 +424,7 @@ public class OrderServiceTest
         Assert.Equal("Transição de status inválida: Criado para Pronto.", exception.Message);
         A.CallTo(() => orderRepository.UpdateAsync(A<Order>._)).MustNotHaveHappened();
         A.CallTo(() => messagePublisher.PublishAsync(
-                A<NotifyMessageDto>._,
+                A<OrderStatusChangedMessageDto>._,
                 A<string>._,
                 A<string?>._))
             .MustNotHaveHappened();
@@ -448,10 +446,10 @@ public class OrderServiceTest
         var exception = await Assert.ThrowsAsync<ArgumentException>(() => orderService.UpdateStatusAsync(dto));
 
         // assert
-        Assert.Equal("Cancelamento e erro não fazem parte do avanço normal do pedido.", exception.Message);
+        Assert.Equal("Cancelamento não faz parte do avanço normal do pedido.", exception.Message);
         A.CallTo(() => orderRepository.UpdateAsync(A<Order>._)).MustNotHaveHappened();
         A.CallTo(() => messagePublisher.PublishAsync(
-                A<NotifyMessageDto>._,
+                A<OrderStatusChangedMessageDto>._,
                 A<string>._,
                 A<string?>._))
             .MustNotHaveHappened();
@@ -478,7 +476,7 @@ public class OrderServiceTest
         Assert.Equal(esperado, ex.Message);
         A.CallTo(() => orderRepository.UpdateAsync(A<Order>._)).MustNotHaveHappened();
         A.CallTo(() => messagePublisher.PublishAsync(
-                A<NotifyMessageDto>._,
+                A<OrderStatusChangedMessageDto>._,
                 A<string>._,
                 A<string?>._))
             .MustNotHaveHappened();
@@ -501,7 +499,7 @@ public class OrderServiceTest
         Assert.Equal("Pedido não encontrado.", exception.Message);
         A.CallTo(() => orderRepository.UpdateAsync(A<Order>._)).MustNotHaveHappened();
         A.CallTo(() => messagePublisher.PublishAsync(
-                A<NotifyMessageDto>._,
+                A<OrderStatusChangedMessageDto>._,
                 A<string>._,
                 A<string?>._))
             .MustNotHaveHappened();
@@ -533,12 +531,10 @@ public class OrderServiceTest
         Assert.Equal(OrderStatusEnum.Cancelado, order.Status);
         A.CallTo(() => orderRepository.UpdateAsync(A<Order>._)).MustHaveHappenedOnceExactly();
         A.CallTo(() => messagePublisher.PublishAsync(
-                A<NotifyMessageDto>.That.Matches(message =>
+                A<OrderStatusChangedMessageDto>.That.Matches(message =>
                     message.OrderId == orderId &&
-                    message.OrderStatus == OrderStatusEnum.Cancelado &&
-                    message.CustomerName == customer.Name &&
-                    message.Phone == customer.Phone),
-                RabbitMqConstants.Exchanges.NotifyExchange,
+                    message.Status == OrderStatusEnum.Cancelado),
+                RabbitMqConstants.Exchanges.OrderStatusChangedExchange,
                 A<string?>._))
             .MustHaveHappenedOnceExactly();
     }

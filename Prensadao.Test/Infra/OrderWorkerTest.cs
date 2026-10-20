@@ -49,10 +49,10 @@ public class OrderWorkerTest
         Assert.Equal(OrderStatusEnum.EmPreparacao, order.Status);
         A.CallTo(() => repository.UpdateAsync(order)).MustHaveHappenedOnceExactly();
         A.CallTo(() => publisher.PublishAsync(
-                A<NotifyMessageDto>.That.Matches(message =>
+                A<OrderStatusChangedMessageDto>.That.Matches(message =>
                     message.OrderId == orderId &&
-                    message.OrderStatus == OrderStatusEnum.EmPreparacao),
-                RabbitMqConstants.Exchanges.NotifyExchange,
+                    message.Status == OrderStatusEnum.EmPreparacao),
+                RabbitMqConstants.Exchanges.OrderStatusChangedExchange,
                 A<string?>._))
             .MustHaveHappenedOnceExactly();
     }
@@ -95,7 +95,7 @@ public class OrderWorkerTest
         Assert.Equal(OrderStatusEnum.EmPreparacao, order.Status);
         A.CallTo(() => repository.UpdateAsync(A<Order>._)).MustNotHaveHappened();
         A.CallTo(() => publisher.PublishAsync(
-                A<NotifyMessageDto>._,
+                A<OrderStatusChangedMessageDto>._,
                 A<string>._,
                 A<string?>._))
             .MustNotHaveHappened();

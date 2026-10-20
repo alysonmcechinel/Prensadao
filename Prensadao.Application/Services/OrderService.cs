@@ -95,7 +95,7 @@ namespace Prensadao.Application.Services
 
             order.ChangeStatus(dto.Status!.Value);
             await _orderRepository.UpdateAsync(order);
-            await PublishNotifyMessageAsync(order);
+            await PublishOrderStatusChangedMessageAsync(order);
 
             return OrderResponseDto.ToDto(order);
         }        
@@ -107,7 +107,7 @@ namespace Prensadao.Application.Services
             order.Cancel();
 
             await _orderRepository.UpdateAsync(order);
-            await PublishNotifyMessageAsync(order);
+            await PublishOrderStatusChangedMessageAsync(order);
         }
 
         // Privates
@@ -187,8 +187,10 @@ namespace Prensadao.Application.Services
         private Task PublishOrderMessageAsync(Order order)
             => _messagePublisher.PublishAsync(CreateOrderMessage(order), RabbitMqConstants.Exchanges.OrderExchange);
 
-        private Task PublishNotifyMessageAsync(Order order)
-            => _messagePublisher.PublishAsync(CreateNotifyMessage(order), RabbitMqConstants.Exchanges.NotifyExchange);
+        private Task PublishOrderStatusChangedMessageAsync(Order order)
+            => _messagePublisher.PublishAsync(
+                CreateOrderStatusChangedMessage(order),
+                RabbitMqConstants.Exchanges.OrderStatusChangedExchange);
 
         private static OrderMessageDto CreateOrderMessage(Order order)
             => new()
@@ -196,14 +198,12 @@ namespace Prensadao.Application.Services
                 OrderId = order.OrderId
             };
 
-        private static NotifyMessageDto CreateNotifyMessage(Order order)
+        private static OrderStatusChangedMessageDto CreateOrderStatusChangedMessage(Order order)
             => new()
             {
                 OrderId = order.OrderId,
-                CustomerName = order.Customer.Name,
                 IsDelivery = order.IsDelivery,
-                OrderStatus = order.Status,
-                Phone = order.Customer.Phone
+                Status = order.Status
             };
     }
 }

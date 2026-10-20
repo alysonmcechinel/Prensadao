@@ -1,16 +1,16 @@
-﻿using Prensadao.Application.DTOs;
-using Prensadao.Application.Services.Notifications;
+using Prensadao.Application.DTOs;
+using Prensadao.Application.Services.OrderStatusMessages;
 using Prensadao.Domain.Enums;
 
 namespace Prensadao.Test.Application;
 
-public class OrderStatusNotificationStrategyTest
+public class OrderStatusMessageStrategyTest
 {
     [Fact]
-    public void BuildMessage_DeveRetornarMensagemDePedidoEmPreparacao()
+    public void BuildMessage_ShouldReturnPreparingMessage()
     {
         // arrange
-        var strategy = new OrderPreparingNotificationStrategy();
+        var strategy = new OrderPreparingMessageStrategy();
         var message = CreateMessage(OrderStatusEnum.EmPreparacao);
 
         // act
@@ -21,10 +21,10 @@ public class OrderStatusNotificationStrategyTest
     }
 
     [Fact]
-    public void BuildMessage_DeveRetornarMensagemDePedidoProntoParaEntrega()
+    public void BuildMessage_ShouldReturnReadyForDeliveryMessage()
     {
         // arrange
-        var strategy = new OrderReadyNotificationStrategy();
+        var strategy = new OrderReadyMessageStrategy();
         var message = CreateMessage(OrderStatusEnum.Pronto, isDelivery: true);
 
         // act
@@ -35,10 +35,10 @@ public class OrderStatusNotificationStrategyTest
     }
 
     [Fact]
-    public void BuildMessage_DeveRetornarMensagemDePedidoProntoParaRetirada()
+    public void BuildMessage_ShouldReturnReadyForPickupMessage()
     {
         // arrange
-        var strategy = new OrderReadyNotificationStrategy();
+        var strategy = new OrderReadyMessageStrategy();
         var message = CreateMessage(OrderStatusEnum.Pronto, isDelivery: false);
 
         // act
@@ -49,10 +49,10 @@ public class OrderStatusNotificationStrategyTest
     }
 
     [Fact]
-    public void BuildMessage_DeveRetornarMensagemDePedidoSaiuParaEntrega()
+    public void BuildMessage_ShouldReturnOutForDeliveryMessage()
     {
         // arrange
-        var strategy = new OrderOutForDeliveryNotificationStrategy();
+        var strategy = new OrderOutForDeliveryMessageStrategy();
         var message = CreateMessage(OrderStatusEnum.SaiuParaEntrega);
 
         // act
@@ -63,10 +63,10 @@ public class OrderStatusNotificationStrategyTest
     }
 
     [Fact]
-    public void BuildMessage_DeveRetornarMensagemDePedidoCancelado()
+    public void BuildMessage_ShouldReturnCanceledMessage()
     {
         // arrange
-        var strategy = new OrderCanceledNotificationStrategy();
+        var strategy = new OrderCanceledMessageStrategy();
         var message = CreateMessage(OrderStatusEnum.Cancelado);
 
         // act
@@ -77,10 +77,10 @@ public class OrderStatusNotificationStrategyTest
     }
 
     [Fact]
-    public void BuildMessage_DeveRetornarMensagemDePedidoFinalizado()
+    public void BuildMessage_ShouldReturnFinishedMessage()
     {
         // arrange
-        var strategy = new OrderFinishedNotificationStrategy();
+        var strategy = new OrderFinishedMessageStrategy();
         var message = CreateMessage(OrderStatusEnum.Finalizado);
 
         // act
@@ -90,25 +90,11 @@ public class OrderStatusNotificationStrategyTest
         Assert.Equal("O seu pedido N°10 foi concluído. Agradecemos a preferência e bom apetite!", result);
     }
 
-    [Fact]
-    public void BuildMessage_DeveRetornarMensagemDeStatusNaoIdentificado()
-    {
-        // arrange
-        var strategy = new UnknownOrderStatusNotificationStrategy();
-        var message = CreateMessage(OrderStatusEnum.Error);
-
-        // act
-        var result = strategy.BuildMessage(message);
-
-        // assert
-        Assert.Equal("O seu pedido N°10 está com status não identificado.", result);
-    }
-
-    private static NotifyMessageDto CreateMessage(OrderStatusEnum status, bool isDelivery = true)
+    private static OrderStatusChangedMessageDto CreateMessage(OrderStatusEnum status, bool isDelivery = true)
         => new()
         {
             OrderId = 10,
-            OrderStatus = status,
+            Status = status,
             IsDelivery = isDelivery
         };
 }

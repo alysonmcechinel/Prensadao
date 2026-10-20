@@ -8,7 +8,7 @@
 - Workers ficam em `Prensadao.Infra/Messaging/Workers`.
 - Workers devem passar o `CancellationToken` do host para o `IConsumer`.
 - Contratos de mensagem devem ser serializados em JSON e manter compatibilidade.
-- Ao alterar `OrderMessageDto` ou `NotifyMessageDto`, atualize produtores, consumidores, documentação e testes.
+- Ao alterar `OrderMessageDto` ou `OrderStatusChangedMessageDto`, atualize produtores, consumidores, documentação e testes.
 - Workers devem tratar cancelamento e falhas de forma previsível.
 - Não use espera bloqueante; mantenha o worker ativo apenas com operação assíncrona cancelável pelo token do host.
 - Repositórios não devem publicar mensagens.
@@ -24,7 +24,7 @@ public static class RabbitMqConstants
     public static class Exchanges
     {
         public const string OrderExchange = "prensado.order";
-        public const string NotifyExchange = "prensado.notify";
+        public const string OrderStatusChangedExchange = "prensado.order-status-changed";
     }
 }
 ```

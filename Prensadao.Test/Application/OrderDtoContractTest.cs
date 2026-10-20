@@ -73,13 +73,13 @@ public class OrderDtoContractTest
     }
 
     [Fact]
-    public void NotifyMessageDto_ShouldSerializeIsDelivery()
+    public void OrderStatusChangedMessageDto_ShouldSerializeCanonicalFields()
     {
         // arrange
-        var dto = new Prensadao.Application.DTOs.NotifyMessageDto
+        var dto = new Prensadao.Application.DTOs.OrderStatusChangedMessageDto
         {
             OrderId = 10,
-            OrderStatus = OrderStatusEnum.Pronto,
+            Status = OrderStatusEnum.Pronto,
             IsDelivery = true
         };
 
@@ -87,27 +87,26 @@ public class OrderDtoContractTest
         var json = JsonSerializer.Serialize(dto);
 
         // assert
+        Assert.Contains("\"OrderId\":10", json);
+        Assert.Contains("\"Status\":2", json);
         Assert.Contains("\"IsDelivery\":true", json);
+        Assert.DoesNotContain("CustomerName", json);
+        Assert.DoesNotContain("Phone", json);
     }
 
     [Fact]
-    public void NotifyMessageDto_ShouldSerializeCustomerNameAsCanonicalField()
+    public void OrderStatusChangedMessageDto_ShouldRejectMessage_WhenStatusIsMissing()
     {
         // arrange
-        var dto = new Prensadao.Application.DTOs.NotifyMessageDto
-        {
-            OrderId = 10,
-            OrderStatus = OrderStatusEnum.Pronto,
-            CustomerName = "Cliente",
-            Phone = "48999999999"
-        };
+        const string json = """
+            { "OrderId": 10, "IsDelivery": true }
+            """;
 
         // act
-        var json = JsonSerializer.Serialize(dto);
+        var act = () => JsonSerializer.Deserialize<Prensadao.Application.DTOs.OrderStatusChangedMessageDto>(json);
 
         // assert
-        Assert.Contains("\"CustomerName\":\"Cliente\"", json);
-        Assert.DoesNotContain("ConsumerName", json);
+        Assert.Throws<JsonException>(act);
     }
 
     [Fact]

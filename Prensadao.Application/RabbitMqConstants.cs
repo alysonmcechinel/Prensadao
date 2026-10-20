@@ -6,7 +6,7 @@
         public static class Exchanges
         {
             public const string OrderExchange = "prensado.order";
-            public const string NotifyExchange = "prensado.notify";
+            public const string OrderStatusChangedExchange = "prensado.order-status-changed";
         }
 
         public static class RoutingKeys
@@ -17,7 +17,7 @@
         public static class Queues
         {
             public const string OrderCozinhaQueue = "prensado.orders.cozinha";
-            public const string OrderNotifyQueue = "prensado.orders.notify";
+            public const string OrderStatusMessageQueue = "prensado.order-status-messages";
         }
     }
 }
