@@ -22,12 +22,12 @@ public class ProductServiceTest
         {
             Name = "X Salada",
             Description = "O melhor x da região",
-            Value = 12.30m
+            Price = 12.30m
         };
         
         A.CallTo(() => repository.ExistsByNameAsync("X Salada")).Returns(Task.FromResult(false)); // quando checar se o nome existe retorna "false" (não existe)
         A.CallTo(() => repository.AddAsync(
-            A<Product>.That.Matches(p => p.Name == dto.Name && p.Description == dto.Description && p.Price == dto.Value)
+            A<Product>.That.Matches(p => p.Name == dto.Name && p.Description == dto.Description && p.Price == dto.Price)
             )).Returns(1); // adiciona um Product cujo os nomes batem com o DTO e retona com o ID 1.
 
         // act
@@ -49,7 +49,7 @@ public class ProductServiceTest
         {
             Name = "",
             Description = "O melhor x da região",
-            Value = 12.30m
+            Price = 12.30m
         };
 
         // act
@@ -71,7 +71,7 @@ public class ProductServiceTest
         {
             Name = "X Salada",
             Description = "O melhor x da região",
-            Value = 12.30m
+            Price = 12.30m
         };
 
         A.CallTo(() => repository.ExistsByNameAsync("X Salada")).Returns(Task.FromResult(true));
@@ -88,7 +88,7 @@ public class ProductServiceTest
     [Theory]
     [InlineData(0)]
     [InlineData(-1)]
-    public async Task AddProduct_ShouldThrow_WhenValueIsNotPositive(decimal value)
+    public async Task AddProduct_ShouldThrow_WhenPriceIsNotPositive(decimal price)
     {
         // arrange
         var repository = A.Fake<IProductRepository>();
@@ -97,7 +97,7 @@ public class ProductServiceTest
         {
             Name = "X Salada",
             Description = "O melhor x da região",
-            Value = value
+            Price = price
         };
 
         A.CallTo(() => repository.ExistsByNameAsync("X Salada")).Returns(Task.FromResult(false));
@@ -127,7 +127,7 @@ public class ProductServiceTest
         // assert
         Assert.NotNull(result);
         result.Name.Should().Be("X Salada");
-        result.Value.Should().Be(12.30m);
+        result.Price.Should().Be(12.30m);
         result.Description.Should().Be("O melhor x da região");
         A.CallTo(() => repository.GetByIdAsync(1)).MustHaveHappenedOnceExactly();
     }
@@ -178,7 +178,7 @@ public class ProductServiceTest
             Name = "X-Salada",
             Description = "O melhor x salada da região",
             Enabled = true,
-            Value = 10.50m
+            Price = 10.50m
         };
 
         A.CallTo(() => repository.GetByIdAsync(1)).Returns(Task.FromResult<Product?>(product));
@@ -190,7 +190,7 @@ public class ProductServiceTest
         // assert
         product.Name.Should().Be(dto.Name);
         product.Description.Should().Be(dto.Description);
-        product.Price.Should().Be(dto.Value);
+        product.Price.Should().Be(dto.Price);
         product.Enabled.Should().Be(dto.Enabled);
 
         A.CallTo(() => repository.GetByIdAsync(1)).MustHaveHappenedOnceExactly();        
@@ -198,7 +198,7 @@ public class ProductServiceTest
             A<Product>.That.Matches(p =>
                 p.Name == dto.Name &&
                 p.Description == dto.Description &&
-                p.Price == dto.Value &&
+                p.Price == dto.Price &&
                 p.Enabled == dto.Enabled)))
          .MustHaveHappenedOnceExactly(); // Verifica que chamou Update com um Product que tem os valores esperados
     }
@@ -219,7 +219,7 @@ public class ProductServiceTest
             Name = "X-Salada",
             Description = "O melhor x salada da região",
             Enabled = true,
-            Value = 10.50m
+            Price = 10.50m
         };
 
         // act
@@ -244,7 +244,7 @@ public class ProductServiceTest
             Name = "X-Salada",
             Description = "O melhor x salada da região",
             Enabled = true,
-            Value = 10.50m
+            Price = 10.50m
         };
 
         A.CallTo(() => repository.GetByIdAsync(dto.ProductId!.Value)).Returns(Task.FromResult<Product?>(null)!);

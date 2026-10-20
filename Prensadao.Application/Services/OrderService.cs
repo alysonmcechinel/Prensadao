@@ -6,6 +6,7 @@ using Prensadao.Application.Interfaces;
 using Prensadao.Domain.Entities;
 using Prensadao.Domain.Enums;
 using Prensadao.Domain.Repositories;
+using NodaTime;
 using System.Transactions;
 
 namespace Prensadao.Application.Services
@@ -17,13 +18,20 @@ namespace Prensadao.Application.Services
         private readonly IOrderRepository _orderRepository;
         private readonly IOrderItemRepository _orderItemRepository;
         private readonly IProductRepository _productRepository;
+        private readonly IClock _clock;
 
-        public OrderService(IMessagePublisher messagePublisher, IOrderRepository orderRepository, IOrderItemRepository orderItemRepository, IProductRepository productRepository)
+        public OrderService(
+            IMessagePublisher messagePublisher,
+            IOrderRepository orderRepository,
+            IOrderItemRepository orderItemRepository,
+            IProductRepository productRepository,
+            IClock clock)
         {
             _messagePublisher = messagePublisher;
             _orderRepository = orderRepository;
             _orderItemRepository = orderItemRepository;
             _productRepository = productRepository;
+            _clock = clock;
         }
 
         public async Task<List<OrderResponseDto>> GetOrdersAsync() => OrderResponseDto.ToListDto(await _orderRepository.GetAllWithDetailsAsync());
@@ -82,25 +90,24 @@ namespace Prensadao.Application.Services
 
             var order = await GetOrderByIdOrThrowAsync(dto.OrderId);
 
-            if (order.Status == dto.OrderStatus)
-                throw new ArgumentException("Status do pedido já está definido como o informado.");
+            if (order.Status == dto.Status)
+                return OrderResponseDto.ToDto(order);
 
-            order.SetStatus(dto.OrderStatus);
+            order.ChangeStatus(dto.Status!.Value);
             await _orderRepository.UpdateAsync(order);
-            await PublishNotifyMessageAsync(order);
+            await PublishOrderStatusChangedMessageAsync(order);
 
             return OrderResponseDto.ToDto(order);
         }        
 
-        public async Task EnabledAsync(int id)
+        public async Task CancelAsync(int id)
         {
             var order = await GetOrderByIdOrThrowAsync(id);
 
-            ValidateOrderCanBeCanceled(order);
-            order.SetStatus(OrderStatusEnum.Cancelado);
+            order.Cancel();
 
             await _orderRepository.UpdateAsync(order);
-            await PublishNotifyMessageAsync(order);
+            await PublishOrderStatusChangedMessageAsync(order);
         }
 
         // Privates
@@ -110,15 +117,27 @@ namespace Prensadao.Application.Services
 
             if (dto.CustomerId <= 0)
                 throw new ArgumentException("Pedido não pode ser feito sem cliente cadastrado.");
+
+            if (!dto.IsDelivery.HasValue)
+                throw new ArgumentException("A modalidade de entrega do pedido deve ser informada.");
         }
 
         private static void ValidateUpdateStatusRequest(UpdateStatusDto dto)
         {
             ArgumentNullException.ThrowIfNull(dto);
+
+            if (dto.OrderId <= 0)
+                throw new ArgumentException("Id do pedido deve ser maior que zero.");
+
+            if (!dto.Status.HasValue)
+                throw new ArgumentException("Status do pedido deve ser informado.");
+
+            if (!Enum.IsDefined(dto.Status.Value))
+                throw new ArgumentException("Status do pedido inválido.");
         }
 
-        private static Order CreateOrder(OrderRequestDto dto, decimal totalAmountOrder)
-            => new(dto.Delivery, totalAmountOrder, dto.Observation ?? string.Empty, dto.CustomerId, NodaTimeExtensions.NowUtc());
+        private Order CreateOrder(OrderRequestDto dto, decimal totalAmountOrder)
+            => new(dto.IsDelivery!.Value, totalAmountOrder, dto.Notes ?? string.Empty, dto.CustomerId, _clock.NowUtc());
 
         private static decimal CalculateTotalAmount(IEnumerable<OrderItemRequestDto> items, IReadOnlyDictionary<int, decimal> prices)
             => Math.Round(items.Sum(item => prices[item.ProductId] * item.Quantity), 2, MidpointRounding.AwayFromZero);
@@ -131,12 +150,6 @@ namespace Prensadao.Application.Services
                 throw new ArgumentException("Pedido não encontrado.");
 
             return order;
-        }
-
-        private static void ValidateOrderCanBeCanceled(Order order)
-        {
-            if (order.Status != OrderStatusEnum.EmPreparacao && order.Status != OrderStatusEnum.Criado)
-                throw new ArgumentException($"Pedido não pode ser cancelado pois, já esta com status: {order.Status.GetDescription()}");
         }
 
         private async Task<Dictionary<int, decimal>> GetPricesAsync(IEnumerable<OrderItemRequestDto> orderItems)
@@ -174,8 +187,10 @@ namespace Prensadao.Application.Services
         private Task PublishOrderMessageAsync(Order order)
             => _messagePublisher.PublishAsync(CreateOrderMessage(order), RabbitMqConstants.Exchanges.OrderExchange);
 
-        private Task PublishNotifyMessageAsync(Order order)
-            => _messagePublisher.PublishAsync(CreateNotifyMessage(order), RabbitMqConstants.Exchanges.NotifyExchange);
+        private Task PublishOrderStatusChangedMessageAsync(Order order)
+            => _messagePublisher.PublishAsync(
+                CreateOrderStatusChangedMessage(order),
+                RabbitMqConstants.Exchanges.OrderStatusChangedExchange);
 
         private static OrderMessageDto CreateOrderMessage(Order order)
             => new()
@@ -183,14 +198,12 @@ namespace Prensadao.Application.Services
                 OrderId = order.OrderId
             };
 
-        private static NotifyMessageDto CreateNotifyMessage(Order order)
+        private static OrderStatusChangedMessageDto CreateOrderStatusChangedMessage(Order order)
             => new()
             {
                 OrderId = order.OrderId,
-                ConsumerName = order.Customer.Name,
-                Delivery = order.IsDelivery,
-                OrderStatus = order.Status,
-                Phone = order.Customer.Phone
+                IsDelivery = order.IsDelivery,
+                Status = order.Status
             };
     }
 }

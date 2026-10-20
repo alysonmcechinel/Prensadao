@@ -60,7 +60,7 @@ namespace Prensadao.Infra
         public static IServiceCollection AddWorkers(this IServiceCollection services)
         {
             services.AddHostedService<OrderWorker>();
-            services.AddHostedService<NotifyWorker>();
+            services.AddHostedService<OrderStatusMessageWorker>();
 
             return services;
         }

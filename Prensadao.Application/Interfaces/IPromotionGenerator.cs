@@ -5,5 +5,5 @@ namespace Prensadao.Application.Interfaces;
 
 public interface IPromotionGenerator
 {
-    Task<PromotionProductDto> GenerateWeeklyPromotionAsync(GeneratePromotionRequest request, CancellationToken cancellationToken);
+    Task<PromotionProductDto> GeneratePromotionAsync(GeneratePromotionRequest request, CancellationToken cancellationToken);
 }

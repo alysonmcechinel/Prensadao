@@ -21,7 +21,7 @@ public async Task<IActionResult> GenerateAsync(
     [FromBody] GeneratePromotionRequest dto,
     CancellationToken cancellationToken)
 {
-    var result = await _promotionGenerator.GenerateWeeklyPromotionAsync(dto, cancellationToken);
+    var result = await _promotionGenerator.GeneratePromotionAsync(dto, cancellationToken);
     return Ok(result);
 }
 ```
@@ -29,7 +29,7 @@ public async Task<IActionResult> GenerateAsync(
 Serviço de aplicação concentra a regra e a orquestração. Este exemplo é reduzido; mantenha o mapeamento completo do DTO no código real.
 
 ```csharp
-public async Task<PromotionProductDto> GenerateWeeklyPromotionAsync(
+public async Task<PromotionProductDto> GeneratePromotionAsync(
     GeneratePromotionRequest request,
     CancellationToken cancellationToken)
 {
@@ -37,7 +37,7 @@ public async Task<PromotionProductDto> GenerateWeeklyPromotionAsync(
         throw new ArgumentException("TopN deve ser maior que zero.");
 
     var topProducts = await _salesAnalyticsRepository.GetTopProductsSoldAsync(
-        weekStart,
+        topProductsStartUtc,
         nowUtc,
         request.TopN,
         cancellationToken);

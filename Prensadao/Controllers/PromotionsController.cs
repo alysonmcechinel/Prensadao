@@ -26,7 +26,7 @@ namespace Prensadao.API.Controllers
         {
             try
             {
-                var result = await _promotionGenerator.GenerateWeeklyPromotionAsync(dto, cancellationToken);
+                var result = await _promotionGenerator.GeneratePromotionAsync(dto, cancellationToken);
                 return Ok(result);
             }
             catch (Exception ex)

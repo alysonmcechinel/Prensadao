@@ -2,6 +2,8 @@
 
 A feature de promoções com IA gera uma sugestão para um produto com base nos produtos mais vendidos e no histórico usado para selecionar o melhor dia da semana.
 
+O caso de uso `GeneratePromotionAsync` é executado sob demanda. O nome não representa frequência, validade ou agendamento semanal; o aspecto semanal da análise é somente a escolha de `BestDayOfWeek`.
+
 ## Endpoint
 
 `POST api/Promotions/Generate`
@@ -42,29 +44,33 @@ Response:
 
 ## Análises e Cálculos Atuais
 
-As regras abaixo descrevem o comportamento implementado. As decisões ainda pendentes sobre nomenclatura, status considerados e elegibilidade de produtos estão registradas em `ROADMAP.md`.
+As regras abaixo descrevem o comportamento implementado.
 
 ### Produtos mais vendidos
 
-- O intervalo começa 360 dias antes do instante atual em UTC e termina no instante atual, incluindo os limites.
+- O intervalo contém os últimos `TopProductsLookbackDays` dias comerciais completos (atualmente 360), considerando `America/Sao_Paulo` e excluindo o dia comercial atual.
+- O início corresponde à meia-noite local do primeiro dia incluído e o fim exclusivo corresponde à meia-noite local do dia atual; ambos são convertidos para UTC antes da consulta.
+- Apenas itens de pedidos com status `Finalizado` participam das métricas de vendas e receita.
 - Os itens de pedido são agrupados por produto, nome e preço atual.
 - `UnitsSold` é a soma de `OrderItem.Quantity` para o produto.
 - `Revenue` é a soma de `Quantity * UnitPrice`, usando o preço histórico de cada item.
 - A classificação usa `UnitsSold` em ordem decrescente e, em empate, `Revenue` em ordem decrescente.
+- Apenas produtos ativos (`Product.Enabled = true`) participam do ranking e podem ser enviados como candidatos à IA.
 - Apenas os primeiros `TopN` produtos são retornados e enviados como candidatos à IA.
-- A consulta atual não filtra `Order.Status` nem `Product.Enabled`.
 - Se nenhum produto for encontrado, a geração termina com erro antes de chamar a IA.
 
 ### Melhor dia da semana
 
-- O intervalo começa 84 dias antes do instante atual em UTC e termina no instante atual, incluindo os limites.
-- Os itens são agrupados pelo `DayOfWeek` de `Order.CreatedAt`.
-- Para cada dia da semana, o sistema calcula a receita total, as unidades totais e a quantidade de datas distintas presentes no grupo.
+- O intervalo contém os últimos `BestDayLookbackDays` dias comerciais completos (atualmente 84), considerando `America/Sao_Paulo` e excluindo o dia comercial atual.
+- O início corresponde à meia-noite local do primeiro dia incluído e o fim exclusivo corresponde à meia-noite local do dia atual; ambos são convertidos para UTC antes da consulta.
+- Apenas itens de pedidos com status `Finalizado` participam da análise temporal.
+- Os itens são agrupados pelo `DayOfWeek` local de `Order.CreatedAt` em `America/Sao_Paulo`.
+- Para cada dia da semana, o sistema calcula a receita total, as unidades totais e a quantidade de datas comerciais distintas presentes no grupo.
 - A receita média do dia é `receita total / quantidade de datas distintas`.
 - A classificação usa a receita média em ordem decrescente e, em empate, as unidades totais em ordem decrescente.
 - Quando não existem dados no intervalo, o resultado padrão é `Friday`.
 - O resultado usa o nome em inglês produzido por `DayOfWeek.ToString()`.
-- A consulta atual não filtra `Order.Status` nem `Product.Enabled`.
+- Vendas históricas de produtos atualmente ativos ou inativos participam desta análise temporal quando o pedido está finalizado.
 
 ### Preço promocional
 

@@ -72,7 +72,7 @@ namespace Prensadao.API.Controllers
             }
         }
 
-        [HttpPut("UpdateStatus")]
+        [HttpPut("Status")]
         [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> UpdateStatusAsync([FromBody] UpdateStatusDto dto)
@@ -93,14 +93,14 @@ namespace Prensadao.API.Controllers
             }
         }
 
-        [HttpPut("Enabled")]
+        [HttpPost("{id:int}/Cancel")]
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> EnabledAsync([FromQuery] int id)
+        public async Task<IActionResult> CancelAsync([FromRoute] int id)
         {
             try
             {
-                await _orderService.EnabledAsync(id);
+                await _orderService.CancelAsync(id);
                 return Ok("Pedido cancelado com sucesso.");
             }
             catch (Exception ex)

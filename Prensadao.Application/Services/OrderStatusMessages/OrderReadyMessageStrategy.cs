@@ -2,15 +2,15 @@ using Prensadao.Application.DTOs;
 using Prensadao.Application.Interfaces;
 using Prensadao.Domain.Enums;
 
-namespace Prensadao.Application.Services.Notifications;
+namespace Prensadao.Application.Services.OrderStatusMessages;
 
-public class OrderReadyNotificationStrategy : IOrderStatusNotificationStrategy
+public class OrderReadyMessageStrategy : IOrderStatusMessageStrategy
 {
     public OrderStatusEnum Status => OrderStatusEnum.Pronto;
 
-    public string BuildMessage(NotifyMessageDto message)
+    public string BuildMessage(OrderStatusChangedMessageDto message)
     {
-        if (message.Delivery)
+        if (message.IsDelivery)
             return $"O seu pedido N°{message.OrderId} está pronto e aguardando saída para entrega.";
 
         return $"O seu pedido N°{message.OrderId} está pronto para retirada.";

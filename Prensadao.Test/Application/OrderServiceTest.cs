@@ -1,5 +1,6 @@
 ﻿using AutoFixture.Xunit2;
 using FakeItEasy;
+using NodaTime;
 using Prensadao.Application;
 using Prensadao.Application.DTOs;
 using Prensadao.Application.DTOs.Requests;
@@ -27,8 +28,8 @@ public class OrderServiceTest
         var dto = new OrderRequestDto
         {
             CustomerId = 1,
-            Delivery = true,
-            Observation = "Sem cebola",
+            IsDelivery = true,
+            Notes = "Sem cebola",
             OrderItems =
             [
                 new OrderItemRequestDto { ProductId = 10, Quantity = 2 },
@@ -59,8 +60,9 @@ public class OrderServiceTest
         A.CallTo(() => orderRepository.AddAsync(
             A<Order>.That.Matches(order =>
                 order.CustomerId == dto.CustomerId &&
-                order.IsDelivery == dto.Delivery &&
-                order.Notes == dto.Observation &&
+                order.IsDelivery == dto.IsDelivery &&
+                order.Notes == dto.Notes &&
+                order.CreatedAt == new DateTime(2026, 1, 1, 12, 0, 0, DateTimeKind.Utc) &&
                 order.TotalAmount == 39.00m &&
                 order.Status == OrderStatusEnum.Criado)))
             .MustHaveHappenedOnceExactly();
@@ -118,6 +120,26 @@ public class OrderServiceTest
         // assert
         Assert.Equal("Pedido não pode ser feito sem cliente cadastrado.", ex.Message);
         A.CallTo(() => orderRepository.AddAsync(A<Order>._)).MustNotHaveHappened();
+    }
+
+    [Theory, AutoFakeItEasyData]
+    public async Task OrderCreate_ShouldThrowAndNotPersist_WhenDeliveryModeIsMissing(
+        [Frozen] IOrderRepository orderRepository,
+        [Frozen] IProductRepository productRepository,
+        OrderService orderService,
+        OrderRequestDto dto)
+    {
+        // arrange
+        dto.CustomerId = 1;
+        dto.IsDelivery = null;
+
+        // act
+        var exception = await Assert.ThrowsAsync<ArgumentException>(() => orderService.OrderCreateAsync(dto));
+
+        // assert
+        Assert.Equal("A modalidade de entrega do pedido deve ser informada.", exception.Message);
+        A.CallTo(() => orderRepository.AddAsync(A<Order>._)).MustNotHaveHappened();
+        A.CallTo(() => productRepository.ExistsInactiveByIdsAsync(A<IReadOnlyCollection<int>>._)).MustNotHaveHappened();
     }
 
     [Theory, AutoFakeItEasyData]
@@ -218,14 +240,14 @@ public class OrderServiceTest
         var customer = new Customer("Nome", "48999999999", "Rua", "Bairro", "123", "Cidade", "Ponto de referencia", 88000000);
         typeof(Customer).GetProperty("CustomerId")!.SetValue(customer, customerId);
 
-        var order = new Order(isDelivery: true, totalAmount: 42.50m, notes: "Sem cebola", customerId: customerId, createdAt: NodaTimeExtensions.NowUtc());
+        var order = new Order(isDelivery: true, totalAmount: 42.50m, notes: "Sem cebola", customerId: customerId, createdAt: SystemClock.Instance.NowUtc());
         typeof(Order).GetProperty("OrderId")!.SetValue(order, orderId);
         typeof(Order).GetProperty("Customer")!.SetValue(order, customer);
 
         var dto = new UpdateStatusDto
         {
             OrderId = orderId,
-            OrderStatus = OrderStatusEnum.EmPreparacao
+            Status = OrderStatusEnum.EmPreparacao
         };
 
         A.CallTo(() => orderRepository.GetByIdWithDetailsAsync(orderId)).Returns(order);
@@ -235,7 +257,7 @@ public class OrderServiceTest
 
         // assert
         Assert.Equal(orderId, result.OrderId);
-        Assert.Equal(OrderStatusEnum.EmPreparacao.GetDescription(), result.OrderStatus);
+        Assert.Equal(OrderStatusEnum.EmPreparacao.GetDescription(), result.Status);
         Assert.Equal(customerId, result.CustomerId);
         Assert.Equal(customer.Name, result.CustomerName);
         Assert.Equal(OrderStatusEnum.EmPreparacao, order.Status);
@@ -250,19 +272,17 @@ public class OrderServiceTest
             .MustHaveHappenedOnceExactly();
 
         A.CallTo(() => messagePublisher.PublishAsync(
-                A<NotifyMessageDto>.That.Matches(message =>
+                A<OrderStatusChangedMessageDto>.That.Matches(message =>
                     message.OrderId == orderId &&
-                    message.ConsumerName == customer.Name &&
-                    message.Delivery == order.IsDelivery &&
-                    message.OrderStatus == OrderStatusEnum.EmPreparacao &&
-                    message.Phone == customer.Phone),
-                RabbitMqConstants.Exchanges.NotifyExchange,
+                    message.IsDelivery == order.IsDelivery &&
+                    message.Status == OrderStatusEnum.EmPreparacao),
+                RabbitMqConstants.Exchanges.OrderStatusChangedExchange,
                 A<string?>._))
             .MustHaveHappenedOnceExactly();
     }
 
     [Theory, AutoFakeItEasyData]
-    public async Task UpdateStatusAsync_DeveLancarExceptionENaoAtualizarOuPublicar_QuandoStatusJaEstaDefinido(
+    public async Task UpdateStatusAsync_ShouldReturnWithoutWritingOrPublishing_WhenStatusIsAlreadySet(
         [Frozen] IMessagePublisher messagePublisher,
         [Frozen] IOrderRepository orderRepository,
         OrderService orderService,
@@ -273,24 +293,25 @@ public class OrderServiceTest
         var customer = new Customer("Nome", "48999999999", "Rua", "Bairro", "123", "Cidade", "Ponto de referencia", 88000000);
         typeof(Customer).GetProperty("CustomerId")!.SetValue(customer, customerId);
 
-        var order = new Order(isDelivery: true, totalAmount: 42.50m, notes: "Sem cebola", customerId: customerId, createdAt: NodaTimeExtensions.NowUtc());
+        var order = new Order(isDelivery: true, totalAmount: 42.50m, notes: "Sem cebola", customerId: customerId, createdAt: SystemClock.Instance.NowUtc());
         typeof(Order).GetProperty("OrderId")!.SetValue(order, orderId);
         typeof(Order).GetProperty("Customer")!.SetValue(order, customer);
-        order.SetStatus(OrderStatusEnum.Pronto);
+        order.AdvanceStatus();
+        order.AdvanceStatus();
 
         var dto = new UpdateStatusDto
         {
             OrderId = orderId,
-            OrderStatus = OrderStatusEnum.Pronto
+            Status = OrderStatusEnum.Pronto
         };
 
         A.CallTo(() => orderRepository.GetByIdWithDetailsAsync(orderId)).Returns(order);
 
         // act
-        var exception = await Assert.ThrowsAsync<ArgumentException>(() => orderService.UpdateStatusAsync(dto));
+        var result = await orderService.UpdateStatusAsync(dto);
 
         // assert
-        Assert.Equal("Status do pedido já está definido como o informado.", exception.Message);
+        Assert.Equal(OrderStatusEnum.Pronto.GetDescription(), result.Status);
 
         A.CallTo(() => orderRepository.GetByIdWithDetailsAsync(orderId))
             .MustHaveHappenedOnceExactly();
@@ -299,34 +320,194 @@ public class OrderServiceTest
             .MustNotHaveHappened();
 
         A.CallTo(() => messagePublisher.PublishAsync(
-                A<NotifyMessageDto>._,
+                A<OrderStatusChangedMessageDto>._,
                 A<string>._,
                 A<string?>._))
             .MustNotHaveHappened();
     }
 
     [Theory, AutoFakeItEasyData]
-    public async Task Enabled_DeveLancar_JaEstaComStatusNaoCancelavel(
+    public async Task UpdateStatusAsync_ShouldThrowAndNotReadOrWrite_WhenStatusIsUndefined(
+        [Frozen] IMessagePublisher messagePublisher,
+        [Frozen] IOrderRepository orderRepository,
+        OrderService orderService,
+        int orderId)
+    {
+        // arrange
+        var dto = new UpdateStatusDto
+        {
+            OrderId = orderId,
+            Status = (OrderStatusEnum)999
+        };
+
+        // act
+        var exception = await Assert.ThrowsAsync<ArgumentException>(() => orderService.UpdateStatusAsync(dto));
+
+        // assert
+        Assert.Equal("Status do pedido inválido.", exception.Message);
+        A.CallTo(() => orderRepository.GetByIdWithDetailsAsync(A<int>._)).MustNotHaveHappened();
+        A.CallTo(() => orderRepository.UpdateAsync(A<Order>._)).MustNotHaveHappened();
+        A.CallTo(() => messagePublisher.PublishAsync(
+                A<OrderStatusChangedMessageDto>._,
+                A<string>._,
+                A<string?>._))
+            .MustNotHaveHappened();
+    }
+
+    [Theory, AutoFakeItEasyData]
+    public async Task UpdateStatusAsync_ShouldThrowAndNotReadOrWrite_WhenOrderIdIsInvalid(
+        [Frozen] IMessagePublisher messagePublisher,
+        [Frozen] IOrderRepository orderRepository,
+        OrderService orderService)
+    {
+        // arrange
+        var dto = new UpdateStatusDto
+        {
+            OrderId = 0,
+            Status = OrderStatusEnum.EmPreparacao
+        };
+
+        // act
+        var exception = await Assert.ThrowsAsync<ArgumentException>(() => orderService.UpdateStatusAsync(dto));
+
+        // assert
+        Assert.Equal("Id do pedido deve ser maior que zero.", exception.Message);
+        A.CallTo(() => orderRepository.GetByIdWithDetailsAsync(A<int>._)).MustNotHaveHappened();
+        A.CallTo(() => orderRepository.UpdateAsync(A<Order>._)).MustNotHaveHappened();
+        A.CallTo(() => messagePublisher.PublishAsync(
+                A<OrderStatusChangedMessageDto>._,
+                A<string>._,
+                A<string?>._))
+            .MustNotHaveHappened();
+    }
+
+    [Theory, AutoFakeItEasyData]
+    public async Task UpdateStatusAsync_ShouldThrowAndNotReadOrWrite_WhenStatusIsMissing(
+        [Frozen] IMessagePublisher messagePublisher,
+        [Frozen] IOrderRepository orderRepository,
+        OrderService orderService,
+        int orderId)
+    {
+        // arrange
+        var dto = new UpdateStatusDto { OrderId = orderId, Status = null };
+
+        // act
+        var exception = await Assert.ThrowsAsync<ArgumentException>(() => orderService.UpdateStatusAsync(dto));
+
+        // assert
+        Assert.Equal("Status do pedido deve ser informado.", exception.Message);
+        A.CallTo(() => orderRepository.GetByIdWithDetailsAsync(A<int>._)).MustNotHaveHappened();
+        A.CallTo(() => orderRepository.UpdateAsync(A<Order>._)).MustNotHaveHappened();
+        A.CallTo(() => messagePublisher.PublishAsync(
+                A<OrderStatusChangedMessageDto>._,
+                A<string>._,
+                A<string?>._))
+            .MustNotHaveHappened();
+    }
+
+    [Theory, AutoFakeItEasyData]
+    public async Task UpdateStatusAsync_ShouldThrowAndNotWriteOrPublish_WhenTransitionSkipsStatus(
+        [Frozen] IMessagePublisher messagePublisher,
+        [Frozen] IOrderRepository orderRepository,
+        OrderService orderService,
+        int orderId)
+    {
+        // arrange
+        var order = new Order(isDelivery: true, totalAmount: 10m, notes: string.Empty, customerId: 1, createdAt: SystemClock.Instance.NowUtc());
+        var dto = new UpdateStatusDto { OrderId = orderId, Status = OrderStatusEnum.Pronto };
+        A.CallTo(() => orderRepository.GetByIdWithDetailsAsync(orderId)).Returns(order);
+
+        // act
+        var exception = await Assert.ThrowsAsync<ArgumentException>(() => orderService.UpdateStatusAsync(dto));
+
+        // assert
+        Assert.Equal("Transição de status inválida: Criado para Pronto.", exception.Message);
+        A.CallTo(() => orderRepository.UpdateAsync(A<Order>._)).MustNotHaveHappened();
+        A.CallTo(() => messagePublisher.PublishAsync(
+                A<OrderStatusChangedMessageDto>._,
+                A<string>._,
+                A<string?>._))
+            .MustNotHaveHappened();
+    }
+
+    [Theory, AutoFakeItEasyData]
+    public async Task UpdateStatusAsync_ShouldThrowAndNotWriteOrPublish_WhenCancellationUsesStatusEndpoint(
+        [Frozen] IMessagePublisher messagePublisher,
+        [Frozen] IOrderRepository orderRepository,
+        OrderService orderService,
+        int orderId)
+    {
+        // arrange
+        var order = new Order(isDelivery: true, totalAmount: 10m, notes: string.Empty, customerId: 1, createdAt: SystemClock.Instance.NowUtc());
+        var dto = new UpdateStatusDto { OrderId = orderId, Status = OrderStatusEnum.Cancelado };
+        A.CallTo(() => orderRepository.GetByIdWithDetailsAsync(orderId)).Returns(order);
+
+        // act
+        var exception = await Assert.ThrowsAsync<ArgumentException>(() => orderService.UpdateStatusAsync(dto));
+
+        // assert
+        Assert.Equal("Cancelamento não faz parte do avanço normal do pedido.", exception.Message);
+        A.CallTo(() => orderRepository.UpdateAsync(A<Order>._)).MustNotHaveHappened();
+        A.CallTo(() => messagePublisher.PublishAsync(
+                A<OrderStatusChangedMessageDto>._,
+                A<string>._,
+                A<string?>._))
+            .MustNotHaveHappened();
+    }
+
+    [Theory, AutoFakeItEasyData]
+    public async Task CancelAsync_ShouldThrowAndNotPersist_WhenStatusCannotBeCanceled(
+        [Frozen] IMessagePublisher messagePublisher,
         [Frozen] IOrderRepository orderRepository,
         OrderService orderService,
         int pedidoId)
     {
         // arrange: pedido em status que NÃO pode ser cancelado (ex.: Pronto)
-        var order = new Order(isDelivery: true, totalAmount: 10m, notes: "obs", customerId: 1, createdAt: NodaTimeExtensions.NowUtc());
-        order.SetStatus(OrderStatusEnum.Pronto);
+        var order = new Order(isDelivery: true, totalAmount: 10m, notes: "obs", customerId: 1, createdAt: SystemClock.Instance.NowUtc());
+        order.AdvanceStatus();
+        order.AdvanceStatus();
         A.CallTo(() => orderRepository.GetByIdWithDetailsAsync(pedidoId)).Returns(order);
 
         // act
-        var ex = await Assert.ThrowsAsync<ArgumentException>(() => orderService.EnabledAsync(pedidoId));
+        var ex = await Assert.ThrowsAsync<ArgumentException>(() => orderService.CancelAsync(pedidoId));
 
         // assert
-        var esperado = $"Pedido não pode ser cancelado pois, já esta com status: {order.Status.GetDescription()}";
+        var esperado = $"Pedido não pode ser cancelado no status atual: {order.Status}.";
         Assert.Equal(esperado, ex.Message);
         A.CallTo(() => orderRepository.UpdateAsync(A<Order>._)).MustNotHaveHappened();
+        A.CallTo(() => messagePublisher.PublishAsync(
+                A<OrderStatusChangedMessageDto>._,
+                A<string>._,
+                A<string?>._))
+            .MustNotHaveHappened();
     }
 
     [Theory, AutoFakeItEasyData]
-    public async Task Enabled_DeveCancelar_PedidoComStatusCancelavel(
+    public async Task CancelAsync_ShouldThrowAndNotWriteOrPublish_WhenOrderDoesNotExist(
+        [Frozen] IMessagePublisher messagePublisher,
+        [Frozen] IOrderRepository orderRepository,
+        OrderService orderService,
+        int orderId)
+    {
+        // arrange
+        A.CallTo(() => orderRepository.GetByIdWithDetailsAsync(orderId)).Returns((Order?)null);
+
+        // act
+        var exception = await Assert.ThrowsAsync<ArgumentException>(() => orderService.CancelAsync(orderId));
+
+        // assert
+        Assert.Equal("Pedido não encontrado.", exception.Message);
+        A.CallTo(() => orderRepository.UpdateAsync(A<Order>._)).MustNotHaveHappened();
+        A.CallTo(() => messagePublisher.PublishAsync(
+                A<OrderStatusChangedMessageDto>._,
+                A<string>._,
+                A<string?>._))
+            .MustNotHaveHappened();
+    }
+
+    [Theory, AutoFakeItEasyData]
+    public async Task CancelAsync_ShouldCancelPersistAndPublish_WhenStatusCanBeCanceled(
+        [Frozen] IMessagePublisher messagePublisher,
         [Frozen] IOrderRepository orderRepository,
         OrderService orderService,
         int orderId,
@@ -336,18 +517,25 @@ public class OrderServiceTest
         var customer = new Customer("Nome", "48999999999", "Rua", "Bairro", "123", "Cidade", "Ponto de referência", 88000000);
         typeof(Customer).GetProperty("CustomerId")!.SetValue(customer, customerId);
 
-        var order = new Order(isDelivery: true, totalAmount: 10m, notes: "obs", customerId: customerId, createdAt: NodaTimeExtensions.NowUtc());
+        var order = new Order(isDelivery: true, totalAmount: 10m, notes: "obs", customerId: customerId, createdAt: SystemClock.Instance.NowUtc());
         typeof(Order).GetProperty("OrderId")!.SetValue(order, orderId);
         typeof(Order).GetProperty("Customer")!.SetValue(order, customer);
 
-        order.SetStatus(OrderStatusEnum.EmPreparacao);
+        order.AdvanceStatus();
         A.CallTo(() => orderRepository.GetByIdWithDetailsAsync(orderId)).Returns(order);
 
         // act
-        await orderService.EnabledAsync(orderId);
+        await orderService.CancelAsync(orderId);
 
         // assert
         Assert.Equal(OrderStatusEnum.Cancelado, order.Status);
         A.CallTo(() => orderRepository.UpdateAsync(A<Order>._)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => messagePublisher.PublishAsync(
+                A<OrderStatusChangedMessageDto>.That.Matches(message =>
+                    message.OrderId == orderId &&
+                    message.Status == OrderStatusEnum.Cancelado),
+                RabbitMqConstants.Exchanges.OrderStatusChangedExchange,
+                A<string?>._))
+            .MustHaveHappenedOnceExactly();
     }
 }
