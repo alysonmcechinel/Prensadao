@@ -13,7 +13,10 @@ Este diretório concentra a documentação técnica e operacional do projeto. `A
 | `ERROR_HANDLING.md` | Proposta e roteiro para padronizar erros HTTP | Comportamento apresentado como já implementado |
 | `RUNBOOK.md` | Execução, configuração, migrations e diagnóstico | Decisões de negócio |
 | `ROADMAP.md` | Pendências, débitos conhecidos e decisões futuras | Comportamento apresentado como concluído |
+| `features/` | Decisões e desenhos de funcionalidades planejadas ou em evolução | Inventário do comportamento já disponível |
 | `rules/` | Regras prescritivas para mudanças | Inventário de funcionalidades |
+
+As especificações de funcionalidades confirmadas ou ainda em decisão ficam em `docs/features/`. Consulte `docs/features/README.md` para o índice e o estado de cada uma.
 
 ## Rotas de Leitura
 
