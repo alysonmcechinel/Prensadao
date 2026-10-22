@@ -28,9 +28,10 @@ public class OrderWorker : BackgroundService
         {
             using var scope = _serviceProvider.CreateScope();
             var orderRepository = scope.ServiceProvider.GetRequiredService<IOrderRepository>();
-            var order = await orderRepository.GetByIdAsync(message.OrderId);
+            var order = await orderRepository.GetByIdAsync(message.OrderId)
+                ?? throw new InvalidOperationException($"Pedido {message.OrderId} não encontrado para processamento.");
 
-            if (order is null || order.Status != OrderStatusEnum.Criado)
+            if (order.Status != OrderStatusEnum.Criado)
                 return;
 
             order.AdvanceStatus();

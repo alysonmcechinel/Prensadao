@@ -4,16 +4,19 @@ using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System.Text;
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
 
 namespace Prensadao.Infra.Messaging.RabbitMq;
 
 public class Consumer : IConsumer
 {
     private readonly IRabbitMqConfig _rabbitMqConfigService;
+    private readonly ILogger<Consumer> _logger;
 
-    public Consumer(IRabbitMqConfig rabbitMqConfigService)
+    public Consumer(IRabbitMqConfig rabbitMqConfigService, ILogger<Consumer> logger)
     {
         _rabbitMqConfigService = rabbitMqConfigService;
+        _logger = logger;
     }
 
     public Task Listen<T>(string queue, Func<T, Task> onMessage, CancellationToken cancellationToken)
@@ -38,22 +41,21 @@ public class Consumer : IConsumer
 
             try
             {
-                var message = JsonSerializer.Deserialize<T>(content);
+                var message = JsonSerializer.Deserialize<T>(content)
+                    ?? throw new JsonException($"A mensagem da fila {queue} foi desserializada como nula.");
 
-                if (message is not null)
-                {
-                    await onMessage(message);
-                    channel.BasicAck(eventArgs.DeliveryTag, false);
-                }
-                else
-                {
-                    Console.WriteLine("Mensagem nula recebida.");
-                }
+                await onMessage(message);
+                channel.BasicAck(eventArgs.DeliveryTag, multiple: false);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Erro ao processar a mensagem: {ex.Message}");
-                //TODO: Implementar dead-letter ou log de falhas
+                _logger.LogError(
+                    ex,
+                    "Falha ao processar mensagem da fila {Queue}. A mensagem será encaminhada para a dead-letter queue.",
+                    queue);
+
+                if (channel.IsOpen)
+                    channel.BasicNack(eventArgs.DeliveryTag, multiple: false, requeue: false);
             }
         };
 
@@ -72,7 +74,7 @@ public class Consumer : IConsumer
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Erro ao encerrar o consumidor da fila {queue}: {ex.Message}");
+                _logger.LogWarning(ex, "Erro ao encerrar o consumidor da fila {Queue}.", queue);
             }
         });
 

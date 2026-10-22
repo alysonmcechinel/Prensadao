@@ -43,6 +43,9 @@ public class OrderStatusMessageWorker : BackgroundService
                             "Valor de status inválido {OrderStatusValue} recebido para o pedido {OrderId}.",
                             (int)message.Status,
                             message.OrderId);
+
+                        throw new InvalidOperationException(
+                            $"Valor de status inválido {(int)message.Status} recebido para o pedido {message.OrderId}.");
                     }
 
                     return Task.CompletedTask;

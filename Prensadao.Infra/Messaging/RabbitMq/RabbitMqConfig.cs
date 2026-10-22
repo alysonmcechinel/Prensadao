@@ -24,21 +24,7 @@ namespace Prensadao.Infra.Messaging.RabbitMq
         public Task Config()
         {
             using var channel = _connection.CreateModel();
-
-            // exchanges
-            channel.ExchangeDeclare(RabbitMqConstants.Exchanges.OrderExchange, ExchangeType.Fanout, durable: true);
-            channel.ExchangeDeclare(RabbitMqConstants.Exchanges.OrderStatusChangedExchange, ExchangeType.Fanout, durable: true);
-
-            // queues
-            channel.QueueDeclare(RabbitMqConstants.Queues.OrderCozinhaQueue, durable: true, exclusive: false, arguments: null);
-            channel.QueueDeclare(RabbitMqConstants.Queues.OrderStatusMessageQueue, durable: true, exclusive: false, arguments: null);
-
-            // bind queues to exchange
-            channel.QueueBind(RabbitMqConstants.Queues.OrderCozinhaQueue, RabbitMqConstants.Exchanges.OrderExchange, "");
-            channel.QueueBind(
-                RabbitMqConstants.Queues.OrderStatusMessageQueue,
-                RabbitMqConstants.Exchanges.OrderStatusChangedExchange,
-                "");
+            RabbitMqTopology.Configure(channel);
 
             return Task.CompletedTask;
         }

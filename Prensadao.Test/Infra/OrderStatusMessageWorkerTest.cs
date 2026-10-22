@@ -49,7 +49,7 @@ public class OrderStatusMessageWorkerTest
     }
 
     [Fact]
-    public async Task ExecuteAsync_ShouldNotBuildMessage_WhenStatusValueIsInvalid()
+    public async Task ExecuteAsync_ShouldFailMessage_WhenStatusValueIsInvalid()
     {
         // arrange
         var consumer = A.Fake<IConsumer>();
@@ -74,15 +74,15 @@ public class OrderStatusMessageWorkerTest
             {
                 var handler = call.GetArgument<Func<OrderStatusChangedMessageDto, Task>>(1);
                 await handler(message);
-                cancellation.Cancel();
             });
 
         var worker = new TestableOrderStatusMessageWorker(consumer, resolver, logger);
 
         // act
-        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => worker.RunAsync(cancellation.Token));
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => worker.RunAsync(cancellation.Token));
 
         // assert
+        Assert.Contains("Valor de status inválido 999", exception.Message);
         A.CallTo(() => strategy.BuildMessage(A<OrderStatusChangedMessageDto>._)).MustNotHaveHappened();
     }
 
