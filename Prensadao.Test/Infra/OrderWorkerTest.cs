@@ -101,6 +101,45 @@ public class OrderWorkerTest
             .MustNotHaveHappened();
     }
 
+    [Fact]
+    public async Task ExecuteAsync_ShouldFailMessage_WhenOrderDoesNotExist()
+    {
+        // arrange
+        const int orderId = 999;
+        var repository = A.Fake<IOrderRepository>();
+        var consumer = A.Fake<IConsumer>();
+        var publisher = A.Fake<IMessagePublisher>();
+        A.CallTo(() => repository.GetByIdAsync(orderId)).Returns((Order)null!);
+
+        using var provider = new ServiceCollection()
+            .AddSingleton(repository)
+            .BuildServiceProvider();
+        using var cancellation = new CancellationTokenSource();
+
+        A.CallTo(() => consumer.Listen<OrderMessageDto>(
+                RabbitMqConstants.Queues.OrderCozinhaQueue,
+                A<Func<OrderMessageDto, Task>>._,
+                cancellation.Token))
+            .ReturnsLazily(async call =>
+            {
+                var handler = call.GetArgument<Func<OrderMessageDto, Task>>(1);
+                await handler(new OrderMessageDto { OrderId = orderId });
+            });
+
+        var worker = new TestableOrderWorker(provider, consumer, publisher);
+
+        // act
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => worker.RunAsync(cancellation.Token));
+
+        // assert
+        Assert.Contains($"Pedido {orderId} não encontrado", exception.Message);
+        A.CallTo(() => publisher.PublishAsync(
+                A<OrderStatusChangedMessageDto>._,
+                A<string>._,
+                A<string?>._))
+            .MustNotHaveHappened();
+    }
+
     private static Order CreateOrder(int orderId)
     {
         var customer = new Customer("Nome", "48999999999", "Rua", "Bairro", "123", "Cidade", "Referência", 88000000);

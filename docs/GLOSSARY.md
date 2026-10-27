@@ -82,6 +82,8 @@ O sistema não modela toda a operação comercial da lanchonete. Pagamento, esto
 | **Evento de alteração de status** / `OrderStatusChangedMessageDto` | Contrato assíncrono que informa o pedido, o novo status e sua modalidade para produzir uma mensagem textual. | Não é uma notificação enviada ao cliente nem contém dados de contato. | `OrderStatusChangedMessageDto`; `OrderStatusMessageWorker` |
 | **Mensagem de status do pedido** | Conteúdo textual gerado de acordo com o status e registrado no log da aplicação. | Não é SMS, WhatsApp, e-mail, push nem prova de comunicação externa. | Estratégias de mensagem; `OrderStatusMessageWorker` |
 | **Consumidor** / `IConsumer` | Componente técnico que recebe mensagens de uma fila. | Não significa cliente da lanchonete. | `IConsumer`; workers |
+| **Dead-letter queue** / **DLQ** | Fila RabbitMQ durável que isola uma mensagem rejeitada por payload inválido ou falha de processamento na fila principal correspondente. | Não é retry automático, histórico permanente, correção da mensagem nem garantia de reprocessamento. | `RabbitMqConstants`; `RabbitMqTopology`; `Consumer` |
+| **Mensagem duplicada** | Nova entrega de uma mensagem de pedido cujo efeito esperado já ocorreu; no fluxo da cozinha, o pedido já não está em `Criado`. | Não é falha e não deve ser enviada à DLQ apenas por ter sido entregue novamente. | `OrderWorker` |
 
 ## Vendas, IA e Promoções
 

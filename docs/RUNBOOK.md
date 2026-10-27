@@ -54,5 +54,21 @@ Não edite migrations antigas sem pedido explícito.
 ## Troubleshooting
 - Se a API não conectar no banco, verifique se o PostgreSQL está ativo e se a connection string aponta para o host correto.
 - Se mensagens não forem consumidas, verifique RabbitMQ, exchanges, filas e workers.
+- Se uma mensagem falhar, consulte `prensado.orders.cozinha.dlq` ou `prensado.order-status-messages.dlq` no RabbitMQ Management. Os headers `x-death` indicam a fila de origem e o motivo do dead-lettering.
+- Não republique mensagens da DLQ sem corrigir e validar a causa da falha. O sistema não executa retry nem reprocessamento automático da DLQ.
 - Se promoções com IA falharem, verifique `AzureOpenAi:Endpoint`, `DeploymentName`, `ApiKey` e se a resposta respeita o schema.
 - Se erros de IA não voltarem como `ProblemDetails`, verifique se `RequestContextMiddleware` está habilitado no pipeline.
+
+## Migração das Filas para Dead-letter
+
+O RabbitMQ não permite redeclarar uma fila existente com novos argumentos. Na primeira execução desta versão, filas criadas anteriormente sem `x-dead-letter-exchange` podem causar `PRECONDITION_FAILED`.
+
+Antes da atualização em um ambiente com filas existentes:
+
+1. Pare os produtores e consumidores.
+2. Verifique se `prensado.orders.cozinha` e `prensado.order-status-messages` possuem mensagens pendentes e preserve ou processe essas mensagens antes de prosseguir.
+3. Remova somente essas duas filas principais pelo RabbitMQ Management; essa operação elimina qualquer mensagem que ainda estiver nelas.
+4. Inicie a aplicação para que `RabbitMqStartup` recrie as filas com os argumentos de dead-letter e declare as respectivas DLQs.
+5. Confirme no RabbitMQ Management os bindings com `prensado.dead-letter` antes de reativar os produtores.
+
+Em uma instalação nova, nenhuma ação de migração é necessária.

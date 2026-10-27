@@ -364,3 +364,4 @@ MigrationBackup/
 FodyWeavers.xsd
 /Prensadao/appsettings.Development.json
 /.codex/rules
+/.agents/

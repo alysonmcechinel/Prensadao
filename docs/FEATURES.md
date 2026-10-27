@@ -43,7 +43,9 @@ Este documento registra apenas comportamentos já implementados. Trabalho futuro
 - RabbitMQ usa exchanges e filas centralizadas em `RabbitMqConstants`.
 - `OrderWorker` consome pedidos da fila da cozinha e publica um evento de alteração de status.
 - `OrderStatusMessageWorker` consome eventos `OrderStatusChangedMessageDto`, gera o texto correspondente por estratégia e o registra no log da aplicação.
-- `Criado` não produz mensagem de status. Valores de status inválidos são registrados como falha técnica e não são convertidos em estados do pedido.
+- `Criado` não produz mensagem de status. Valores de status inválidos são registrados como falha técnica, rejeitados e encaminhados à dead-letter queue.
+- Cada fila principal possui uma dead-letter queue durável. Payloads inválidos e falhas de processamento recebem `nack` sem requeue e são encaminhados à DLQ correspondente com os metadados `x-death` do RabbitMQ.
+- Mensagens duplicadas de pedidos que já avançaram de `Criado` são confirmadas sem novo processamento; mensagens referentes a pedidos inexistentes são encaminhadas à DLQ.
 - O sistema ainda não envia SMS, WhatsApp, e-mail ou push.
 - A inicialização de exchanges, filas e binds ocorre via `RabbitMqStartup`.
 

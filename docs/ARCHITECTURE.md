@@ -33,6 +33,7 @@ Não crie dependência de Domain para Application, Infra ou API.
 - Entities protegem invariantes ligadas ao próprio estado.
 - Repositories persistem e consultam dados; não publicam mensagens nem executam regra de negócio.
 - Workers consomem mensagens e executam processamento assíncrono.
+- A topologia RabbitMQ associa cada fila principal a uma dead-letter queue própria por meio do exchange direto `prensado.dead-letter`; o consumidor rejeita sem requeue mensagens inválidas ou cujo processamento falha.
 
 ## Datas, Dinheiro e Serialização
 - Use `decimal` para valores monetários.
