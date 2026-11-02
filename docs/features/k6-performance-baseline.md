@@ -9,7 +9,7 @@
 - Decisão: implementação confirmada pelo usuário em 27/10/2026 durante a descoberta desta funcionalidade.
 - Trabalho relacionado: a carga seguirá o fluxo existente de criação e processamento de pedidos pela cozinha. Promoções com IA, controle de capacidade da cozinha e Outbox permanecem documentados separadamente e não fazem parte deste trabalho.
 - Risco: o impacto técnico é pequeno e reversível, mas uma linha de base enganosa pode ocultar regressões ou apresentar variações da máquina como defeitos da aplicação.
-- Restrição atual: o ambiente em contêiner não publica a porta HTTP da API e `RabbitMqConfig` conecta-se a `localhost`, ignorando o host configurado do RabbitMQ. O teste ponta a ponta isolado não será reproduzível até que esses contratos de execução estejam alinhados.
+- Pré-requisito atendido: o ambiente em contêiner publica a API em `http://localhost:8080` e `RabbitMqConfig` usa a seção tipada `RabbitMq`, sobrescrita pelo compose para acessar o broker na rede interna. A feature de desempenho ainda deverá criar, migrar e descartar seu próprio ambiente isolado.
 
 ## Problema
 

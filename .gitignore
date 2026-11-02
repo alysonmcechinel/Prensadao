@@ -365,3 +365,8 @@ FodyWeavers.xsd
 /Prensadao/appsettings.Development.json
 /.codex/rules
 /.agents/
+
+# Local environment files may contain credentials.
+.env
+.env.*
+!.env.example
