@@ -8,15 +8,11 @@ namespace Prensadao.Infra.Messaging.RabbitMq
     {
         private readonly IConnection _connection;
 
-        public RabbitMqConfig()
+        public RabbitMqConfig(IConnectionFactory connectionFactory)
         {
-            var factory = new ConnectionFactory
-            {
-                HostName = "localhost",
-                DispatchConsumersAsync = true
-            };
+            ArgumentNullException.ThrowIfNull(connectionFactory);
 
-            _connection = factory.CreateConnection("prensadao-app");
+            _connection = connectionFactory.CreateConnection("prensadao-app");
         }
 
         public IModel CreateChannel() => _connection.CreateModel();

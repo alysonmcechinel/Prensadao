@@ -2,9 +2,8 @@
 
 namespace Prensadao.Infra.Messaging.Interfaces;
 
-public interface IRabbitMqConfig
+public interface IRabbitMqConfig : IDisposable
 {
     IModel CreateChannel();
     Task Config();
-    void Dispose();
 }

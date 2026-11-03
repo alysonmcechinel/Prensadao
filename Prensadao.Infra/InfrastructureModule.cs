@@ -3,6 +3,7 @@ using Hangfire.PostgreSql;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using NodaTime;
 using Prensadao.Application.Interfaces;
 using Prensadao.Domain.Interfaces;
@@ -14,6 +15,8 @@ using Prensadao.Infra.Messaging.Workers;
 using Prensadao.Infra.Options;
 using Prensadao.Infra.Persistence;
 using Prensadao.Infra.Persistence.Repositories;
+using RabbitMQ.Client;
+using RabbitMqConnectionFactory = RabbitMQ.Client.IConnectionFactory;
 
 namespace Prensadao.Infra
 {
@@ -23,7 +26,7 @@ namespace Prensadao.Infra
         {
             services
                 .AddData(configuration)
-                .AddRabbitMQ()
+                .AddRabbitMQ(configuration)
                 .AddHangFire(configuration)
                 .AddWorkers()
                 .AddNodaTime()
@@ -45,8 +48,35 @@ namespace Prensadao.Infra
         }
 
         // Configuração do rabbitMQ, injeção de dependecia services e inicialiação do RabbitMQ
-        public static IServiceCollection AddRabbitMQ(this IServiceCollection services)
+        public static IServiceCollection AddRabbitMQ(this IServiceCollection services, IConfiguration configuration)
         {
+            services
+                .AddOptions<RabbitMqOptions>()
+                .Bind(configuration.GetSection(RabbitMqOptions.SectionName))
+                .Validate(options => !string.IsNullOrWhiteSpace(options.Host),
+                    $"{RabbitMqOptions.SectionName}:Host deve ser informado.")
+                .Validate(options => options.Port is >= 1 and <= 65535,
+                    $"{RabbitMqOptions.SectionName}:Port deve estar entre 1 e 65535.")
+                .Validate(options => !string.IsNullOrWhiteSpace(options.User),
+                    $"{RabbitMqOptions.SectionName}:User deve ser informado.")
+                .Validate(options => !string.IsNullOrWhiteSpace(options.Password),
+                    $"{RabbitMqOptions.SectionName}:Password deve ser informado.")
+                .ValidateOnStart();
+
+            services.AddSingleton<RabbitMqConnectionFactory>(serviceProvider =>
+            {
+                var options = serviceProvider.GetRequiredService<IOptions<RabbitMqOptions>>().Value;
+
+                return new ConnectionFactory
+                {
+                    HostName = options.Host,
+                    Port = options.Port,
+                    UserName = options.User,
+                    Password = options.Password,
+                    DispatchConsumersAsync = true
+                };
+            });
+
             services.AddSingleton<IMessagePublisher, RabbitMqMessagePublisher>();
             services.AddSingleton<IConsumer, Consumer>();
 
