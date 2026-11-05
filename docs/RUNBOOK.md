@@ -11,6 +11,26 @@ dotnet test Prensadao.Test/Prensadao.Test.csproj --collect:"XPlat Code Coverage"
 
 Ao finalizar mudanças de código, rode `dotnet build Prensadao.sln`. Para mudanças em regras de negócio, DTOs, contratos públicos, repositórios, mensageria, workers ou IA, rode também os testes relevantes.
 
+## Integração Contínua e Pull Requests
+
+O workflow `.github/workflows/ci.yml` executa em pull requests destinados a `master` e depois de merges nessa branch. O check público `CI / build-and-test`:
+
+1. restaura as dependências da solução;
+2. compila a solução em `Release`;
+3. executa os testes de `Prensadao.Test`.
+
+O workflow usa somente permissão de leitura do conteúdo, não recebe segredos e não inicia PostgreSQL, RabbitMQ, Hangfire, Azure OpenAI ou a API. Ele valida compilação e testes automatizados; não substitui testes de integração nem comprova que a aplicação completa inicia com a infraestrutura real.
+
+Warnings de compilação permanecem visíveis no log, mas ainda não bloqueiam o PR. O template `.github/pull_request_template.md` registra contexto, validação, impactos, riscos e documentação de cada mudança.
+
+O ruleset ativo de `master` aplica:
+
+- pull request obrigatório, sem aprovação humana obrigatória enquanto houver apenas um mantenedor;
+- check `CI / build-and-test` obrigatório e branch atualizada antes do merge;
+- resolução obrigatória das conversas;
+- bloqueio de push direto, force push e exclusão, sem bypass do proprietário;
+- aprovação manual para executar workflows originados de qualquer fork externo.
+
 ## Executar API
 ```powershell
 dotnet run --project Prensadao/Prensadao.API.csproj

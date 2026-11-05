@@ -63,3 +63,11 @@ Este documento registra apenas comportamentos já implementados. Trabalho futuro
 - Usa Azure OpenAI via `IPromotionSuggestionService`.
 - Valida resposta da IA antes de calcular o preço promocional.
 - Detalhes em `AI_PROMOTIONS.md`.
+
+## Integração Contínua e Pull Requests
+
+- O workflow `.github/workflows/ci.yml` valida pull requests destinados a `master` e novos commits integrados nessa branch.
+- O check obrigatório `CI / build-and-test` restaura as dependências, compila a solução em `Release` e executa `Prensadao.Test` em Linux.
+- A branch `master` exige pull request, check atualizado e conversas resolvidas, além de bloquear push direto, force push e exclusão.
+- Workflows originados de forks externos exigem aprovação manual antes da execução.
+- Pull requests usam o template público `.github/pull_request_template.md` para registrar contexto, validação, riscos e documentação.

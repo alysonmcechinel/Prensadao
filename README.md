@@ -1,5 +1,7 @@
 # Prensadão
 
+[![CI](https://github.com/alysonmcechinel/Prensadao/actions/workflows/ci.yml/badge.svg)](https://github.com/alysonmcechinel/Prensadao/actions/workflows/ci.yml)
+
 Sistema de gestão de pedidos para uma hamburgueria, desenvolvido em ASP.NET Core com arquitetura em camadas. O projeto usa PostgreSQL, Entity Framework Core, RabbitMQ, Hangfire, NodaTime e Azure OpenAI para geração de sugestões de promoções.
 
 ## Documentação
