@@ -23,7 +23,7 @@ O workflow usa somente permissão de leitura do conteúdo, não recebe segredos 
 
 Warnings de compilação permanecem visíveis no log, mas ainda não bloqueiam o PR. O template `.github/pull_request_template.md` registra contexto, validação, impactos, riscos e documentação de cada mudança.
 
-Depois da primeira execução bem-sucedida do workflow no GitHub, configure um ruleset ativo para `master` com:
+O ruleset ativo de `master` aplica:
 
 - pull request obrigatório, sem aprovação humana obrigatória enquanto houver apenas um mantenedor;
 - check `CI / build-and-test` obrigatório e branch atualizada antes do merge;
