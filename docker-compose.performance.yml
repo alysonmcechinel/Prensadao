@@ -1,0 +1,16 @@
+services:
+  postgres:
+    container_name: postgres_prensadao_performance
+    restart: "no"
+    ports: !override []
+
+  rabbitmq:
+    container_name: rabbitmq_prensadao_performance
+    restart: "no"
+    ports: !override []
+
+  api:
+    container_name: prensadao_api_performance
+    restart: "no"
+    ports: !override
+      - "18080:8080"

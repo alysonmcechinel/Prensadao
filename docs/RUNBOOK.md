@@ -59,6 +59,24 @@ docker compose config
 
 PostgreSQL e RabbitMQ possuem healthchecks. O serviço `api` inicia somente depois que ambos estiverem saudáveis.
 
+### Ambiente isolado para testes de desempenho
+
+O `docker-compose.performance.yml` complementa o compose principal sem duplicar a definição da aplicação. Ele usa nomes de containers próprios, não publica PostgreSQL nem RabbitMQ no host e publica a API de performance em `http://localhost:18080`.
+
+Use sempre o nome de projeto `prensadao-performance`; ele isola rede e volumes dos recursos usados no desenvolvimento:
+
+```powershell
+docker compose -p prensadao-performance -f docker-compose.yml -f docker-compose.performance.yml up -d --build
+```
+
+Remover o ambiente e seus dados descartáveis:
+
+```powershell
+docker compose -p prensadao-performance -f docker-compose.yml -f docker-compose.performance.yml down --volumes --remove-orphans
+```
+
+O ambiente de performance ainda não aplica migrations nem executa o k6 automaticamente. Essas responsabilidades pertencem ao runner de performance, que deverá preservar os relatórios antes de remover os volumes.
+
 ## Migrations
 Aplicar migrations:
 
