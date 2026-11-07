@@ -63,6 +63,8 @@ PostgreSQL e RabbitMQ possuem healthchecks. O serviço `api` inicia somente depo
 
 O `docker-compose.performance.yml` complementa o compose principal sem duplicar a definição da aplicação. Ele usa nomes de containers próprios, não publica PostgreSQL nem RabbitMQ no host e publica a API de performance em `http://localhost:18080`.
 
+Antes da API, o serviço descartável `migrate` executa o mesmo artefato com o argumento `--migrate-database`, aplica as migrations e encerra. A API só inicia quando essa etapa termina com sucesso. Depois da inicialização, `GET http://localhost:18080/health/ready` confirma que o processo HTTP está pronto para receber a carga.
+
 Use sempre o nome de projeto `prensadao-performance`; ele isola rede e volumes dos recursos usados no desenvolvimento:
 
 ```powershell
@@ -75,7 +77,7 @@ Remover o ambiente e seus dados descartáveis:
 docker compose -p prensadao-performance -f docker-compose.yml -f docker-compose.performance.yml down --volumes --remove-orphans
 ```
 
-O ambiente de performance ainda não aplica migrations nem executa o k6 automaticamente. Essas responsabilidades pertencem ao runner de performance, que deverá preservar os relatórios antes de remover os volumes.
+O ambiente de performance ainda não executa o k6 nem aguarda o endpoint de readiness automaticamente. Essas responsabilidades pertencem ao runner de performance, que deverá preservar os relatórios antes de remover os volumes.
 
 ## Migrations
 Aplicar migrations:

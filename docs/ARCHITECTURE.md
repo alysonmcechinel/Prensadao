@@ -25,6 +25,7 @@ Não crie dependência de Domain para Application, Infra ou API.
 ## Composição
 - Serviços de aplicação são registrados em `ApplicationModule`.
 - Banco, repositórios, RabbitMQ, workers, Hangfire, NodaTime e Azure OpenAI são registrados em `InfrastructureModule`.
+- O executável da API aceita `--migrate-database` para aplicar migrations como um processo isolado e encerrar sem hospedar HTTP ou iniciar workers. O ambiente de performance usa esse modo antes de iniciar a API.
 - A conexão RabbitMQ é criada na Infra a partir da seção tipada `RabbitMq`; configurações inválidas impedem a inicialização da aplicação.
 - Controllers recebem serviços por injeção de dependência e não instanciam infraestrutura diretamente.
 

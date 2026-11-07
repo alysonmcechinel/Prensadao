@@ -9,8 +9,24 @@ services:
     restart: "no"
     ports: !override []
 
+  migrate:
+    image: prensadao/api:dev
+    container_name: prensadao_migrate_performance
+    command: ["--migrate-database"]
+    restart: "no"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=dbPrensadao;Username=devPrensadao;Password=devpass"
+    networks:
+      - backend
+
   api:
     container_name: prensadao_api_performance
     restart: "no"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
     ports: !override
       - "18080:8080"
