@@ -1,16 +1,16 @@
+[CmdletBinding()]
 param(
-    [ValidateRange(10, 600)]
+    [ValidateRange(30, 600)]
     [int]$ReadinessTimeoutSeconds = 120
 )
 
-Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-$repositoryRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
+$repositoryRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $composeArguments = @(
     '-p', 'prensadao-performance',
     '-f', (Join-Path $repositoryRoot 'docker-compose.yml'),
-    '-f', (Join-Path $repositoryRoot 'docker-compose.performance.yml')
+    '-f', (Join-Path $repositoryRoot 'Prensadao.Test\Performance\docker-compose.performance.yml')
 )
 $readinessUrl = 'http://localhost:18080/health/ready'
 $resultsDirectory = Join-Path $PSScriptRoot 'results'
@@ -27,7 +27,7 @@ function Assert-DockerEngineIsAvailable {
     }
 
     if ($dockerExitCode -ne 0) {
-        throw "Docker Engine is not available. Start Docker Desktop before running the smoke test. Details: $dockerInformation"
+        throw "Docker Engine is not available. Start Docker Desktop before running calibration. Details: $dockerInformation"
     }
 }
 
@@ -68,9 +68,9 @@ try {
 
     Invoke-PerformanceCompose -Arguments @('up', '-d', '--build', 'api')
     Wait-PerformanceApi
-    Invoke-PerformanceCompose -Arguments @('--profile', 'load-test', 'run', '--rm', 'k6')
+    Invoke-PerformanceCompose -Arguments @('--profile', 'load-test', 'run', '--rm', 'k6', 'run', '/scripts/calibration.js')
 
-    Write-Host "Smoke test passed. Result: $resultsDirectory\smoke-summary.json"
+    Write-Host "Calibration completed. Result: $resultsDirectory\calibration-summary.json"
 }
 finally {
     & docker compose @composeArguments down --volumes --remove-orphans

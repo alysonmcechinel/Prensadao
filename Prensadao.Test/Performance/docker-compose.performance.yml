@@ -41,8 +41,8 @@ services:
     environment:
       BASE_URL: "http://api:8080"
     volumes:
-      - ./performance/k6:/scripts:ro
-      - ./performance/results:/results
+      - ./Prensadao.Test/Performance/k6:/scripts:ro
+      - ./Prensadao.Test/Performance/results:/results
     command: ["run", "/scripts/smoke.js"]
     networks:
       - backend

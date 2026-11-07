@@ -372,4 +372,4 @@ FodyWeavers.xsd
 !.env.example
 
 # Generated performance test reports.
-/performance/results/
+/Prensadao.Test/Performance/results/

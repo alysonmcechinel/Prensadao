@@ -2,26 +2,10 @@ import http from 'k6/http';
 import { check, fail, sleep } from 'k6';
 import { Trend } from 'k6/metrics';
 
-const baseUrl = __ENV.BASE_URL || 'http://api:8080';
-const orderCreateDuration = new Trend('order_create_duration', true);
-const orderToPreparingDuration = new Trend('order_to_preparing_duration', true);
+const performanceBaseUrl = __ENV.BASE_URL || 'http://api:8080';
 
-export const options = {
-  scenarios: {
-    smoke: {
-      executor: 'shared-iterations',
-      vus: 1,
-      iterations: 5,
-      maxDuration: '1m',
-    },
-  },
-  thresholds: {
-    checks: ['rate==1'],
-    http_req_failed: ['rate<0.01'],
-    iterations: ['count==5'],
-    dropped_iterations: ['count==0'],
-  },
-};
+export const orderCreateDuration = new Trend('order_create_duration', true);
+export const orderToPreparingDuration = new Trend('order_to_preparing_duration', true);
 
 const jsonRequest = {
   headers: {
@@ -30,7 +14,7 @@ const jsonRequest = {
 };
 
 function post(path, body, operation) {
-  return http.post(`${baseUrl}${path}`, JSON.stringify(body), {
+  return http.post(`${performanceBaseUrl}${path}`, JSON.stringify(body), {
     ...jsonRequest,
     tags: { operation },
   });
@@ -59,7 +43,7 @@ function responseData(response, operation) {
   return body.data;
 }
 
-export function setup() {
+export function setupOrderJourney() {
   const suffix = `${Date.now()}`;
   const customerResponse = post('/api/Customer/Post', {
     name: 'Cliente k6',
@@ -76,7 +60,7 @@ export function setup() {
     name: `Produto k6 ${suffix}`,
     enabled: true,
     price: 25.90,
-    description: 'Produto criado pelo smoke test do k6',
+    description: 'Produto criado pelo teste de performance do k6',
   }, 'create_product');
 
   return {
@@ -85,11 +69,11 @@ export function setup() {
   };
 }
 
-export default function (data) {
+export function executeOrderJourney(data) {
   const startedAt = Date.now();
   const createResponse = post('/api/Order/Post', {
     isDelivery: false,
-    notes: 'Smoke test k6',
+    notes: 'Teste de performance k6',
     customerId: data.customerId,
     orderItems: [
       {
@@ -105,7 +89,7 @@ export default function (data) {
   let finalStatus = null;
 
   while (Date.now() < deadline) {
-    const statusResponse = http.get(`${baseUrl}/api/Order/GetById?id=${orderId}`, {
+    const statusResponse = http.get(`${performanceBaseUrl}/api/Order/GetById?id=${orderId}`, {
       tags: { operation: 'get_order_status' },
     });
 
@@ -123,13 +107,4 @@ export default function (data) {
   check(finalStatus, {
     'order reaches Em preparação within 10 seconds': (status) => status === 'Em preparação',
   });
-}
-
-export function handleSummary(data) {
-  const iterationCount = data.metrics.iterations?.values?.count ?? 0;
-
-  return {
-    stdout: `Smoke k6 concluido: ${iterationCount} pedidos executados.\n`,
-    '/results/smoke-summary.json': JSON.stringify(data, null, 2),
-  };
 }
