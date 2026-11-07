@@ -9,6 +9,7 @@
 **/bin
 **/obj
 **/TestResults
+performance/results
 
 .env
 .env.*

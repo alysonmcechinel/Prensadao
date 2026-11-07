@@ -145,7 +145,7 @@ Alternativa considerada: medir somente `POST api/Order/Post`. Essa alternativa v
 
 | Situação | Comportamento esperado | Resultado apresentado |
 | --- | --- | --- |
-| Perfil de fumaça | Cinco pedidos sequenciais validam o ambiente e os contratos sem capturar uma linha de base. | Resultado simples de aprovação ou falha. |
+| Perfil de fumaça | Cinco pedidos sequenciais validam o ambiente e os contratos sem capturar uma linha de base. | Implementado por `performance/run-smoke.ps1`, com resumo em `performance/results/smoke-summary.json`. |
 | Perfil de calibração | Taxas de 1, 5, 10 e 20 pedidos por segundo são executadas por 60 segundos cada. | Primeira etapa instável e maior etapa estável. |
 | Existe uma taxa estável | A taxa de regressão passa a ser 50% da maior etapa estável e roda por 120 segundos. | Carga proposta aguardando aceitação explícita da linha de base. |
 | Nenhuma etapa é estável | Nenhuma linha de base é gravada. | Diagnóstico que mostra o primeiro critério reprovado. |

@@ -370,3 +370,6 @@ FodyWeavers.xsd
 .env
 .env.*
 !.env.example
+
+# Generated performance test reports.
+/performance/results/

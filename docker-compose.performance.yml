@@ -30,3 +30,19 @@ services:
         condition: service_completed_successfully
     ports: !override
       - "18080:8080"
+
+  k6:
+    image: grafana/k6:2.3.0
+    profiles:
+      - load-test
+    depends_on:
+      api:
+        condition: service_started
+    environment:
+      BASE_URL: "http://api:8080"
+    volumes:
+      - ./performance/k6:/scripts:ro
+      - ./performance/results:/results
+    command: ["run", "/scripts/smoke.js"]
+    networks:
+      - backend

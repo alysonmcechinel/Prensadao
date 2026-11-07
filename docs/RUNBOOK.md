@@ -77,7 +77,13 @@ Remover o ambiente e seus dados descartáveis:
 docker compose -p prensadao-performance -f docker-compose.yml -f docker-compose.performance.yml down --volumes --remove-orphans
 ```
 
-O ambiente de performance ainda não executa o k6 nem aguarda o endpoint de readiness automaticamente. Essas responsabilidades pertencem ao runner de performance, que deverá preservar os relatórios antes de remover os volumes.
+Executar o smoke test completo:
+
+```powershell
+.\performance\run-smoke.ps1
+```
+
+O runner cria o ambiente, aguarda o endpoint de readiness por até 120 segundos, executa cinco pedidos sequenciais com `grafana/k6:2.3.0`, grava `performance/results/smoke-summary.json` e remove containers e volumes mesmo quando a carga falha. O relatório é local e permanece ignorado pelo Git.
 
 ## Migrations
 Aplicar migrations:
