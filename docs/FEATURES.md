@@ -71,3 +71,10 @@ Este documento registra apenas comportamentos já implementados. Trabalho futuro
 - A branch `master` exige pull request, check atualizado e conversas resolvidas, além de bloquear push direto, force push e exclusão.
 - Workflows originados de forks externos exigem aprovação manual antes da execução.
 - Pull requests usam o template público `.github/pull_request_template.md` para registrar contexto, validação, riscos e documentação.
+
+## Testes de desempenho
+
+- `Prensadao.Test/Performance/` oferece smoke, calibração, aceitação de baseline local e regressão k6 em um ambiente descartável com API, PostgreSQL e RabbitMQ isolados.
+- A regressão executa 10 pedidos por segundo durante 120 segundos e reprova quando um p95 degrada mais de 20%, um check falha, a taxa de falhas HTTP atinge 1% ou alguma iteração é descartada.
+- As latências de criação do pedido e de chegada a `EmPreparacao` são avaliadas separadamente. Baseline e relatórios contêm evidências locais e são ignorados pelo Git.
+- Consulte `RUNBOOK.md` para execução e `ARCHITECTURE.md` para a organização dos componentes.

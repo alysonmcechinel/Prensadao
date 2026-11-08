@@ -59,31 +59,18 @@ docker compose config
 
 PostgreSQL e RabbitMQ possuem healthchecks. O serviço `api` inicia somente depois que ambos estiverem saudáveis.
 
-### Ambiente isolado para testes de desempenho
+### Testes de desempenho
 
-O `docker-compose.performance.yml` complementa o compose principal sem duplicar a definição da aplicação. Ele usa nomes de containers próprios, não publica PostgreSQL nem RabbitMQ no host e publica a API de performance em `http://localhost:18080`.
+Com o Docker em execução, use os comandos abaixo a partir da raiz. Cada runner cria o ambiente `prensadao-performance`, aplica migrations, aguarda `GET /health/ready`, executa o k6 e remove containers e volumes ao terminar.
 
-Antes da API, o serviço descartável `migrate` executa o mesmo artefato com o argumento `--migrate-database`, aplica as migrations e encerra. A API só inicia quando essa etapa termina com sucesso. Depois da inicialização, `GET http://localhost:18080/health/ready` confirma que o processo HTTP está pronto para receber a carga.
+| Comando | Finalidade |
+| --- | --- |
+| `.\Prensadao.Test\Performance\run-smoke.ps1` | Executa cinco pedidos sequenciais para validar ambiente e contratos. |
+| `.\Prensadao.Test\Performance\run-calibration.ps1` | Testa 1, 5, 10 e 20 pedidos por segundo e propõe o perfil de regressão. |
+| `.\Prensadao.Test\Performance\accept-baseline.ps1` | Executa o perfil aceito e grava o baseline local. |
+| `.\Prensadao.Test\Performance\run-regression.ps1` | Compara os p95 atuais com o baseline e aplica os critérios funcionais. |
 
-Use sempre o nome de projeto `prensadao-performance`; ele isola rede e volumes dos recursos usados no desenvolvimento:
-
-```powershell
-docker compose -p prensadao-performance -f docker-compose.yml -f docker-compose.performance.yml up -d --build
-```
-
-Remover o ambiente e seus dados descartáveis:
-
-```powershell
-docker compose -p prensadao-performance -f docker-compose.yml -f docker-compose.performance.yml down --volumes --remove-orphans
-```
-
-Executar o smoke test completo:
-
-```powershell
-.\performance\run-smoke.ps1
-```
-
-O runner cria o ambiente, aguarda o endpoint de readiness por até 120 segundos, executa cinco pedidos sequenciais com `grafana/k6:2.3.0`, grava `performance/results/smoke-summary.json` e remove containers e volumes mesmo quando a carga falha. O relatório é local e permanece ignorado pelo Git.
+A política versionada em `Prensadao.Test/Performance/baseline/performance-policy.json` define 10 pedidos por segundo durante 120 segundos, tolerância de 20% e versão do k6. O baseline local registra os p95 e a identificação do ambiente; resultados e baseline são ignorados pelo Git. Alterar a política exige nova calibração e nova aceitação do baseline.
 
 ## Migrations
 Aplicar migrations:
