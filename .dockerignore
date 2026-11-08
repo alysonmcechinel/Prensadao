@@ -9,6 +9,8 @@
 **/bin
 **/obj
 **/TestResults
+Prensadao.Test/Performance/results
+Prensadao.Test/Performance/baseline/performance-baseline.local.json
 
 .env
 .env.*

@@ -59,6 +59,19 @@ docker compose config
 
 PostgreSQL e RabbitMQ possuem healthchecks. O serviço `api` inicia somente depois que ambos estiverem saudáveis.
 
+### Testes de desempenho
+
+Com o Docker em execução, use os comandos abaixo a partir da raiz. Cada runner cria o ambiente `prensadao-performance`, aplica migrations, aguarda `GET /health/ready`, executa o k6 e remove containers e volumes ao terminar.
+
+| Comando | Finalidade |
+| --- | --- |
+| `.\Prensadao.Test\Performance\run-smoke.ps1` | Executa cinco pedidos sequenciais para validar ambiente e contratos. |
+| `.\Prensadao.Test\Performance\run-calibration.ps1` | Testa 1, 5, 10 e 20 pedidos por segundo e propõe o perfil de regressão. |
+| `.\Prensadao.Test\Performance\accept-baseline.ps1` | Executa o perfil aceito e grava o baseline local. |
+| `.\Prensadao.Test\Performance\run-regression.ps1` | Compara os p95 atuais com o baseline e aplica os critérios funcionais. |
+
+A política versionada em `Prensadao.Test/Performance/baseline/performance-policy.json` define 10 pedidos por segundo durante 120 segundos, tolerância de 20% e versão do k6. O baseline local registra os p95 e a identificação do ambiente; resultados e baseline são ignorados pelo Git. Alterar a política exige nova calibração e nova aceitação do baseline.
+
 ## Migrations
 Aplicar migrations:
 

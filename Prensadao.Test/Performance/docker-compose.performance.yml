@@ -1,0 +1,48 @@
+services:
+  postgres:
+    container_name: postgres_prensadao_performance
+    restart: "no"
+    ports: !override []
+
+  rabbitmq:
+    container_name: rabbitmq_prensadao_performance
+    restart: "no"
+    ports: !override []
+
+  migrate:
+    image: prensadao/api:dev
+    container_name: prensadao_migrate_performance
+    command: ["--migrate-database"]
+    restart: "no"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=dbPrensadao;Username=devPrensadao;Password=devpass"
+    networks:
+      - backend
+
+  api:
+    container_name: prensadao_api_performance
+    restart: "no"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    ports: !override
+      - "18080:8080"
+
+  k6:
+    image: grafana/k6:2.3.0
+    profiles:
+      - load-test
+    depends_on:
+      api:
+        condition: service_started
+    environment:
+      BASE_URL: "http://api:8080"
+    volumes:
+      - ./Prensadao.Test/Performance/k6:/scripts:ro
+      - ./Prensadao.Test/Performance/results:/results
+    command: ["run", "/scripts/smoke.js"]
+    networks:
+      - backend

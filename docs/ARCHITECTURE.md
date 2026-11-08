@@ -25,6 +25,7 @@ Não crie dependência de Domain para Application, Infra ou API.
 ## Composição
 - Serviços de aplicação são registrados em `ApplicationModule`.
 - Banco, repositórios, RabbitMQ, workers, Hangfire, NodaTime e Azure OpenAI são registrados em `InfrastructureModule`.
+- O executável da API aceita `--migrate-database` para aplicar migrations como um processo isolado e encerrar sem hospedar HTTP ou iniciar workers. O ambiente de performance usa esse modo antes de iniciar a API.
 - A conexão RabbitMQ é criada na Infra a partir da seção tipada `RabbitMq`; configurações inválidas impedem a inicialização da aplicação.
 - Controllers recebem serviços por injeção de dependência e não instanciam infraestrutura diretamente.
 
@@ -35,6 +36,13 @@ Não crie dependência de Domain para Application, Infra ou API.
 - Repositories persistem e consultam dados; não publicam mensagens nem executam regra de negócio.
 - Workers consomem mensagens e executam processamento assíncrono.
 - A topologia RabbitMQ associa cada fila principal a uma dead-letter queue própria por meio do exchange direto `prensado.dead-letter`; o consumidor rejeita sem requeue mensagens inválidas ou cujo processamento falha.
+
+## Testes de Desempenho
+
+- `Prensadao.Test/Performance/` reúne os cenários k6, runners PowerShell e a extensão do Docker Compose.
+- O projeto Docker `prensadao-performance` cria rede, PostgreSQL, RabbitMQ e volumes descartáveis. Um processo aplica as migrations, a API expõe `GET /health/ready` e o runner remove o ambiente ao terminar.
+- Uma jornada compartilhada mede a criação do pedido e o processamento assíncrono até `EmPreparacao`; smoke, calibração, baseline e regressão apenas definem perfis diferentes para essa jornada.
+- A política de carga e tolerância é versionada. Os p95 e a identificação da máquina ficam no baseline local, que é ignorado pelo Git.
 
 ## Datas, Dinheiro e Serialização
 - Use `decimal` para valores monetários.

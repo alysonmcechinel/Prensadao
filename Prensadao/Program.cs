@@ -2,6 +2,7 @@ using Hangfire;
 using NodaTime;
 using NodaTime.Serialization.SystemTextJson;
 using Prensadao.Application;
+using Prensadao.API.Extensions;
 using Prensadao.Infra;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,7 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Ignora logs de queries do EF Core || limpar o console
 builder.Logging.AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.None);
 
-// Aqui esta as configuraÁıes => do modulo de aplicaÁ„o (application) e do modulo Infrastructure (Infra)
+// Aqui esta as configura√ß√µes => do modulo de aplica√ß√£o (application) e do modulo Infrastructure (Infra)
 builder.Services
     .AddAplications()
     .AddInfrastructure(builder.Configuration);
@@ -22,6 +23,7 @@ builder.Services.AddControllers()
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
@@ -40,5 +42,6 @@ app.UseHangfireDashboard();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHealthChecks("/health/ready");
 
-app.Run();
+await app.RunConfiguredModeAsync(args);
