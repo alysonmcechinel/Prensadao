@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "rateRps": 10,
+  "durationSeconds": 120,
+  "maximumDegradationPercent": 20,
+  "k6Version": "2.3.0"
+}

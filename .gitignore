@@ -373,3 +373,4 @@ FodyWeavers.xsd
 
 # Generated performance test reports.
 /Prensadao.Test/Performance/results/
+/Prensadao.Test/Performance/baseline/performance-baseline.local.json
