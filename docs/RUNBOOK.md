@@ -87,6 +87,51 @@ dotnet ef migrations add NomeDaMigration --project Prensadao.Infra/Prensadao.Inf
 
 Não edite migrations antigas sem pedido explícito.
 
+## Seed da Base Local
+
+`tools/Prensadao.Seeder` é um executável separado da API. Ele aplica as migrations e encerra depois de criar massa para testes locais. A ferramenta só funciona em `Development`, acessa apenas o PostgreSQL e não inicia os demais componentes do sistema.
+
+Informe a conexão da base local pela configuração externa padrão do .NET. Não registre uma conexão real no código ou na documentação:
+
+```powershell
+$env:ConnectionStrings__DefaultConnection = "<connection string da sua base local>"
+```
+
+Com o PostgreSQL disponível, execute:
+
+```powershell
+dotnet run --project tools/Prensadao.Seeder/Prensadao.Seeder.csproj
+```
+
+Por padrão, a ferramenta cria 2.000 clientes, 100 produtos e 50.000 pedidos com seus itens. Os volumes e a janela de datas podem ser ajustados pelas opções abaixo.
+
+Os volumes podem ser ajustados sem alterar código:
+
+```powershell
+dotnet run --project tools/Prensadao.Seeder/Prensadao.Seeder.csproj -- `
+  --seed-customers=5000 `
+  --seed-products=200 `
+  --seed-orders=200000 `
+  --seed-days=730 `
+  --seed-random=20261108 `
+  --seed-batch-size=1000
+```
+
+| Opção | Padrão | Finalidade |
+| --- | ---: | --- |
+| `--seed-customers` | 2.000 | Quantidade de novos clientes. |
+| `--seed-products` | 100 | Quantidade de novos produtos. |
+| `--seed-orders` | 50.000 | Quantidade de novos pedidos. |
+| `--seed-days` | 365 | Janela histórica em dias. |
+| `--seed-random` | 20.261.108 | Semente pseudoaleatória para reprodução da distribuição. |
+| `--seed-batch-size` | 1.000 | Quantidade de pedidos persistidos por lote. |
+
+O seed usa a marca `[seed-local-v1]` e recusa uma segunda execução quando já encontra pedidos dessa massa. Dados comuns que já existiam na base são preservados. Para gerar outra massa completa, use uma base local nova; não remova a proteção em ambientes compartilhados.
+
+A configuração não é herdada do `appsettings.json` da API, pois API e seeder são executáveis independentes. A variável `ConnectionStrings__DefaultConnection` usa a mesma convenção aceita pela API e pode ser definida somente na sessão local. O projeto possui um launch profile com `DOTNET_ENVIRONMENT=Development`; fora desse ambiente a ferramenta encerra antes de acessar o banco.
+
+O ambiente k6 continua descartável e prepara apenas o cliente e o produto exigidos pela jornada medida. Use o seed local quando o objetivo for testar consultas, listagens, análises ou uma carga futura sobre uma base previamente populada; não inclua o custo do seed no baseline de latência.
+
 ## Configuração Local
 - `ConnectionStrings:DefaultConnection` aponta para PostgreSQL.
 - `RabbitMq` configura `Host`, `Port`, `User` e `Password`.

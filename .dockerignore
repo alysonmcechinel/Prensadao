@@ -5,6 +5,7 @@
 .codex
 .agents
 .serena
+tools
 
 **/bin
 **/obj
