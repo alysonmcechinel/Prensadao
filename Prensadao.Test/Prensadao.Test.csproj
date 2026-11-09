@@ -25,6 +25,7 @@
     <ProjectReference Include="..\Prensadao.Application\Prensadao.Application.csproj" />
     <ProjectReference Include="..\Prensadao.Domain\Prensadao.Domain.csproj" />
     <ProjectReference Include="..\Prensadao.Infra\Prensadao.Infra.csproj" />
+    <ProjectReference Include="..\tools\Prensadao.Seeder\Prensadao.Seeder.csproj" />
   </ItemGroup>
 
   <ItemGroup>

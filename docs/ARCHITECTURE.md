@@ -8,6 +8,7 @@ O Prensadão segue uma separação em camadas para manter controllers finos, reg
 - `Prensadao.Domain/`: entidades, enums, read models e interfaces de repositório. Não deve depender de API, Application ou Infra.
 - `Prensadao.Infra/`: EF Core, PostgreSQL, RabbitMQ, Hangfire, workers, repositórios concretos e Azure OpenAI.
 - `Prensadao.Test/`: testes unitários, principalmente dos serviços de aplicação.
+- `tools/Prensadao.Seeder/`: executável de desenvolvimento para gerar massa histórica na base local; não integra a API nem sua imagem Docker.
 
 ## Direção de Dependências
 A direção esperada é:
@@ -18,6 +19,8 @@ API -> Infra
 Application -> Domain
 Infra -> Application
 Infra -> Domain
+Seeder -> Infra
+Seeder -> Domain
 ```
 
 Não crie dependência de Domain para Application, Infra ou API.
@@ -28,6 +31,14 @@ Não crie dependência de Domain para Application, Infra ou API.
 - O executável da API aceita `--migrate-database` para aplicar migrations como um processo isolado e encerrar sem hospedar HTTP ou iniciar workers. O ambiente de performance usa esse modo antes de iniciar a API.
 - A conexão RabbitMQ é criada na Infra a partir da seção tipada `RabbitMq`; configurações inválidas impedem a inicialização da aplicação.
 - Controllers recebem serviços por injeção de dependência e não instanciam infraestrutura diretamente.
+
+## Ferramentas de Desenvolvimento
+
+- `Prensadao.Seeder` é uma composição independente, restrita a `Development`, que cria somente o `PrensadaoDbContext` necessário para acessar o PostgreSQL.
+- A conexão do seeder é obrigatoriamente fornecida por `ConnectionStrings__DefaultConnection`; nenhuma credencial ou connection string padrão fica compilada na ferramenta.
+- O seeder aplica migrations e gera dados em lotes usando o modelo persistido e as entidades existentes, mas não hospeda HTTP, inicia workers, conecta ao RabbitMQ ou chama Azure OpenAI.
+- A API não referencia o projeto do seeder. O diretório `tools/` também fica fora do contexto da imagem Docker da API.
+- A massa é marcada e uma segunda execução sobre a mesma base é recusada para evitar duplicação silenciosa.
 
 ## Responsabilidades
 - Controllers validam entrada básica quando necessário, chamam serviços e retornam HTTP responses.
@@ -43,6 +54,7 @@ Não crie dependência de Domain para Application, Infra ou API.
 - O projeto Docker `prensadao-performance` cria rede, PostgreSQL, RabbitMQ e volumes descartáveis. Um processo aplica as migrations, a API expõe `GET /health/ready` e o runner remove o ambiente ao terminar.
 - Uma jornada compartilhada mede a criação do pedido e o processamento assíncrono até `EmPreparacao`; smoke, calibração, baseline e regressão apenas definem perfis diferentes para essa jornada.
 - A política de carga e tolerância é versionada. Os p95 e a identificação da máquina ficam no baseline local, que é ignorado pelo Git.
+- O seed local prepara volume prévio para consultas e análises, mas não faz parte da medição k6. Assim, preparação de massa e latência da jornada permanecem responsabilidades separadas.
 
 ## Datas, Dinheiro e Serialização
 - Use `decimal` para valores monetários.

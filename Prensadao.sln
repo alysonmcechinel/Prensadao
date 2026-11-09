@@ -17,6 +17,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "1 - Test", "1 - Test", "{99
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Prensadao.Test", "Prensadao.Test\Prensadao.Test.csproj", "{EFC7CF03-C2CF-4427-B78D-06496940B28B}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "3 - Tools", "3 - Tools", "{6B6D1355-37F4-4B48-A6D0-1C45E2A9C0CF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Prensadao.Seeder", "tools\Prensadao.Seeder\Prensadao.Seeder.csproj", "{A3E967C9-1D14-4B8C-AB65-E4D31C1B2F40}"
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2 - Infra", "2 - Infra", "{BC9FED5D-6169-4471-A471-63D748126BE9}"
 	ProjectSection(SolutionItems) = preProject
 		docker-compose.yml = docker-compose.yml
@@ -48,6 +52,10 @@ Global
 		{EFC7CF03-C2CF-4427-B78D-06496940B28B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EFC7CF03-C2CF-4427-B78D-06496940B28B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EFC7CF03-C2CF-4427-B78D-06496940B28B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A3E967C9-1D14-4B8C-AB65-E4D31C1B2F40}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A3E967C9-1D14-4B8C-AB65-E4D31C1B2F40}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A3E967C9-1D14-4B8C-AB65-E4D31C1B2F40}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A3E967C9-1D14-4B8C-AB65-E4D31C1B2F40}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -58,6 +66,7 @@ Global
 		{CF676327-0C65-4894-BF65-BF8DB7766A89} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{5AAABB80-17C1-45A4-83A2-DEEEC11064CF} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{EFC7CF03-C2CF-4427-B78D-06496940B28B} = {99EBF680-0270-4D17-91E9-0AE015958DE2}
+		{A3E967C9-1D14-4B8C-AB65-E4D31C1B2F40} = {6B6D1355-37F4-4B48-A6D0-1C45E2A9C0CF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {65B5A9ED-EE92-48E9-8E7C-3858F31C3E96}
