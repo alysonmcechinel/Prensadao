@@ -72,6 +72,27 @@ Com o Docker em execução, use os comandos abaixo a partir da raiz. Cada runner
 
 A política versionada em `Prensadao.Test/Performance/baseline/performance-policy.json` define 10 pedidos por segundo durante 120 segundos, tolerância de 20% e versão do k6. O baseline local registra os p95 e a identificação do ambiente; resultados e baseline são ignorados pelo Git. Alterar a política exige nova calibração e nova aceitação do baseline.
 
+#### Relatórios HTML do k6
+
+Todos os runners habilitam a exportação automática de um relatório HTML do Web Dashboard nativo do k6, além do resumo JSON existente. O HTML é gerado quando a execução coleta dados suficientes. Não é necessário instalar k6 no Windows, criar uma conta no Grafana Cloud ou subir um servidor Grafana. A exportação usa `K6_WEB_DASHBOARD=true`, `K6_WEB_DASHBOARD_PORT=-1` e `K6_WEB_DASHBOARD_EXPORT`: o dashboard não publica uma porta HTTP nem mantém o processo aguardando um navegador aberto.
+
+Os arquivos HTML ficam em `Prensadao.Test/Performance/results/`, com o nome do perfil e um timestamp UTC, por exemplo `calibration-20261121-200000000-report.html`. Cada execução preserva os HTML anteriores; os resumos JSON continuam usando os nomes fixos de cada perfil e são substituídos na próxima execução. Os relatórios sobrevivem à remoção dos containers e volumes e continuam ignorados pelo Git. O runner exibe o caminho do HTML e também o disponibiliza quando o k6 reprova thresholds, desde que a exportação tenha sido concluída.
+
+Use `-OpenReport` em qualquer um dos quatro runners para abrir o HTML no navegador padrão ao terminar. Para gerar gráficos de carga para análise ou publicação:
+
+```powershell
+.\Prensadao.Test\Performance\run-smoke.ps1
+.\Prensadao.Test\Performance\run-calibration.ps1 -OpenReport
+```
+
+A calibração dura aproximadamente cinco minutos, além da preparação do ambiente: são quatro etapas de 60 segundos a 1, 5, 10 e 20 pedidos por segundo, com intervalos entre elas. O smoke valida apenas cinco jornadas e pode terminar sem HTML por insuficiência de dados; isso gera um aviso e não reprova o teste nem abre o navegador. O k6 exige uma duração maior que três períodos de agregação para incluir gráficos no relatório. O período padrão do dashboard é de 10 segundos.
+
+No relatório visual, observe a evolução da latência HTTP, da taxa de requisições e dos erros. Para os p95 específicos de criação e de chegada a `Em preparação`, consulte também `calibration-summary.json`, que separa as métricas por etapa. A calibração coleta dados e classifica as etapas; seus thresholds não são critérios de aprovação de desempenho como os da regressão.
+
+Ao compartilhar prints, informe a carga, a duração, as características da máquina e que o ambiente é local com Docker. Pedidos por segundo não equivalem a requisições HTTP por segundo nem a usuários simultâneos: cada jornada cria um pedido e consulta seu status até `Em preparação`. Essa latência inclui o processamento assíncrono e o intervalo das consultas; não representa o tempo de preparo físico. O ambiente prepara um cliente e um produto, sem a massa histórica do seeder. A maior etapa estável é a maior carga validada nessa execução, não uma medição da capacidade máxima nem garantia de desempenho em produção.
+
+Referência: [Web Dashboard e exportação HTML do k6](https://grafana.com/docs/k6/latest/results-output/web-dashboard/).
+
 ## Migrations
 Aplicar migrations:
 

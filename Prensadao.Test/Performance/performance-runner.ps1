@@ -111,10 +111,16 @@ function Invoke-PerformanceProfile {
 
         [hashtable]$K6Environment = @{},
 
-        [psobject]$ExpectedEnvironment
+        [psobject]$ExpectedEnvironment,
+
+        [switch]$OpenReport
     )
 
     Assert-DockerEngineIsAvailable
+    $profileName = [System.IO.Path]::GetFileNameWithoutExtension($K6Script)
+    $timestamp = [DateTime]::UtcNow.ToString('yyyyMMdd-HHmmssfff')
+    $reportFileName = "$profileName-$timestamp-report.html"
+    $reportPath = Join-Path $script:ResultsDirectory $reportFileName
     Push-Location $script:RepositoryRoot
     try {
         New-Item -ItemType Directory -Path $script:ResultsDirectory -Force | Out-Null
@@ -126,13 +132,22 @@ function Invoke-PerformanceProfile {
             Assert-PerformanceEnvironmentCompatible -ExpectedEnvironment $ExpectedEnvironment
         }
 
+        $runEnvironment = $K6Environment.Clone()
+        $runEnvironment['K6_WEB_DASHBOARD'] = 'true'
+        # Export the report without keeping an HTTP server alive after the test.
+        $runEnvironment['K6_WEB_DASHBOARD_PORT'] = '-1'
+        $runEnvironment['K6_WEB_DASHBOARD_EXPORT'] = "/results/$reportFileName"
+
         $runArguments = @('--profile', 'load-test', 'run', '--rm')
-        foreach ($environmentName in ($K6Environment.Keys | Sort-Object)) {
-            $runArguments += @('-e', "$environmentName=$($K6Environment[$environmentName])")
+        foreach ($environmentName in ($runEnvironment.Keys | Sort-Object)) {
+            $runArguments += @('-e', "$environmentName=$($runEnvironment[$environmentName])")
         }
         $runArguments += @('k6', 'run', "/scripts/$K6Script")
 
         Invoke-PerformanceCompose -Arguments $runArguments
+        if (-not (Test-Path -LiteralPath $reportPath -PathType Leaf)) {
+            Write-Warning "k6 did not generate an HTML report. Short runs may not collect enough data; use calibration or regression to generate graphs."
+        }
     }
     finally {
         & docker compose @script:ComposeArguments down --volumes --remove-orphans
@@ -141,5 +156,17 @@ function Invoke-PerformanceProfile {
         }
 
         Pop-Location
+
+        if (Test-Path -LiteralPath $reportPath -PathType Leaf) {
+            Write-Host "k6 HTML report: $reportPath"
+            if ($OpenReport) {
+                try {
+                    Start-Process -FilePath $reportPath | Out-Null
+                }
+                catch {
+                    Write-Warning "Could not open the HTML report automatically. Open it manually at '$reportPath'. Details: $_"
+                }
+            }
+        }
     }
 }
