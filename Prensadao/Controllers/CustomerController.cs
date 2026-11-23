@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Prensadao.Application.DTOs.Requests;
 using Prensadao.Application.DTOs.Responses;
 using Prensadao.Application.Interfaces;
@@ -9,6 +9,7 @@ namespace Prensadao.API.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [Produces("application/json")]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public class CustomerController : ControllerBase
     {
         private readonly ICustomerService _customerService;
@@ -19,73 +20,47 @@ namespace Prensadao.API.Controllers
         }
 
         [HttpPost("Post")]
-        [ProducesResponseType(typeof(CustomerResponseDto), StatusCodes.Status201Created)]
-        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
         public async Task<IActionResult> PostAsync([FromBody] CustomerRequestDto dto)
         {
-            try
-            {
-                var result = await _customerService.AddCustomerAsync(dto);
+            var result = await _customerService.AddCustomerAsync(dto);
 
-                return Ok(new
-                {
-                    message = "Cliente cadastrado com sucesso.",
-                    data = result
-                });
-            }
-            catch (Exception ex)
+            return Ok(new
             {
-                return BadRequest($"Erro ao cadastrar, motivo: {ex.Message}");
-            }
+                message = "Cliente cadastrado com sucesso.",
+                data = result
+            });
         }
 
         [HttpGet("GetById")]
         [ProducesResponseType(typeof(CustomerResponseDto), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
-        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetByIdAsync([FromQuery] int id)
         {
-            try
-            {
-                var result = await _customerService.GetByIdAsync(id);
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            var result = await _customerService.GetByIdAsync(id);
+            return Ok(result);
         }
 
         [HttpGet("GetAll")]
         [ProducesResponseType(typeof(IEnumerable<CustomerResponseDto>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetAllAsync()
         {
-            try
-            {
-                var result = await _customerService.GetCustomersAsync();
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }            
+            var result = await _customerService.GetCustomersAsync();
+            return Ok(result);
         }
 
         [HttpPut("Update")]
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> UpdateAsync(CustomerRequestDto dto)
         {
-            try
-            {
-                await _customerService.UpdateAsync(dto);
-                return Ok("Cliente atualizado com sucesso.");
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            await _customerService.UpdateAsync(dto);
+            return Ok("Cliente atualizado com sucesso.");
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Prensadao.Application.DTOs;
+using Prensadao.Application.Exceptions;
+using Prensadao.Application.DTOs;
 using Prensadao.Application.DTOs.Requests;
 using Prensadao.Application.DTOs.Responses;
 using Prensadao.Application.Helpers;
@@ -93,7 +94,14 @@ namespace Prensadao.Application.Services
             if (order.Status == dto.Status)
                 return OrderResponseDto.ToDto(order);
 
-            order.ChangeStatus(dto.Status!.Value);
+            try
+            {
+                order.ChangeStatus(dto.Status!.Value);
+            }
+            catch (ArgumentException exception)
+            {
+                throw new ConflictException(exception.Message, exception);
+            }
             await _orderRepository.UpdateAsync(order);
             await PublishOrderStatusChangedMessageAsync(order);
 
@@ -104,7 +112,14 @@ namespace Prensadao.Application.Services
         {
             var order = await GetOrderByIdOrThrowAsync(id);
 
-            order.Cancel();
+            try
+            {
+                order.Cancel();
+            }
+            catch (ArgumentException exception)
+            {
+                throw new ConflictException(exception.Message, exception);
+            }
 
             await _orderRepository.UpdateAsync(order);
             await PublishOrderStatusChangedMessageAsync(order);
@@ -116,10 +131,10 @@ namespace Prensadao.Application.Services
             ArgumentNullException.ThrowIfNull(dto);
 
             if (dto.CustomerId <= 0)
-                throw new ArgumentException("Pedido não pode ser feito sem cliente cadastrado.");
+                throw new RequestValidationException("Pedido não pode ser feito sem cliente cadastrado.");
 
             if (!dto.IsDelivery.HasValue)
-                throw new ArgumentException("A modalidade de entrega do pedido deve ser informada.");
+                throw new RequestValidationException("A modalidade de entrega do pedido deve ser informada.");
         }
 
         private static void ValidateUpdateStatusRequest(UpdateStatusDto dto)
@@ -127,13 +142,13 @@ namespace Prensadao.Application.Services
             ArgumentNullException.ThrowIfNull(dto);
 
             if (dto.OrderId <= 0)
-                throw new ArgumentException("Id do pedido deve ser maior que zero.");
+                throw new RequestValidationException("Id do pedido deve ser maior que zero.");
 
             if (!dto.Status.HasValue)
-                throw new ArgumentException("Status do pedido deve ser informado.");
+                throw new RequestValidationException("Status do pedido deve ser informado.");
 
             if (!Enum.IsDefined(dto.Status.Value))
-                throw new ArgumentException("Status do pedido inválido.");
+                throw new RequestValidationException("Status do pedido inválido.");
         }
 
         private Order CreateOrder(OrderRequestDto dto, decimal totalAmountOrder)
@@ -147,7 +162,7 @@ namespace Prensadao.Application.Services
             var order = await _orderRepository.GetByIdWithDetailsAsync(orderId);
 
             if (order is null)
-                throw new ArgumentException("Pedido não encontrado.");
+                throw new ResourceNotFoundException("Pedido não encontrado.");
 
             return order;
         }
@@ -160,7 +175,7 @@ namespace Prensadao.Application.Services
 
             var idsNotFound = productIds.Except(prices.Keys).ToList();
             if (idsNotFound.Any())
-                throw new ArgumentException($"Produtos não encontrados: {string.Join(", ", idsNotFound)}");
+                throw new RequestValidationException($"Produtos não encontrados: {string.Join(", ", idsNotFound)}");
 
             return prices;
         }
@@ -170,18 +185,18 @@ namespace Prensadao.Application.Services
             var items = orderItems.ToList();
 
             if (!items.Any())
-                throw new ArgumentException("Pedido não pode ser feito sem itens.");
+                throw new RequestValidationException("Pedido não pode ser feito sem itens.");
 
             if (items.Any(x => x.ProductId <= 0))
-                throw new ArgumentException("Pedido contém itens com ProductId inválido.");
+                throw new RequestValidationException("Pedido contém itens com ProductId inválido.");
 
             if (items.Any(x => x.Quantity <= 0))
-                throw new ArgumentException("Pedido contém itens com quantidade inválida.");
+                throw new RequestValidationException("Pedido contém itens com quantidade inválida.");
 
             var productIds = items.Select(x => x.ProductId).Distinct().ToList();
             var verifyProductActive = await _productRepository.ExistsInactiveByIdsAsync(productIds);
             if (verifyProductActive)
-                throw new ArgumentException("Pedido não pode ser feito com produtos inativos.");
+                throw new RequestValidationException("Pedido não pode ser feito com produtos inativos.");
         }
 
         private Task PublishOrderMessageAsync(Order order)

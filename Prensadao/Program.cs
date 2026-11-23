@@ -7,8 +7,7 @@ using Prensadao.Infra;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Ignora logs de queries do EF Core || limpar o console
-builder.Logging.AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.None);
+builder.Logging.AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.Warning);
 
 // Aqui esta as configurações => do modulo de aplicação (application) e do modulo Infrastructure (Infra)
 builder.Services
@@ -24,16 +23,17 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHealthChecks();
+builder.Services.AddApiErrorHandling();
 
 var app = builder.Build();
+
+app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
-//app.UseMiddleware<RequestContextMiddleware>();
 
 app.UseHttpsRedirection();
 

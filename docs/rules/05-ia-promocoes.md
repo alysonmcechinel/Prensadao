@@ -11,7 +11,7 @@
 - Não registre prompts com dados sensíveis ou chaves de API.
 - Não versione `ApiKey` real em `appsettings.json`.
 - Ao alterar prompt, schema, DTOs ou validações de IA, adicione ou atualize testes.
-- Antes de evoluir a feature, resolva ou documente conscientemente o middleware de erro comentado em `Program.cs`.
+- Preserve o tratamento HTTP global em `AddApiErrorHandling()`, conforme `docs/ERROR_HANDLING.md`.
 
 ## Exemplo Bom
 Controller depende do caso de uso, não do provider de IA.

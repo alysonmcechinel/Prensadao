@@ -1,4 +1,5 @@
-﻿using AutoFixture.Xunit2;
+using Prensadao.Application.Exceptions;
+using AutoFixture.Xunit2;
 using FakeItEasy;
 using Prensadao.Application.DTOs.Requests;
 using Prensadao.Application.Services;
@@ -25,7 +26,7 @@ public class CustomerServiceTest
         A.CallTo(() => customerRepository.ExistsByPhoneAsync(dto.Phone)).Returns(true);
 
         // act
-        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => customerService.AddCustomerAsync(dto));
+        var ex = await Assert.ThrowsAsync<ConflictException>(() => customerService.AddCustomerAsync(dto));
 
         // assert
         Assert.Equal("Telefone já cadastrado.", ex.Message);
@@ -44,7 +45,7 @@ public class CustomerServiceTest
         A.CallTo(() => customerRepository.ExistsByPhoneAsync(dto.Phone)).Returns(false);
 
         // act
-        var ex = await Assert.ThrowsAsync<ArgumentException>(() => customerService.AddCustomerAsync(dto));
+        var ex = await Assert.ThrowsAsync<RequestValidationException>(() => customerService.AddCustomerAsync(dto));
 
         // assert
         Assert.Equal("Número de telefone inválido.", ex.Message);
@@ -88,7 +89,7 @@ public class CustomerServiceTest
         A.CallTo(() => customerRepository.GetByIdWithDetailsAsync(idInexistente)).Returns(Task.FromResult<Customer?>(null));
 
         // act
-        var ex = await Assert.ThrowsAsync<ArgumentException>(() => customerService.GetByIdAsync(idInexistente));
+        var ex = await Assert.ThrowsAsync<ResourceNotFoundException>(() => customerService.GetByIdAsync(idInexistente));
 
         // assert
         Assert.Equal("Cliente não encontrado.", ex.Message);
@@ -125,7 +126,7 @@ public class CustomerServiceTest
         A.CallTo(() => customerRepository.GetByIdAsync(dto.CustomerId)).Returns(Task.FromResult<Customer>(null));
 
         // act
-        var ex = await Assert.ThrowsAsync<ArgumentException>(() => customerService.UpdateAsync(dto));
+        var ex = await Assert.ThrowsAsync<ResourceNotFoundException>(() => customerService.UpdateAsync(dto));
 
         // assert
         Assert.Equal("Cliente não encontrado.", ex.Message);

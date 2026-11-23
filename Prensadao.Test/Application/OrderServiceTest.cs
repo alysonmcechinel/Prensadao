@@ -1,4 +1,5 @@
-﻿using AutoFixture.Xunit2;
+using Prensadao.Application.Exceptions;
+using AutoFixture.Xunit2;
 using FakeItEasy;
 using NodaTime;
 using Prensadao.Application;
@@ -115,7 +116,7 @@ public class OrderServiceTest
         dto.CustomerId = 0;
 
         // act
-        var ex = await Assert.ThrowsAsync<ArgumentException>(() => orderService.OrderCreateAsync(dto));
+        var ex = await Assert.ThrowsAsync<RequestValidationException>(() => orderService.OrderCreateAsync(dto));
 
         // assert
         Assert.Equal("Pedido não pode ser feito sem cliente cadastrado.", ex.Message);
@@ -134,7 +135,7 @@ public class OrderServiceTest
         dto.IsDelivery = null;
 
         // act
-        var exception = await Assert.ThrowsAsync<ArgumentException>(() => orderService.OrderCreateAsync(dto));
+        var exception = await Assert.ThrowsAsync<RequestValidationException>(() => orderService.OrderCreateAsync(dto));
 
         // assert
         Assert.Equal("A modalidade de entrega do pedido deve ser informada.", exception.Message);
@@ -153,7 +154,7 @@ public class OrderServiceTest
         dto.OrderItems = new List<OrderItemRequestDto>();
 
         // act
-        var ex = await Assert.ThrowsAsync<ArgumentException>(() => orderService.OrderCreateAsync(dto));
+        var ex = await Assert.ThrowsAsync<RequestValidationException>(() => orderService.OrderCreateAsync(dto));
 
         // assert
         Assert.Equal("Pedido não pode ser feito sem itens.", ex.Message);
@@ -175,7 +176,7 @@ public class OrderServiceTest
         };
 
         // act
-        var ex = await Assert.ThrowsAsync<ArgumentException>(() => orderService.OrderCreateAsync(dto));
+        var ex = await Assert.ThrowsAsync<RequestValidationException>(() => orderService.OrderCreateAsync(dto));
 
         // assert
         Assert.Equal("Pedido contém itens com ProductId inválido.", ex.Message);
@@ -197,7 +198,7 @@ public class OrderServiceTest
         };
 
         // act
-        var ex = await Assert.ThrowsAsync<ArgumentException>(() => orderService.OrderCreateAsync(dto));
+        var ex = await Assert.ThrowsAsync<RequestValidationException>(() => orderService.OrderCreateAsync(dto));
 
         // assert
         Assert.Equal("Pedido contém itens com quantidade inválida.", ex.Message);
@@ -221,7 +222,7 @@ public class OrderServiceTest
         A.CallTo(() => productRepository.ExistsInactiveByIdsAsync(A<IReadOnlyCollection<int>>._)).Returns(true);
 
         // act
-        var ex = await Assert.ThrowsAsync<ArgumentException>(() => orderService.OrderCreateAsync(dto));
+        var ex = await Assert.ThrowsAsync<RequestValidationException>(() => orderService.OrderCreateAsync(dto));
 
         // assert
         Assert.Equal("Pedido não pode ser feito com produtos inativos.", ex.Message);
@@ -341,7 +342,7 @@ public class OrderServiceTest
         };
 
         // act
-        var exception = await Assert.ThrowsAsync<ArgumentException>(() => orderService.UpdateStatusAsync(dto));
+        var exception = await Assert.ThrowsAsync<RequestValidationException>(() => orderService.UpdateStatusAsync(dto));
 
         // assert
         Assert.Equal("Status do pedido inválido.", exception.Message);
@@ -368,7 +369,7 @@ public class OrderServiceTest
         };
 
         // act
-        var exception = await Assert.ThrowsAsync<ArgumentException>(() => orderService.UpdateStatusAsync(dto));
+        var exception = await Assert.ThrowsAsync<RequestValidationException>(() => orderService.UpdateStatusAsync(dto));
 
         // assert
         Assert.Equal("Id do pedido deve ser maior que zero.", exception.Message);
@@ -392,7 +393,7 @@ public class OrderServiceTest
         var dto = new UpdateStatusDto { OrderId = orderId, Status = null };
 
         // act
-        var exception = await Assert.ThrowsAsync<ArgumentException>(() => orderService.UpdateStatusAsync(dto));
+        var exception = await Assert.ThrowsAsync<RequestValidationException>(() => orderService.UpdateStatusAsync(dto));
 
         // assert
         Assert.Equal("Status do pedido deve ser informado.", exception.Message);
@@ -418,7 +419,7 @@ public class OrderServiceTest
         A.CallTo(() => orderRepository.GetByIdWithDetailsAsync(orderId)).Returns(order);
 
         // act
-        var exception = await Assert.ThrowsAsync<ArgumentException>(() => orderService.UpdateStatusAsync(dto));
+        var exception = await Assert.ThrowsAsync<ConflictException>(() => orderService.UpdateStatusAsync(dto));
 
         // assert
         Assert.Equal("Transição de status inválida: Criado para Pronto.", exception.Message);
@@ -443,7 +444,7 @@ public class OrderServiceTest
         A.CallTo(() => orderRepository.GetByIdWithDetailsAsync(orderId)).Returns(order);
 
         // act
-        var exception = await Assert.ThrowsAsync<ArgumentException>(() => orderService.UpdateStatusAsync(dto));
+        var exception = await Assert.ThrowsAsync<ConflictException>(() => orderService.UpdateStatusAsync(dto));
 
         // assert
         Assert.Equal("Cancelamento não faz parte do avanço normal do pedido.", exception.Message);
@@ -469,7 +470,7 @@ public class OrderServiceTest
         A.CallTo(() => orderRepository.GetByIdWithDetailsAsync(pedidoId)).Returns(order);
 
         // act
-        var ex = await Assert.ThrowsAsync<ArgumentException>(() => orderService.CancelAsync(pedidoId));
+        var ex = await Assert.ThrowsAsync<ConflictException>(() => orderService.CancelAsync(pedidoId));
 
         // assert
         var esperado = $"Pedido não pode ser cancelado no status atual: {order.Status}.";
@@ -493,7 +494,7 @@ public class OrderServiceTest
         A.CallTo(() => orderRepository.GetByIdWithDetailsAsync(orderId)).Returns((Order?)null);
 
         // act
-        var exception = await Assert.ThrowsAsync<ArgumentException>(() => orderService.CancelAsync(orderId));
+        var exception = await Assert.ThrowsAsync<ResourceNotFoundException>(() => orderService.CancelAsync(orderId));
 
         // assert
         Assert.Equal("Pedido não encontrado.", exception.Message);

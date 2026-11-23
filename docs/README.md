@@ -10,7 +10,7 @@ Este diretório concentra a documentação técnica e operacional do projeto. `A
 | `FEATURES.md` | Funcionalidades já implementadas | Funcionalidades apenas planejadas |
 | `GLOSSARY.md` | Significado canônico dos termos de negócio e técnicos próprios do Prensadão | Regras ou detalhes de implementação sem impacto semântico |
 | `AI_PROMOTIONS.md` | Contrato e fluxo detalhado da promoção com IA | Regras gerais de arquitetura |
-| `ERROR_HANDLING.md` | Proposta e roteiro para padronizar erros HTTP | Comportamento apresentado como já implementado |
+| `ERROR_HANDLING.md` | Tratamento global de exceções HTTP e registro de falhas | Instrumentação futura de observabilidade |
 | `RUNBOOK.md` | Execução, configuração, migrations e diagnóstico | Decisões de negócio |
 | `ROADMAP.md` | Pendências, débitos conhecidos e decisões futuras | Comportamento apresentado como concluído |
 | `features/` | Decisões e desenhos de funcionalidades planejadas ou em evolução | Inventário do comportamento já disponível |

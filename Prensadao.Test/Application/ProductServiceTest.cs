@@ -1,4 +1,5 @@
-﻿using FakeItEasy;
+using Prensadao.Application.Exceptions;
+using FakeItEasy;
 using FluentAssertions;
 using Prensadao.Application.DTOs.Requests;
 using Prensadao.Application.Services;
@@ -56,7 +57,7 @@ public class ProductServiceTest
         var act = () => productService.AddProductAsync(dto);
 
         // assert
-        await Assert.ThrowsAsync<ArgumentException>(async () => await act());
+        await Assert.ThrowsAsync<RequestValidationException>(async () => await act());
         A.CallTo(() => repository.ExistsByNameAsync(A<string>._)).MustNotHaveHappened();
         A.CallTo(() => repository.AddAsync(A<Product>._)).MustNotHaveHappened();
     }
@@ -80,7 +81,7 @@ public class ProductServiceTest
         var act = () => productService.AddProductAsync(dto);
 
         // assert
-        await Assert.ThrowsAsync<ArgumentException>(async () => await act());
+        await Assert.ThrowsAsync<ConflictException>(async () => await act());
         A.CallTo(() => repository.ExistsByNameAsync(A<string>._)).MustHaveHappenedOnceExactly();
         A.CallTo(() => repository.AddAsync(A<Product>._)).MustNotHaveHappened();
     }
@@ -106,7 +107,7 @@ public class ProductServiceTest
         var act = async () => await productService.AddProductAsync(dto);
 
         // assert
-        await Assert.ThrowsAsync<ArgumentException>(async () => await act());
+        await Assert.ThrowsAsync<RequestValidationException>(async () => await act());
         A.CallTo(() => repository.ExistsByNameAsync(A<string>._)).MustNotHaveHappened();
         A.CallTo(() => repository.AddAsync(A<Product>._)).MustNotHaveHappened();
     }
@@ -143,7 +144,7 @@ public class ProductServiceTest
         var act = () => productService.GetByIdAsync(0);
 
         // assert
-        await Assert.ThrowsAsync<ArgumentException>(async () => await act());
+        await Assert.ThrowsAsync<RequestValidationException>(async () => await act());
         A.CallTo(() => repository.GetByIdAsync(A<int>._)).MustNotHaveHappened();
     }
 
@@ -160,7 +161,7 @@ public class ProductServiceTest
         var act = () => productService.GetByIdAsync(1);
 
         // assert
-        await Assert.ThrowsAsync<ArgumentException>(async () => await act());
+        await Assert.ThrowsAsync<ResourceNotFoundException>(async () => await act());
         A.CallTo(() => repository.GetByIdAsync(1)).MustHaveHappenedOnceExactly();
     }
 
@@ -226,7 +227,7 @@ public class ProductServiceTest
         var act = () => productService.UpdateAsync(dto);
 
         // assert
-        await Assert.ThrowsAsync<ArgumentException>(async () => await act());
+        await Assert.ThrowsAsync<RequestValidationException>(async () => await act());
         A.CallTo(() => repository.GetByIdAsync(A<int>._)).MustNotHaveHappened();
         A.CallTo(() => repository.UpdateAsync(A<Product>._)).MustNotHaveHappened();
     }
@@ -253,7 +254,7 @@ public class ProductServiceTest
         var act = () => productService.UpdateAsync(dto);
 
         // assert
-        await Assert.ThrowsAsync<ArgumentException>(async () => await act());
+        await Assert.ThrowsAsync<ResourceNotFoundException>(async () => await act());
         A.CallTo(() => repository.GetByIdAsync(A<int>._)).MustHaveHappenedOnceExactly();
         A.CallTo(() => repository.UpdateAsync(A<Product>._)).MustNotHaveHappened();
     }
@@ -302,7 +303,7 @@ public class ProductServiceTest
         var act = () => productService.EnabledAsync(dto);
 
         // assert
-        await Assert.ThrowsAsync<ArgumentException>(async () => await act());
+        await Assert.ThrowsAsync<ResourceNotFoundException>(async () => await act());
         A.CallTo(() => repository.GetByIdAsync(A<int>._)).MustHaveHappenedOnceExactly();
         A.CallTo(() => repository.UpdateAsync(A<Product>._)).MustNotHaveHappened();
     }

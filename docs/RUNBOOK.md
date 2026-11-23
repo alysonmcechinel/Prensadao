@@ -93,6 +93,16 @@ Ao compartilhar prints, informe a carga, a duração, as características da má
 
 Referência: [Web Dashboard e exportação HTML do k6](https://grafana.com/docs/k6/latest/results-output/web-dashboard/).
 
+#### Logs durante o teste
+
+Com os containers já iniciados pelo runner, acompanhe os logs em outro terminal, a partir da raiz do repositório:
+
+```powershell
+docker compose -p prensadao-performance -f docker-compose.yml -f Prensadao.Test/Performance/docker-compose.performance.yml logs --follow --no-color api
+```
+
+O handler registra a exceção completa e o identificador da requisição, também disponível no campo `traceId` da resposta de erro. Use esse valor para localizar a falha. O runner remove os containers ao terminar e não preserva os logs automaticamente nesta etapa; capture a saída do terminal se precisar consultá-la depois. Relatórios HTML continuam preservados. O contrato HTTP fica em `ERROR_HANDLING.md`.
+
 ## Migrations
 Aplicar migrations:
 
@@ -171,7 +181,7 @@ Os valores locais do RabbitMQ são `localhost`, porta `5672` e credenciais de de
 - Se uma mensagem falhar, consulte `prensado.orders.cozinha.dlq` ou `prensado.order-status-messages.dlq` no RabbitMQ Management. Os headers `x-death` indicam a fila de origem e o motivo do dead-lettering.
 - Não republique mensagens da DLQ sem corrigir e validar a causa da falha. O sistema não executa retry nem reprocessamento automático da DLQ.
 - Se promoções com IA falharem, verifique `AzureOpenAi:Endpoint`, `DeploymentName`, `ApiKey` e se a resposta respeita o schema.
-- Se erros de IA não voltarem como `ProblemDetails`, verifique se `RequestContextMiddleware` está habilitado no pipeline.
+- Se exceções HTTP não voltarem como `ProblemDetails`, verifique o registro `AddApiErrorHandling()` e se `UseExceptionHandler()` vem antes dos endpoints. Controllers devem propagar as exceções.
 
 ## Migração das Filas para Dead-letter
 

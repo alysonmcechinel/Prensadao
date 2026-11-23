@@ -122,3 +122,7 @@ O prompt orienta a IA a:
 ## Trabalho Futuro
 
 As pendências de tratamento de erro e cobertura automatizada estão centralizadas em `ROADMAP.md`.
+
+## Erros HTTP
+
+O tratamento global retorna `400` para limites inválidos, `422` para ausência de vendas ou resposta inválida da IA e `500` para falhas inesperadas, incluindo falhas do provedor. Detalhes técnicos ficam nos logs. Consulte `ERROR_HANDLING.md`.

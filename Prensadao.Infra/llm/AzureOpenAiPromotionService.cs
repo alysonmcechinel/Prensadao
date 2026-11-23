@@ -53,7 +53,6 @@ public class AzureOpenAiPromotionService : IPromotionSuggestionService
 
         var completion = await chatClient.CompleteChatAsync(messages, options, cancellationToken);
         var content = completion.Value.Content.FirstOrDefault()?.Text;
-
         return ValidationPromotion(topProducts, minDiscountPercent, maxDiscountPercent, content);
     }
 

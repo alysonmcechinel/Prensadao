@@ -9,6 +9,7 @@ namespace Prensadao.API.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [Produces("application/json")]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public class ProductController : ControllerBase
     {
         private readonly IProductService _productService;
@@ -20,88 +21,56 @@ namespace Prensadao.API.Controllers
 
         [HttpPost("Post")]
         [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
         public async Task<IActionResult> PostAsync([FromBody] ProductRequestDto dto)
         {
-            try
-            {
-                var result = await _productService.AddProductAsync(dto);
+            var result = await _productService.AddProductAsync(dto);
 
-                return Ok(new
-                {
-                    message = "Produto criado com sucesso.",
-                    data = result
-                });
-            }
-            catch (Exception ex)
+            return Ok(new
             {
-                return BadRequest($"Erro ao criar produto, {ex.Message}");
-            }
+                message = "Produto criado com sucesso.",
+                data = result
+            });
         }
 
         [HttpGet("GetAll")]
         [ProducesResponseType(typeof(IEnumerable<ProductResponseDto>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetAllAsync()
         {
-            try
-            {
-                var result = await _productService.GetProductsAsync();
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            var result = await _productService.GetProductsAsync();
+            return Ok(result);
         }
 
         [HttpGet("GetById")]
         [ProducesResponseType(typeof(ProductResponseDto), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
-        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetByIdAsync([FromQuery] int id)
         {
-            try
-            {
-                var result = await _productService.GetByIdAsync(id);
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            var result = await _productService.GetByIdAsync(id);
+            return Ok(result);
         }
 
         [HttpPost("Enabled")]
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> EnabledAsync([FromBody] ProductEnabledDto dto)
         {
-            try
-            {
-                await _productService.EnabledAsync(dto);
-                return Ok("Produto atualizado com sucesso.");
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            await _productService.EnabledAsync(dto);
+            return Ok("Produto atualizado com sucesso.");
         }
 
         [HttpPut("Update")]
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> UpdateAsync([FromBody] ProductRequestDto dto)
         {
-            try
-            {
-                await _productService.UpdateAsync(dto);
-                return Ok("Produto atualizado com sucesso.");
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            await _productService.UpdateAsync(dto);
+            return Ok("Produto atualizado com sucesso.");
         }
     }
 }
