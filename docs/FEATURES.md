@@ -64,6 +64,10 @@ Este documento registra apenas comportamentos já implementados. Trabalho futuro
 - Valida resposta da IA antes de calcular o preço promocional.
 - Detalhes em `AI_PROMOTIONS.md`.
 
+## Tratamento de Erros HTTP
+
+- Controllers propagam exceções para o tratamento global com `IExceptionHandler`. O handler registra a falha e devolve uma resposta segura, preservando os retornos de sucesso. Consulte `ERROR_HANDLING.md`.
+
 ## Integração Contínua e Pull Requests
 
 - O workflow `.github/workflows/ci.yml` valida pull requests destinados a `master` e novos commits integrados nessa branch.

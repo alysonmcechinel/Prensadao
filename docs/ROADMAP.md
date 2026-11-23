@@ -2,16 +2,14 @@
 
 Este documento reúne trabalho ainda não concluído. Itens daqui não devem ser descritos como funcionalidades prontas em `FEATURES.md`.
 
-## Tratamento de Erros
+## Diagnóstico de Desempenho
 
-- Seguir a proposta e as decisões pendentes registradas em `ERROR_HANDLING.md`.
-- Decidir e aplicar o tratamento global de exceções: `RequestContextMiddleware` existe, mas está comentado em `Prensadao/Program.cs`.
-- Remover a captura genérica de `Exception` em `PromotionsController` quando o tratamento global estiver ativo, preservando respostas `ProblemDetails` coerentes.
+- Reproduzir as falhas de transação sob carga e identificar sua causa antes de ajustar persistência ou concorrência. O handler global registra a exceção original com o identificador da requisição.
+- Avaliar coleta automática de logs do ambiente k6 e instrumentação com `ActivitySource`/OpenTelemetry em etapas separadas, conforme a necessidade do diagnóstico.
 
 ## Promoções com IA
 
 - Adicionar testes para validação e falhas de `AzureOpenAiPromotionService`, sem acessar o serviço real.
-- Cobrir o mapeamento de `AiResponseValidationException` no tratamento HTTP escolhido.
 
 ## Evoluções da Integração Contínua
 

@@ -5,6 +5,10 @@ A prioridade deste projeto é clareza, estudo e manutenção segura.
 
 Use princípios como guia, não como desculpa para criar abstrações desnecessárias.
 
+## KISS e YAGNI
+
+Prefira a implementação mais simples que resolva a necessidade atual. Não acrescente abstrações, dependências ou instrumentação para necessidades apenas previstas; faça mudanças pequenas e focadas, que possam ser entendidas e revisadas separadamente.
+
 ## SRP
 SRP, o princípio da responsabilidade única, é o princípio mais importante neste projeto.
 

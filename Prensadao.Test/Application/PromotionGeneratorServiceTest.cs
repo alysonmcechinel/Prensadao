@@ -1,3 +1,4 @@
+using Prensadao.Application.Exceptions;
 using FakeItEasy;
 using NodaTime;
 using Prensadao.Application.DTOs.Requests;
@@ -120,7 +121,7 @@ public class PromotionGeneratorServiceTest
         };
 
         // act
-        var exception = await Assert.ThrowsAsync<ArgumentException>(() =>
+        var exception = await Assert.ThrowsAsync<RequestValidationException>(() =>
             service.GeneratePromotionAsync(request, CancellationToken.None));
 
         // assert
@@ -151,7 +152,7 @@ public class PromotionGeneratorServiceTest
         var service = new PromotionGeneratorService(repository, suggestionService, clock);
 
         // act
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+        var exception = await Assert.ThrowsAsync<InsufficientSalesDataException>(() =>
             service.GeneratePromotionAsync(new GeneratePromotionRequest(), CancellationToken.None));
 
         // assert
@@ -214,7 +215,7 @@ public class PromotionGeneratorServiceTest
         var service = new PromotionGeneratorService(repository, suggestionService, clock);
 
         // act
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+        var exception = await Assert.ThrowsAsync<AiResponseValidationException>(() =>
             service.GeneratePromotionAsync(new GeneratePromotionRequest(), CancellationToken.None));
 
         // assert

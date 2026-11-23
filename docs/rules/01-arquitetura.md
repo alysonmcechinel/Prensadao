@@ -11,6 +11,9 @@
 - Registre infraestrutura em `InfrastructureModule`.
 - Use `IServiceProvider` apenas como último recurso no ponto de composição, com escopo limitado.
 - Evite refatorações amplas quando a tarefa pedir uma mudança pequena.
+- Centralize o tratamento de exceções HTTP no `IExceptionHandler` da API; controllers devem propagar as falhas, sem `catch (Exception)` que converta qualquer erro em `BadRequest`.
+- Distinga falhas esperadas com exceções específicas na Application, sem dependência de HTTP; o mapeamento para status pertence à API e não deve depender do texto da mensagem nem classificar toda `ArgumentException` ou `InvalidOperationException` como falha esperada.
+- Registre a exceção original uma única vez, preservando suas causas internas, sem incluir segredos; falhas inesperadas devem retornar `500` com mensagem segura, conforme o [contrato de erros HTTP](../ERROR_HANDLING.md).
 
 ## Exemplo Bom
 Controller fino: recebe HTTP, chama serviço e devolve resposta.
@@ -34,7 +37,7 @@ public async Task<PromotionProductDto> GeneratePromotionAsync(
     CancellationToken cancellationToken)
 {
     if (request.TopN <= 0)
-        throw new ArgumentException("TopN deve ser maior que zero.");
+        throw new RequestValidationException("TopN deve ser maior que zero.");
 
     var topProducts = await _salesAnalyticsRepository.GetTopProductsSoldAsync(
         topProductsStartUtc,
@@ -43,7 +46,7 @@ public async Task<PromotionProductDto> GeneratePromotionAsync(
         cancellationToken);
 
     if (topProducts.Count == 0)
-        throw new InvalidOperationException("Não há vendas suficientes para gerar promoção.");
+        throw new InsufficientSalesDataException("Não há vendas suficientes para gerar promoção.");
 
     var aiSuggestion = await _promotionSuggestionService.SuggestPromotionAsync(
         TopProductSalesDto.FromModels(topProducts),

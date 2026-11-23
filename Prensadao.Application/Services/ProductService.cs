@@ -1,4 +1,5 @@
-﻿using Prensadao.Application.DTOs.Requests;
+using Prensadao.Application.Exceptions;
+using Prensadao.Application.DTOs.Requests;
 using Prensadao.Application.DTOs.Responses;
 using Prensadao.Application.Interfaces;
 using Prensadao.Domain.Entities;
@@ -66,22 +67,22 @@ namespace Prensadao.Application.Services
             ArgumentNullException.ThrowIfNull(dto);
 
             if (string.IsNullOrWhiteSpace(dto.Name))
-                throw new ArgumentException("O produto deve ter um nome.");
+                throw new RequestValidationException("O produto deve ter um nome.");
 
             if (dto.Price <= 0)
-                throw new ArgumentException("O preço do produto deve ser maior que 0");
+                throw new RequestValidationException("O preço do produto deve ser maior que 0");
         }
 
         private static void ValidateProductId(int? productId)
         {
             if (!productId.HasValue || productId <= 0)
-                throw new ArgumentException("O ID informado está incorreto.");
+                throw new RequestValidationException("O ID informado está incorreto.");
         }
 
         private static void ValidateProductId(int productId)
         {
             if (productId <= 0)
-                throw new ArgumentException("O ID informado está incorreto.");
+                throw new RequestValidationException("O ID informado está incorreto.");
         }
 
         private async Task<Product> GetProductByIdOrThrowAsync(int productId)
@@ -89,7 +90,7 @@ namespace Prensadao.Application.Services
             var product = await _productRepository.GetByIdAsync(productId);
 
             if (product is null)
-                throw new ArgumentException("Produto não encontrado.");
+                throw new ResourceNotFoundException("Produto não encontrado.");
 
             return product;
         }
@@ -98,7 +99,7 @@ namespace Prensadao.Application.Services
         {
             var nameAlreadyExists = await _productRepository.ExistsByNameAsync(productName);
             if (nameAlreadyExists)
-                throw new ArgumentException("Já existe um produto com esse nome");
+                throw new ConflictException("Já existe um produto com esse nome");
         }
     }
 }

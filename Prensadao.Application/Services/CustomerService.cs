@@ -1,4 +1,5 @@
-﻿using Prensadao.Application.DTOs.Requests;
+using Prensadao.Application.Exceptions;
+using Prensadao.Application.DTOs.Requests;
 using Prensadao.Application.DTOs.Responses;
 using Prensadao.Application.Helpers;
 using Prensadao.Application.Interfaces;
@@ -62,7 +63,7 @@ namespace Prensadao.Application.Services
         private static void ValidateCustomerId(int customerId)
         {
             if (customerId <= 0)
-                throw new ArgumentException("O ID informado incorretamente.");
+                throw new RequestValidationException("O ID informado incorretamente.");
         }
 
         private async Task<Customer> GetCustomerByIdOrThrowAsync(int customerId)
@@ -70,7 +71,7 @@ namespace Prensadao.Application.Services
             var customer = await _customerRepository.GetByIdAsync(customerId);
 
             if (customer is null)
-                throw new ArgumentException("Cliente não encontrado.");
+                throw new ResourceNotFoundException("Cliente não encontrado.");
 
             return customer;
         }
@@ -80,7 +81,7 @@ namespace Prensadao.Application.Services
             var customer = await _customerRepository.GetByIdWithDetailsAsync(customerId);
 
             if (customer is null)
-                throw new ArgumentException("Cliente não encontrado.");
+                throw new ResourceNotFoundException("Cliente não encontrado.");
 
             return customer;
         }
@@ -88,7 +89,7 @@ namespace Prensadao.Application.Services
         private async Task EnsurePhoneIsAvailableAsync(string phone)
         {
             if (await PhoneExistsAsync(phone))
-                throw new InvalidOperationException("Telefone já cadastrado.");
+                throw new ConflictException("Telefone já cadastrado.");
         }
 
         // Eliding Async/Await: wrapper puro, sem lógica extra (sem state machine desnecessária)

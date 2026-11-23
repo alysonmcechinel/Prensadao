@@ -1,4 +1,5 @@
-﻿using Prensadao.Application.DTOs.Requests;
+using Prensadao.Application.Exceptions;
+using Prensadao.Application.DTOs.Requests;
 using Prensadao.Application.DTOs.Responses;
 using Prensadao.Application.Helpers;
 using Prensadao.Application.Interfaces;
@@ -31,10 +32,10 @@ public class PromotionGeneratorService : IPromotionGenerator
         ArgumentNullException.ThrowIfNull(request);
 
         if (request.TopN <= 0)
-            throw new ArgumentException("TopN deve ser maior que zero.");
+            throw new RequestValidationException("TopN deve ser maior que zero.");
 
         if (request.MinDiscountPercent < 0 || request.MaxDiscountPercent <= 0 || request.MinDiscountPercent > request.MaxDiscountPercent)
-            throw new ArgumentException("Limites de desconto inválidos.");
+            throw new RequestValidationException("Limites de desconto inválidos.");
 
         var currentInstant = _clock.GetCurrentInstant();
         var topProductsWindow = currentInstant.GetCompletedBusinessDaysWindowUtc(TopProductsLookbackDays);
@@ -46,7 +47,7 @@ public class PromotionGeneratorService : IPromotionGenerator
             request.TopN,
             cancellationToken);
         if (topProducts.Count == 0)
-            throw new InvalidOperationException("Não há vendas suficientes para gerar promoção.");
+            throw new InsufficientSalesDataException("Não há vendas suficientes para gerar promoção.");
 
         var topProductsDTO = TopProductSalesDto.FromModels(topProducts);
 
@@ -63,16 +64,16 @@ public class PromotionGeneratorService : IPromotionGenerator
             cancellationToken);
 
         if (!int.TryParse(aiSuggestion.ProductId, out var suggestedProductId))
-            throw new InvalidOperationException("ProductId sugerido pela IA é inválido.");
+            throw new AiResponseValidationException("ProductId sugerido pela IA é inválido.");
 
         var selectedProduct = topProducts.FirstOrDefault(x => x.ProductId == suggestedProductId)
-            ?? throw new InvalidOperationException("Produto sugerido não encontrado entre os mais vendidos.");
+            ?? throw new AiResponseValidationException("Produto sugerido não encontrado entre os mais vendidos.");
 
         var safeDiscount = Math.Clamp(aiSuggestion.DiscountPercent, request.MinDiscountPercent, request.MaxDiscountPercent);
         var promotionalPrice = Math.Round(selectedProduct.CurrentPrice * (1 - safeDiscount / 100m), 2, MidpointRounding.AwayFromZero);
 
         if (promotionalPrice < 0)
-            throw new InvalidOperationException("Preço promocional inválido.");
+            throw new AiResponseValidationException("Preço promocional inválido.");
 
         return new PromotionProductDto
         {

@@ -1,7 +1,9 @@
 [CmdletBinding()]
 param(
     [ValidateRange(30, 600)]
-    [int]$ReadinessTimeoutSeconds = 120
+    [int]$ReadinessTimeoutSeconds = 120,
+
+    [switch]$OpenReport
 )
 
 . (Join-Path $PSScriptRoot 'performance-runner.ps1')
@@ -57,6 +59,7 @@ $k6Environment = @{
 Invoke-PerformanceProfile `
     -K6Script 'regression.js' `
     -ReadinessTimeoutSeconds $ReadinessTimeoutSeconds `
+    -OpenReport:$OpenReport `
     -K6Environment $k6Environment `
     -ExpectedEnvironment $baseline.environment
 

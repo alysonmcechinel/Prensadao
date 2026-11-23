@@ -8,6 +8,7 @@ namespace Prensadao.API.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [Produces("application/json")]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public class PromotionsController : ControllerBase
     {
         private readonly IPromotionGenerator _promotionGenerator;
@@ -20,19 +21,11 @@ namespace Prensadao.API.Controllers
         [HttpPost("Generate")]
         [ProducesResponseType(typeof(PromotionProductDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
-        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GenerateAsync([FromBody] GeneratePromotionRequest dto, CancellationToken cancellationToken)
         {
-            try
-            {
-                var result = await _promotionGenerator.GeneratePromotionAsync(dto, cancellationToken);
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest($"Erro ao criar promoção, {ex.Message}");
-            }
+            var result = await _promotionGenerator.GeneratePromotionAsync(dto, cancellationToken);
+            return Ok(result);
         }
     }
 }

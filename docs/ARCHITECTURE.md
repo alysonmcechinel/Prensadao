@@ -32,6 +32,11 @@ Não crie dependência de Domain para Application, Infra ou API.
 - A conexão RabbitMQ é criada na Infra a partir da seção tipada `RabbitMq`; configurações inválidas impedem a inicialização da aplicação.
 - Controllers recebem serviços por injeção de dependência e não instanciam infraestrutura diretamente.
 
+## Erros HTTP
+
+- A API registra o tratamento em `AddApiErrorHandling` e ativa `UseExceptionHandler` antes dos endpoints. O handler classifica a falha, registra a exceção completa uma vez e escreve `ProblemDetails` com o identificador nativo da requisição.
+- Falhas esperadas usam exceções específicas na Application, sem dependência de HTTP no domínio. O contrato fica em `ERROR_HANDLING.md`.
+
 ## Ferramentas de Desenvolvimento
 
 - `Prensadao.Seeder` é uma composição independente, restrita a `Development`, que cria somente o `PrensadaoDbContext` necessário para acessar o PostgreSQL.
